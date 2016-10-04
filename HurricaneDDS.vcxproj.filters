@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="DDSNodeId.h" />
+    <ClInclude Include="DDSKey.h" />
+    <ClInclude Include="DDSRoutingTable.refl.h" />
+    <ClInclude Include="DDSRoutingTable.refl.meta.h" />
+    <ClInclude Include="DDSNetworkBackend.h" />
+    <ClInclude Include="DDSNodeNetworkService.h" />
+    <ClInclude Include="DDSDataObjectStore.h" />
+    <ClInclude Include="DDSDatabaseConnectionPool.h" />
+    <ClInclude Include="DDSRoutingTable.h" />
+    <ClInclude Include="DDSServerToServerSender.h" />
+    <ClInclude Include="DDSServerToServerMessages.refl.h" />
+    <ClInclude Include="DDSServerToServerMessages.refl.meta.h" />
+    <ClInclude Include="DDSNodeState.h" />
+    <ClInclude Include="DDSCoordinatorState.h" />
+    <ClInclude Include="DDSCoordinatorNetworkService.h" />
+    <ClInclude Include="DDSCoordinatorServerProtocol.h" />
+    <ClInclude Include="DDSCoordinatorProtocolMessages.refl.h" />
+    <ClInclude Include="DDSCoordinatorProtocolMessages.refl.meta.h" />
+    <ClInclude Include="DDSCoordinatorClientProtocol.h" />
+    <ClInclude Include="DDSDataObjectStoreBase.h" />
+    <ClInclude Include="DDSLog.h" />
+    <ClInclude Include="DDSChallenge.h" />
+    <ClInclude Include="DDSVersion.h" />
+    <ClInclude Include="DDSRandom.h" />
+    <ClInclude Include="DDSIncomingKeyspaceTransferManager.h" />
+    <ClInclude Include="DDSOutgoingKeyspaceTransferManager.h" />
+    <ClInclude Include="DDSOutgoingKeyspaceTransfer.h" />
+    <ClInclude Include="DDSServerToServerReceiver.h" />
+    <ClInclude Include="DDSServerMessage.h" />
+    <ClInclude Include="DDSDataObjectTypeList.h" />
+    <ClInclude Include="DDSResponder.refl.h" />
+    <ClInclude Include="DDSResponder.refl.meta.h" />
+    <ClInclude Include="DDSResponderCall.h" />
+    <ClInclude Include="DDSResponder.h" />
+    <ClInclude Include="DDSIncomingKeyspaceTransfer.h" />
+    <ClInclude Include="DDSDataObjectAddress.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DDSNetworkBackend.cpp" />
+    <ClCompile Include="DDSNodeNetworkService.cpp" />
+    <ClCompile Include="DDSDatabaseConnectionPool.cpp" />
+    <ClCompile Include="DDSRoutingTable.cpp" />
+    <ClCompile Include="DDSKey.cpp" />
+    <ClCompile Include="DDSServerToServerSender.cpp" />
+    <ClCompile Include="DDSNodeState.cpp" />
+    <ClCompile Include="DDSCoordinatorState.cpp" />
+    <ClCompile Include="DDSCoordinatorNetworkService.cpp" />
+    <ClCompile Include="DDSCoordinatorServerProtocol.cpp" />
+    <ClCompile Include="DDSCoordinatorClientProtocol.cpp" />
+    <ClCompile Include="DDSResponder.cpp" />
+    <ClCompile Include="DDSLog.cpp" />
+    <ClCompile Include="DDSRandom.cpp" />
+    <ClCompile Include="DDSIncomingKeyspaceTransferManager.cpp" />
+    <ClCompile Include="DDSOutgoingKeyspaceTransferManager.cpp" />
+    <ClCompile Include="DDSOutgoingKeyspaceTransfer.cpp" />
+    <ClCompile Include="DDSServerToServerReceiver.cpp" />
+    <ClCompile Include="DDSIncomingKeyspaceTransfer.cpp" />
+  </ItemGroup>
+</Project>

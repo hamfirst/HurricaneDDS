@@ -21,31 +21,31 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2DC80801-5BFA-4813-81E6-12CF0B5D8B78}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>HurricanDDS</RootNamespace>
+    <RootNamespace>HurricaneDDS</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -87,7 +87,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_WINDOWS;_WIN32_WINNT=0x0A00;USE_MBED</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)External</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -100,7 +101,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_WINDOWS;_WIN32_WINNT=0x0A00;USE_MBED</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)External</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,7 +117,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_WINDOWS;_WIN32_WINNT=0x0A00;USE_MBED</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)External</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,7 +135,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_WINDOWS;_WIN32_WINNT=0x0A00;USE_MBED</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)External</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,8 +146,198 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DDSChallenge.h" />
+    <ClInclude Include="DDSCoordinatorClientProtocol.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorNetworkService.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorProtocolMessages.refl.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorProtocolMessages.refl.meta.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorServerProtocol.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorState.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseConnectionPool.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSDataObjectAddress.h" />
+    <ClInclude Include="DDSDataObjectStore.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSDataObjectStoreBase.h" />
+    <ClInclude Include="DDSDataObjectTypeList.h" />
+    <ClInclude Include="DDSIncomingKeyspaceTransfer.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSIncomingKeyspaceTransferManager.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSKey.h" />
+    <ClInclude Include="DDSLog.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSNetworkBackend.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSNodeId.h" />
+    <ClInclude Include="DDSNodeNetworkService.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSNodeState.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSOutgoingKeyspaceTransfer.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSOutgoingKeyspaceTransferManager.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSRandom.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSResponder.h" />
+    <ClInclude Include="DDSResponder.refl.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSResponder.refl.meta.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSResponderCall.h" />
+    <ClInclude Include="DDSRoutingTable.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSRoutingTable.refl.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSRoutingTable.refl.meta.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSServerMessage.h" />
+    <ClInclude Include="DDSServerToServerMessages.refl.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSServerToServerMessages.refl.meta.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSServerToServerReceiver.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSServerToServerSender.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSVersion.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DDSCoordinatorClientProtocol.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSCoordinatorNetworkService.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSCoordinatorServerProtocol.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSCoordinatorState.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSDatabaseConnectionPool.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSIncomingKeyspaceTransfer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSIncomingKeyspaceTransferManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSKey.cpp" />
+    <ClCompile Include="DDSLog.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSNetworkBackend.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSNodeNetworkService.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSNodeState.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSOutgoingKeyspaceTransfer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSOutgoingKeyspaceTransferManager.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSRandom.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSResponder.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSRoutingTable.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSServerToServerReceiver.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSServerToServerSender.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(SolutionDir)StormRefl\StormRefl.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
 </Project>
