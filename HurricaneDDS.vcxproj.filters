@@ -37,6 +37,9 @@
     <ClInclude Include="DDSResponder.h" />
     <ClInclude Include="DDSIncomingKeyspaceTransfer.h" />
     <ClInclude Include="DDSDataObjectAddress.h" />
+    <ClInclude Include="DDSNodeInterface.h" />
+    <ClInclude Include="DDSDataObject.h" />
+    <ClInclude Include="DDSCoordinator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSNetworkBackend.cpp" />
@@ -58,5 +61,7 @@
     <ClCompile Include="DDSOutgoingKeyspaceTransfer.cpp" />
     <ClCompile Include="DDSServerToServerReceiver.cpp" />
     <ClCompile Include="DDSIncomingKeyspaceTransfer.cpp" />
+    <ClCompile Include="DDSNodeInterface.cpp" />
+    <ClCompile Include="DDSCoordinator.cpp" />
   </ItemGroup>
 </Project>

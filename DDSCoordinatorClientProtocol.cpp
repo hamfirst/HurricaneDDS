@@ -27,6 +27,11 @@ void DDSCoordinatorClientProtocol::SendMessageToServer(const T & t)
   m_ClientFrontend->FreeOutgoingPacket(writer);
 }
 
+DDSCoordinatorClientProtocol::~DDSCoordinatorClientProtocol()
+{
+
+}
+
 DDSCoordinatorClientProtocol::DDSCoordinatorClientProtocol(DDSNodeState & node_state, const DDSCoordinatorClientSettings & settings) :
   m_NodeState(node_state),
   m_State(kDisconnected),

@@ -17,6 +17,11 @@ DDSNodeNetworkService::DDSNodeNetworkService(DDSNodeState & node_state,
 
 }
 
+DDSNodeNetworkService::~DDSNodeNetworkService()
+{
+
+}
+
 void DDSNodeNetworkService::SendMessageToServer(DDSNodeId node_id, std::string && data)
 {
   bool sent = false;

@@ -11,7 +11,7 @@ class DDSDataObjectStoreBase
 public:
   ~DDSDataObjectStoreBase() {}
 
-  virtual uint32_t GetDataClassNameHash() = 0;
+  virtual uint32_t GetDataClassNameHash() const = 0;
 
   virtual void HandleMessage(DDSKey key, DDSResponderData responder, const char * msg) = 0;
   virtual void HandleQuery(DDSKey key, DDSResponderData responder, const char * msg) = 0;

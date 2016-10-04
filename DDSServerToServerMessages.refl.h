@@ -17,6 +17,8 @@ enum STORM_REFL_ENUM class DDSServerToServerMessageType
   kHandshakeFinalize,
   kDataObjectListSync,
   kResponderCall,
+  kTargetedMessage,
+  kTargetedMessageResponder,
 };
 
 struct DDSServerToServerHandshakeRequest
@@ -90,4 +92,33 @@ struct DDSResponderCallData
   int m_MethodId;
   std::string m_MethodArgs;
 };
+
+struct DDSTargetedMessage
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kTargetedMessage;
+  DDSKey m_Key;
+  int m_ObjectType;
+
+  int m_MethodId;
+  std::string m_MethodArgs;
+};
+
+struct DDSTargetedMessageWithResponder
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kTargetedMessageResponder;
+  DDSKey m_Key;
+  int m_ObjectType;
+
+  int m_MethodId;
+  std::string m_MethodArgs;
+
+  DDSKey m_ResponderKey;
+  int m_ResponderObjectType;
+  int m_ResponderMethodId;
+
+  std::string m_ReturnArg;
+};
+
 

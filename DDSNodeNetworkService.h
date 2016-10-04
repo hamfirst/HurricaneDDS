@@ -25,6 +25,8 @@ public:
                         const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings,
                         const StormSockets::StormSocketClientFrontendWebsocketSettings & client_settings);
 
+  ~DDSNodeNetworkService();
+
   void ProcessEvents();
   void SendMessageToServer(DDSNodeId node_id, std::string && data);
 

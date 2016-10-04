@@ -124,6 +124,20 @@ DDSNodeId DDSNodeState::GetNodeIdForKey(DDSKey key) const
   throw std::runtime_error("Invalid routing table");
 }
 
+int DDSNodeState::GetDataObjectTypeIdForNameHash(uint32_t name_hash) const
+{
+  for(std::size_t index = 0; index < m_DataObjectList.size(); index++)
+  {
+    if (m_DataObjectList[index]->GetDataClassNameHash() == name_hash)
+    {
+      return (int)index;
+    }
+  }
+
+  DDSLog::LogError("Invalid object id request");
+  return -1;
+}
+
 DDSDataObjectStoreBase & DDSNodeState::GetDataObjectStore(int object_type_id)
 {
   return *m_DataObjectList[object_type_id].get();

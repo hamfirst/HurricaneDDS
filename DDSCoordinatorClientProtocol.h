@@ -21,6 +21,7 @@ class DDSCoordinatorClientProtocol
 {
 public:
   DDSCoordinatorClientProtocol(DDSNodeState & node_state, const DDSCoordinatorClientSettings & settings);
+  ~DDSCoordinatorClientProtocol();
 
   void ProcessEvents();
   void RequestConnect();

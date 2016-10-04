@@ -147,6 +147,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DDSChallenge.h" />
+    <ClInclude Include="DDSCoordinator.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSCoordinatorClientProtocol.h">
       <SubType>
       </SubType>
@@ -175,6 +179,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSDataObject.h" />
     <ClInclude Include="DDSDataObjectAddress.h" />
     <ClInclude Include="DDSDataObjectStore.h">
       <SubType>
@@ -200,6 +205,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="DDSNodeId.h" />
+    <ClInclude Include="DDSNodeInterface.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSNodeNetworkService.h">
       <SubType>
       </SubType>
@@ -262,6 +271,10 @@
     <ClInclude Include="DDSVersion.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DDSCoordinator.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSCoordinatorClientProtocol.cpp">
       <SubType>
       </SubType>
@@ -296,6 +309,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSNetworkBackend.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSNodeInterface.cpp">
       <SubType>
       </SubType>
     </ClCompile>

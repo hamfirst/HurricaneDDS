@@ -13,6 +13,7 @@ class DDSNetworkBackend
 {
 public:
   DDSNetworkBackend(const StormSockets::StormSocketInitSettings & settings);
+  ~DDSNetworkBackend();
 
 private:
   friend class DDSCoordinatorNetworkService;

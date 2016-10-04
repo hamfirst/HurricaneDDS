@@ -34,6 +34,8 @@ public:
     func(*this, m_DataObjectList);
   }
 
+  ~DDSNodeState() = default;
+
   void ProcessEvents();
   void GotInitialCoordinatorSync(DDSNodeId node_id, const DDSRoutingTable & routing_table, bool initial_node, uint64_t server_secret, uint64_t client_secret);
   void GotNewRoutingTable(const DDSRoutingTable & routing_table);
@@ -41,6 +43,8 @@ public:
 
   void SendTargetedMessage(DDSDataObjectAddress addr, std::string && message);
   DDSNodeId GetNodeIdForKey(DDSKey key) const;
+
+  int GetDataObjectTypeIdForNameHash(uint32_t name_hash) const;
 
   DDSDataObjectStoreBase & GetDataObjectStore(int object_type_id);
 
