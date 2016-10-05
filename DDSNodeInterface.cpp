@@ -6,8 +6,8 @@
 
 #include <StormRefl\StormReflJsonStd.h>
 
-DDSNodeInterface::DDSNodeInterface(DDSNodeState & node_state, DDSKey key) :
-  m_NodeState(node_state), m_Key(key)
+DDSNodeInterface::DDSNodeInterface(DDSNodeState & node_state, DDSDataObjectStoreBase * data_store, DDSKey key) :
+  m_NodeState(node_state), m_DataStore(data_store), m_Key(key)
 {
 
 }
@@ -25,7 +25,7 @@ void DDSNodeInterface::SendMessageToObject(int target_object_type, DDSKey target
   packet.m_MethodId = target_method_id;
   packet.m_MethodArgs = message;
 
-  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key }, StormReflEncodeJson(packet));
+  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key }, DDSServerToServerMessageType::kTargetedMessage, StormReflEncodeJson(packet));
 }
 
 void DDSNodeInterface::SendMessageToObjectWithResponder(int target_object_type, DDSKey target_key, int target_method_id,
@@ -40,7 +40,7 @@ void DDSNodeInterface::SendMessageToObjectWithResponder(int target_object_type, 
   packet.m_ResponderObjectType = responder_object_type;
   packet.m_ResponderMethodId = responder_method_id;
 
-  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key }, StormReflEncodeJson(packet));
+  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key }, DDSServerToServerMessageType::kTargetedMessageResponder, StormReflEncodeJson(packet));
 }
 
 void DDSNodeInterface::SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
@@ -56,6 +56,6 @@ void DDSNodeInterface::SendMessageToObjectWithResponderReturnArg(int target_obje
   packet.m_ResponderMethodId = responder_method_id;
   packet.m_ReturnArg = return_arg;
 
-  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key }, StormReflEncodeJson(packet));
+  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key }, DDSServerToServerMessageType::kTargetedMessageResponder, StormReflEncodeJson(packet));
 }
 

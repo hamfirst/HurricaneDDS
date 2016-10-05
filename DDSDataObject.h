@@ -2,6 +2,8 @@
 
 #include <StormRefl\StormRefl.h>
 
+#include "DDSNodeInterface.h"
+
 #define DDS_DATA_OBJECT \
   STORM_REFL; \
   STORM_REFL_FUNCS; \

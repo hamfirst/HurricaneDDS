@@ -83,9 +83,7 @@ bool DDSCoordinatorClientProtocol::HandleConnectionEstablished()
 {
   DDSCoordinatorHandshakeRequest request;
   request.m_Version = DDS_VERSION;
-  request.m_Challenge = DDSGetRandomNumber();
-  request.m_Challenge <<= 32;
-  request.m_Challenge |= DDSGetRandomNumber();
+  request.m_Challenge = DDSGetRandomNumber64();
 
   m_ExpectedChallengeResponse = DDSCalculateChallengeResponse(request.m_Challenge);
   SendMessageToServer(request);

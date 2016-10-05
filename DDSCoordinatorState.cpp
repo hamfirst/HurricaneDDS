@@ -17,8 +17,8 @@ DDSCoordinatorState::DDSCoordinatorState(const StormSockets::StormSocketInitSett
   const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings) :
   m_NetworkService(*this, backend_settings, server_settings),
   m_NextNodeId(0),
-  m_ClientSecret(DDSGetRandomNumber()),
-  m_ServerSecret(DDSGetRandomNumber())
+  m_ClientSecret(DDSGetRandomNumber64()),
+  m_ServerSecret(DDSGetRandomNumber64())
 {
 
 }

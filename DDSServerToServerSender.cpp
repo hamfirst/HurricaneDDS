@@ -30,9 +30,7 @@ void DDSServerToServerSender::HandleConnectionEstablished()
   DDSServerToServerHandshakeRequest request;
   request.m_NodeId = m_NodeState.GetLocalNodeId();
   request.m_Version = DDS_VERSION;
-  request.m_Challenge = DDSGetRandomNumber();
-  request.m_Challenge <<= 32;
-  request.m_Challenge |= DDSGetRandomNumber();
+  request.m_Challenge = DDSGetRandomNumber64();
   request.m_Secret = m_NodeState.GetClientSecret();
   std::string message = DDSGetServerMessage(request);
 

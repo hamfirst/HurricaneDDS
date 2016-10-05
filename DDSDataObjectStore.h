@@ -9,61 +9,266 @@
 
 #include "DDSKey.h"
 #include "DDSLog.h"
+#include "DDSRandom.h"
 #include "DDSNodeState.h"
 #include "DDSDataObjectStoreBase.h"
 #include "DDSDatabaseConnectionPool.h"
 #include "DDSResponder.h"
 #include "DDSResponderCall.h"
+#include "DDSNodeInterface.h"
 
-#include "DDSServerToServerMessages.refl.h"
+#include "DDSServerToServerMessages.refl.meta.h"
 
-#include <StormRefl\StormReflJson.h>
+#include <StormRefl\StormReflJsonStd.h>
 #include <StormRefl\StormReflMetaCallJson.h>
 #include <StormData\StormDataPath.h>
 
-template <bool TakesResponder>
-struct DDSMessageCaller
+template <typename ReturnArg>
+struct DDSMessageCallerNoResponder
 {
   template <class Deserializer, class C, typename ... Args>
-  bool CallWithResponder(DDSResponder & responder, Deserializer && deserializer, C & c, void (C::*func)(Args...))
+  static bool Call(Deserializer && deserializer, C & c, void (C::*func)(Args...), const std::string & str)
   {
+    if (str.length() > 0)
+    {
+      std::remove_const_t<std::remove_reference_t<ReturnArg>> arg{};
+      StormReflParseJson(arg, str.c_str());
+      return StormReflCallCheck(deserializer, c, func, arg);
+    }
+
     return StormReflCallCheck(deserializer, c, func);
   }
 };
 
 template <>
-struct DDSMessageCaller<true>
+struct DDSMessageCallerNoResponder<void>
 {
   template <class Deserializer, class C, typename ... Args>
-  bool CallWithResponder(DDSResponder & responder, Deserializer && deserializer, C & c, void (C::*func)(Args...))
+  static bool Call(Deserializer && deserializer, C & c, void (C::*func)(Args...), const std::string & return_arg)
+  {
+    return StormReflCallCheck(deserializer, c, func);
+  }
+};
+
+template <typename ReturnArg>
+struct DDSMessageCallerWithResponder
+{
+  template <class Deserializer, class C, typename ... Args>
+  static bool Call(DDSResponder & responder, Deserializer && deserializer, C & c, void (C::*func)(Args...), const std::string & str)
+  {
+    if (str.length() > 0)
+    {
+      std::remove_const_t<std::remove_reference_t<ReturnArg>> arg{};
+      StormReflParseJson(arg, str.c_str());
+      return StormReflCallCheck(deserializer, c, func, responder, arg);
+    }
+
+    return StormReflCallCheck(deserializer, c, func);
+  }
+};
+
+template <>
+struct DDSMessageCallerWithResponder<void>
+{
+  template <class Deserializer, class C, typename ... Args>
+  static bool Call(DDSResponder & responder, Deserializer && deserializer, C & c, void (C::*func)(Args...), const std::string & return_arg)
   {
     return StormReflCallCheck(deserializer, c, func, responder);
   }
 };
 
-template <class DataType>
-void DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSTargetedMessage & message)
+
+template <int FuncIndex, bool TakesResponder>
+struct DDSMessageCaller
 {
-  auto deserializer = [&](auto & t)
+  template <class Deserializer, class C, typename ... Args>
+  static bool CallWithResponder(DDSResponder & responder, Deserializer && deserializer, C & c, void (C::*func)(Args...), const std::string & return_arg)
   {
-    StormReflJsonAdvanceWhiteSpace(str);
-    if (*str != ',')
+    using ParamType = typename StormReflGetParamType<C, FuncIndex, 0>::type;
+    return DDSMessageCallerNoResponder<ParamType>::Call(deserializer, c, func, return_arg);
+  }
+};
+
+template <int FuncIndex>
+struct DDSMessageCaller<FuncIndex, true>
+{
+  template <class Deserializer, class C, typename ... Args>
+  static bool CallWithResponder(DDSResponder & responder, Deserializer && deserializer, C & c, void (C::*func)(Args...), const std::string & return_arg)
+  {
+    using ParamType = typename StormReflGetParamType<C, FuncIndex, 1>::type;
+    return DDSMessageCallerWithResponder<ParamType>::Call(responder, deserializer, c, func, return_arg);
+  }
+};
+
+template <class DataType>
+bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSTargetedMessage & message)
+{
+  const char * str = message.m_MethodArgs.c_str();
+  StormReflJsonAdvanceWhiteSpace(str);
+  if (*str != '[')
+  {
+    return false;
+  }
+
+  str++;
+
+  auto deserializer = [&](auto & t, bool final_arg)
+  {
+    if (StormReflParseJson(t, str, str) == false)
     {
       return false;
     }
 
-    str++;
     StormReflJsonAdvanceWhiteSpace(str);
-    return StormReflParseJson(t, str, str);
+    if (final_arg)
+    {
+      if (*str != ']')
+      {
+        return false;
+      }
+
+      return true;
+    }
+    else
+    {
+      if (*str != ',')
+      {
+        return false;
+      }
+
+      str++;
+      return true;
+    }
   };
 
+  DDSResponder responder = { node_state, {0, -1, -1} };
+
+  bool parsed = false;
   auto func_visitor = [&](auto f)
   {
     auto func_pointer = f.GetFunctionPtr();
-    parsed = StormReflCallCheck(deserializer, c, func_pointer);
+    constexpr int func_index = f.GetFunctionIndex();
+    constexpr bool use_responder = StormReflIsParamOfType<DataType, func_index, 0, DDSResponder &>();
+
+    parsed = DDSMessageCaller<func_index, use_responder>::CallWithResponder(responder, deserializer, dt, func_pointer, "");
   };
 
-  StormReflVisitFuncByIndex(c, func_visitor, message.m_MethodId);
+  StormReflVisitFuncByIndex(dt, func_visitor, message.m_MethodId);
+  return parsed;
+}
+
+template <class DataType>
+bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSTargetedMessageWithResponder & message)
+{
+  const char * str = message.m_MethodArgs.c_str();
+  StormReflJsonAdvanceWhiteSpace(str);
+  if (*str != '[')
+  {
+    return false;
+  }
+
+  str++;
+
+  auto deserializer = [&](auto & t, bool final_arg)
+  {
+    if (StormReflParseJson(t, str, str) == false)
+    {
+      return false;
+    }
+
+    StormReflJsonAdvanceWhiteSpace(str);
+    if (final_arg)
+    {
+      if (*str != ']')
+      {
+        return false;
+      }
+
+      return true;
+    }
+    else
+    {
+      if (*str != ',')
+      {
+        return false;
+      }
+
+      str++;
+      return true;
+    }
+  };
+
+  DDSResponder responder = { node_state, { message.m_ResponderKey, message.m_ResponderObjectType, message.m_ResponderMethodId } };
+
+  bool parsed = false;
+  auto func_visitor = [&](auto f)
+  {
+    auto func_pointer = f.GetFunctionPtr();
+    constexpr int func_index = f.GetFunctionIndex();
+    constexpr bool use_responder = StormReflIsParamOfType<DataType, func_index, 0, DDSResponder &>();
+
+    parsed = DDSMessageCaller<func_index, use_responder>::CallWithResponder(responder, deserializer, dt, func_pointer, "");
+  };
+
+  StormReflVisitFuncByIndex(dt, func_visitor, message.m_MethodId);
+  return parsed;
+}
+
+template <class DataType>
+bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSResponderCallData & message)
+{
+  const char * str = message.m_MethodArgs.c_str();
+  StormReflJsonAdvanceWhiteSpace(str);
+  if (*str != '[')
+  {
+    return false;
+  }
+
+  str++;
+
+  auto deserializer = [&](auto & t, bool final_arg)
+  {
+    if (StormReflParseJson(t, str, str) == false)
+    {
+      return false;
+    }
+
+    StormReflJsonAdvanceWhiteSpace(str);
+    if (final_arg)
+    {
+      if (*str != ']')
+      {
+        return false;
+      }
+
+      return true;
+    }
+    else
+    {
+      if (*str != ',')
+      {
+        return false;
+      }
+
+      str++;
+      return true;
+    }
+  };
+
+  DDSResponder responder = { node_state,{ 0, -1, -1 } };
+
+  bool parsed = false;
+  auto func_visitor = [&](auto f)
+  {
+    auto func_pointer = f.GetFunctionPtr();
+    constexpr int func_index = f.GetFunctionIndex();
+    constexpr bool use_responder = StormReflIsParamOfType<DataType, func_index, 0, DDSResponder &>();
+
+    parsed = DDSMessageCaller<func_index, use_responder>::CallWithResponder(responder, deserializer, dt, func_pointer, message.m_ResponderArgs);
+  };
+
+  StormReflVisitFuncByIndex(dt, func_visitor, message.m_MethodId);
+  return parsed;
 }
 
 template <class DataType, class DatabaseBackedType>
@@ -99,7 +304,31 @@ public:
     return StormReflTypeInfo<DataType>::GetNameHash();
   }
 
-  void HandleMessage(DDSKey key, DDSResponderData responder, const char * msg)
+  uint32_t GetDatabaseClassNameHash() const
+  {
+    return StormReflTypeInfo<DatabaseBackedType>::GetNameHash();
+  }
+
+  void SpawnNewNonDatabaseBackedType(DDSKey key)
+  {
+    throw std::runtime_error("Trying to create a non database backed type for a database backed data store");
+  }
+
+  DDSKey GetUnusedKeyInRange(DDSKeyRange range)
+  {
+    while (true)
+    {
+      DDSKey size = GetKeyRangeSize(range);
+      DDSKey test_key = (DDSGetRandomNumber64() % size) + range.m_Min;
+
+      if (m_Objects.find(test_key) == m_Objects.end())
+      {
+        return test_key;
+      }
+    }
+  }
+
+  void HandleMessage(DDSKey key, DDSServerToServerMessageType message_type, const char * msg)
   {
     auto itr = m_Objects.find(key);
     auto & obj_data = itr == m_Objects.end() ? LoadObjectByKey(key) : itr->second;
@@ -116,15 +345,15 @@ public:
 
     if (obj_data.m_State == kActive)
     {
-      //ProcessMessage(key, obj_data, msg, responder);
+      ProcessMessage(obj_data, message_type, msg);
     }
     else
     {
-      obj_data.m_PendingMessages.emplace_back(DDSExportedMessage{ msg, responder });
+      obj_data.m_PendingMessages.emplace_back(DDSExportedMessage{ message_type, msg });
     }
   }
 
-  void HandleQuery(DDSKey key, DDSResponderData responder, const char * msg)
+  void HandleQuery(DDSKey key, DDSServerToServerMessageType message_type, const char * msg)
   {
     auto itr = m_Objects.find(key);
     auto & obj_data = itr == m_Objects.end() ? LoadObjectByKey(key) : itr->second;
@@ -147,13 +376,49 @@ public:
     }
     else
     {
-      obj_data.m_PendingQueries.emplace_back(DDSExportedMessage{ msg, responder });
+      obj_data.m_PendingQueries.emplace_back(DDSExportedMessage{ message_type, msg });
     }
   }
 
-  void ProcessMessage(DDSKey key, ObjectData & obj_data, const char * message, DDSResponder & responder)
+  void ProcessMessage(ObjectData & obj_data, DDSServerToServerMessageType message_type, const char * message)
   {
-    //obj_data.m_ActiveObject->ProcessMessage(message, responder);
+    switch (message_type)
+    {
+      case DDSServerToServerMessageType::kTargetedMessage:
+      {
+        DDSTargetedMessage targeted_msg;
+        StormReflParseJson(targeted_msg, message);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, targeted_msg))
+        {
+          DDSLog::LogError("Failed to process message for object");
+        }
+      }
+      break;
+      case DDSServerToServerMessageType::kTargetedMessageResponder:
+      {
+        DDSTargetedMessageWithResponder targeted_msg;
+        StormReflParseJson(targeted_msg, message);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, targeted_msg))
+        {
+          DDSLog::LogError("Failed to process message for object");
+        }
+      }
+      break;
+      case DDSServerToServerMessageType::kResponderCall:
+      {
+        DDSResponderCallData responder_call;
+        StormReflParseJson(responder_call, message);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, responder_call))
+        {
+          DDSLog::LogError("Failed to process message for object");
+        }
+      }
+      break;
+      default:
+      {
+        DDSLog::LogError("Invalid message type");
+      }
+    }
   }
 
   ObjectData & LoadObjectByKey(DDSKey key)
@@ -356,23 +621,15 @@ private:
 template <class DataType>
 class DDSDataObjectStore<DataType, void> : public DDSDataObjectStoreBase
 {
-  enum ObjectState
-  {
-    kCreating,
-    kActive,
-  };
-
   struct ObjectData
   {
-    ObjectState m_State;
     std::unique_ptr<DataType> m_ActiveObject;
-    std::vector<DDSExportedMessage> m_PendingMessages;
   };
 
 public:
 
   DDSDataObjectStore(DDSNodeState & node_state, int object_type_id) :
-    m_NodeState(node_state), m_Collection(DatabaseBackedType::Collection()), m_ObjectTypeId(object_type_id)
+    m_NodeState(node_state), m_ObjectTypeId(object_type_id)
   {
 
   }
@@ -382,39 +639,93 @@ public:
     return StormReflTypeInfo<DataType>::GetNameHash();
   }
 
-  void HandleMessage(DDSKey key, DDSResponderData responder, const char * msg)
+  uint32_t GetDatabaseClassNameHash() const
   {
-    auto itr = m_Objects.find(key);
-    auto & obj_data = itr == m_Objects.end() ? LoadObjectByKey(key) : itr->second;
+    return 0;
+  }
 
-    if (obj_data.m_State == kDatabaseOnly)
-    {
-      PromoteObject(key);
-    }
+  void SpawnNewNonDatabaseBackedType(DDSKey key)
+  {
+    DDSNodeInterface node_interface(m_NodeState, this, key);
+    m_Objects.emplace(std::make_pair(key, ObjectData{ std::make_unique<DataType>(node_interface) }));
+  }
 
-    if (obj_data.m_State == kDeleted)
+  DDSKey GetUnusedKeyInRange(DDSKeyRange range)
+  {
+    while (true)
     {
-      ReloadObjectByKey(key, obj_data);
-    }
+      DDSKey size = GetKeyRangeSize(range);
+      DDSKey test_key = (DDSGetRandomNumber64() % size) + range.m_Min;
 
-    if (obj_data.m_State == kActive)
-    {
-      //ProcessMessage(key, obj_data, msg, responder);
-    }
-    else
-    {
-      obj_data.m_PendingMessages.emplace_back(DDSExportedMessage{ msg, responder });
+      if (m_Objects.find(test_key) == m_Objects.end())
+      {
+        return test_key;
+      }
     }
   }
 
-  void HandleQuery(DDSKey key, DDSResponderData responder, const char * msg)
+  void DestroyObject(DDSKey key)
+  {
+    m_Objects.erase(key);
+  }
+
+  void HandleMessage(DDSKey key, DDSServerToServerMessageType message_type, const char * msg)
+  {
+    auto itr = m_Objects.find(key);
+    if (itr == m_Objects.end())
+    {
+      return;
+    }
+
+    auto & obj_data = itr->second;
+
+    ProcessMessage(obj_data, message_type, msg);
+  }
+
+  void HandleQuery(DDSKey key, DDSServerToServerMessageType message_type, const char * msg)
   {
     DDSLog::LogError("Query sent to invalid data object");
   }
 
-  void ProcessMessage(DDSKey key, ObjectData & obj_data, const char * message, DDSResponder & responder)
+  void ProcessMessage(ObjectData & obj_data, DDSServerToServerMessageType message_type, const char * message)
   {
-    //obj_data.m_ActiveObject->ProcessMessage(message, responder);
+    switch (message_type)
+    {
+      case DDSServerToServerMessageType::kTargetedMessage:
+      {
+        DDSTargetedMessage targeted_msg;
+        StormReflParseJson(targeted_msg, message);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, targeted_msg))
+        {
+          DDSLog::LogError("Failed to process message for object");
+        }
+      }
+      break;
+      case DDSServerToServerMessageType::kTargetedMessageResponder:
+      {
+        DDSTargetedMessageWithResponder targeted_msg;
+        StormReflParseJson(targeted_msg, message);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, targeted_msg))
+        {
+          DDSLog::LogError("Failed to process message for object");
+        }
+      }
+      break;
+      case DDSServerToServerMessageType::kResponderCall:
+      {
+        DDSResponderCallData responder_call;
+        StormReflParseJson(responder_call, message);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, responder_call))
+        {
+          DDSLog::LogError("Failed to process message for object");
+        }
+      }
+      break;
+      default:
+      {
+        DDSLog::LogError("Invalid message type");
+      }
+    }
   }
 
   bool ExportObjectsInRange(DDSKeyRange requested_range, DDSKeyRange & output_range, DDSKeyRange & remainder_range, int max_objects, std::vector<DDSExportedObject> & output)
@@ -454,22 +765,13 @@ public:
         break;
       }
 
-      if (itr->second.m_State == kActive || itr->second.m_PendingMessages.size() > 0)
-      {
-        DDSExportedObject obj = { itr->first };
-        StormReflEncodeJson(*itr->second.m_ActiveObject.get(), obj.m_ActiveObject);
+      DDSExportedObject obj = { itr->first };
+      StormReflEncodeJson(*itr->second.m_ActiveObject.get(), obj.m_ActiveObject);
 
-        for (auto & message : itr->second.m_PendingMessages)
-        {
-          obj.m_PendingMessages.emplace_back(message);
-          num_objects++;
-        }
+      output.emplace_back(std::move(obj));
+      num_objects++;
 
-        output.emplace_back(std::move(obj));
-        num_objects++;
-
-        saved_itrs.push_back(itr);
-      }
+      saved_itrs.push_back(itr);
 
       itr++;
       if (itr == m_Objects.end())
@@ -495,9 +797,8 @@ public:
   {
     for (auto & object : object_list)
     {
-      ObjectData obj_data = { kLoading, std::make_unique<DataType>() };
-
-      obj_data.m_PendingMessages = std::move(object.m_PendingMessages);
+      DDSNodeInterface node_interface(m_NodeState, this, object.m_Key);
+      ObjectData obj_data = { std::make_unique<DataType>(node_interface) };
 
       if (StormReflParseJson(*obj_data.m_ActiveObject.get(), object.m_ActiveObject.c_str()) == false)
       {
@@ -505,11 +806,9 @@ public:
         return;
       }
 
-      obj_data.m_State = kActive;
       m_Objects.emplace(std::make_pair(object.m_Key, std::move(obj_data)));
     }
   }
-
 
 private:
 

@@ -88,9 +88,7 @@ bool DDSServerToServerReceiver::HandleIncomingMessage(StormSockets::StormWebsock
     m_NodeId = request.m_NodeId;
 
     DDSServerToServerHandshakeResponse response;
-    response.m_Challenge = DDSGetRandomNumber();
-    response.m_Challenge <<= 32;
-    response.m_Challenge |= DDSGetRandomNumber();
+    response.m_Challenge = DDSGetRandomNumber64();
     response.m_Secret = m_NodeState.GetServerSecret();
     response.m_NodeId = m_NodeState.GetLocalNodeId();
     response.m_ChallengeResponse = DDSCalculateChallengeResponse(request.m_Challenge);

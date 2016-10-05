@@ -10,7 +10,7 @@ DDSNetworkBackend::DDSNetworkBackend(const StormSockets::StormSocketInitSettings
 
 }
 
-DDSNetworkBackend()::~DDSNetworkBackend()
+DDSNetworkBackend::~DDSNetworkBackend()
 {
 
 }

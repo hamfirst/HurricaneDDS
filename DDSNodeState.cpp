@@ -2,6 +2,7 @@
 #include "DDSLog.h"
 #include "DDSNodeState.h"
 #include "DDSRoutingTable.h"
+#include "DDSServerMessage.h"
 
 #include "DDSServerToServerMessages.refl.meta.h"
 
@@ -85,15 +86,48 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
 
     m_IncomingKeyspace.SetKeyRangeComplete(obj_list.m_RoutingTableGen, obj_list.m_DataObjectType, DDSKeyRange{ obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax });
   }
+  else if (type == DDSServerToServerMessageType::kTargetedMessage)
+  {
+    DDSTargetedMessage targeted_message;
+    if (StormReflParseJson(targeted_message, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    SendTargetedMessage(DDSDataObjectAddress{ targeted_message.m_ObjectType, targeted_message.m_Key }, type, std::string(data));
+  }
+  else if (type == DDSServerToServerMessageType::kTargetedMessageResponder)
+  {
+    DDSTargetedMessageWithResponder targeted_message;
+    if (StormReflParseJson(targeted_message, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    SendTargetedMessage(DDSDataObjectAddress{ targeted_message.m_ObjectType, targeted_message.m_Key }, type, std::string(data));
+  }
+  else if (type == DDSServerToServerMessageType::kResponderCall)
+  {
+    DDSResponderCallData responder_data;
+    if (StormReflParseJson(responder_data, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    SendTargetedMessage(DDSDataObjectAddress{ responder_data.m_ObjectType, responder_data.m_Key }, type, std::string(data));
+  }
 }
 
-void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, std::string && message)
+void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message)
 {
   if (KeyInKeyRange(addr.m_ObjectKey, m_LocalKeyRange))
   {
     if (m_IncomingKeyspace.IsCompleteForKey(addr))
     {
-      HandleIncomingTargetedMessage(addr, message);
+      HandleIncomingTargetedMessage(addr, type, message);
       return;
     }
   }
@@ -102,13 +136,13 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, std::string &&
     DDSNodeId node_id = GetNodeIdForKey(addr.m_ObjectKey);
     if (m_NodeNetwork.RequestNodeConnection(node_id))
     {
-      m_NodeNetwork.SendMessageToServer(node_id, std::move(message));
+      m_NodeNetwork.SendMessageToServer(node_id, DDSGetServerMessage(type, message.c_str()));
       return;
     }
   }
 
-  auto result = m_PendingTargetedMessages.emplace(std::make_pair(addr, std::vector<std::string>{}));
-  result.first->second.emplace_back(message);
+  auto result = m_PendingTargetedMessages.emplace(std::make_pair(addr, std::vector<std::pair<DDSServerToServerMessageType, std::string>>{}));
+  result.first->second.emplace_back(std::make_pair(type, message));
 }
 
 DDSNodeId DDSNodeState::GetNodeIdForKey(DDSKey key) const
@@ -138,9 +172,41 @@ int DDSNodeState::GetDataObjectTypeIdForNameHash(uint32_t name_hash) const
   return -1;
 }
 
+
+int DDSNodeState::GetDatabaseObjectTypeIdForNameHash(uint32_t name_hash) const
+{
+  for (std::size_t index = 0; index < m_DataObjectList.size(); index++)
+  {
+    if (m_DataObjectList[index]->GetDatabaseClassNameHash() == name_hash)
+    {
+      return (int)index;
+    }
+  }
+
+  DDSLog::LogError("Invalid object id request");
+  return -1;
+}
+
 DDSDataObjectStoreBase & DDSNodeState::GetDataObjectStore(int object_type_id)
 {
   return *m_DataObjectList[object_type_id].get();
+}
+
+bool DDSNodeState::IsReadyToCreateObjects()
+{
+  return m_IncomingKeyspace.IsCompleteForKeyRange(m_LocalKeyRange);
+}
+
+bool DDSNodeState::CreateNewDataObject(int object_type_id, DDSKey & output_key)
+{
+  if (IsReadyToCreateObjects() == false)
+  {
+    return false;
+  }
+
+  output_key = m_DataObjectList[object_type_id]->GetUnusedKeyInRange(m_LocalKeyRange);
+  m_DataObjectList[object_type_id]->SpawnNewNonDatabaseBackedType(output_key);
+  return true;
 }
 
 DDSNetworkBackend & DDSNodeState::GetBackend()
@@ -219,7 +285,7 @@ void DDSNodeState::RecheckOutgoingTargetedMessages()
         {
           for (auto & message : itr_copy->second)
           {
-            HandleIncomingTargetedMessage(itr_copy->first, message);
+            HandleIncomingTargetedMessage(itr_copy->first, message.first, std::move(message.second));
           }
 
           m_PendingTargetedMessages.erase(itr_copy);
@@ -232,7 +298,7 @@ void DDSNodeState::RecheckOutgoingTargetedMessages()
         {
           for (auto & message : itr_copy->second)
           {
-            m_NodeNetwork.SendMessageToServer(node_id, std::move(message));
+            m_NodeNetwork.SendMessageToServer(node_id, DDSGetServerMessage(message.first, message.second.c_str()));
           }
 
           m_PendingTargetedMessages.erase(itr_copy);
@@ -242,7 +308,7 @@ void DDSNodeState::RecheckOutgoingTargetedMessages()
   }
 }
 
-void DDSNodeState::HandleIncomingTargetedMessage(DDSDataObjectAddress addr, std::string & message)
+void DDSNodeState::HandleIncomingTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string & message)
 {
-
+  m_DataObjectList[addr.m_ObjectType]->HandleMessage(addr.m_ObjectKey, type, message.c_str());
 }

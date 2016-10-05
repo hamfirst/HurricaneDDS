@@ -88,9 +88,7 @@ bool DDSCoordinatorServerProtocol::HandleMessage(const char * msg, int length)
 
       DDSCoordinatorHandshakeResponse response;
       response.m_ChallengeResponse = DDSCalculateChallengeResponse(request.m_Challenge);
-      response.m_ChallengeRequest = DDSGetRandomNumber();
-      response.m_ChallengeRequest <<= 32;
-      response.m_ChallengeRequest |= DDSGetRandomNumber();
+      response.m_ChallengeRequest = DDSGetRandomNumber64();
 
       m_ExpectedChallengeResponse = DDSCalculateChallengeResponse(response.m_ChallengeRequest);
       m_State = kHandshakeFinalize;

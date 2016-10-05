@@ -10,10 +10,14 @@
 #include <StormRefl\StormReflMetaCallJson.h>
 
 class DDSNodeState;
+class DDSDataObjectStoreBase;
+
 class DDSNodeInterface
 {
 public:
-  DDSNodeInterface(DDSNodeState & node_state, DDSKey key);
+  DDSNodeInterface(DDSNodeState & node_state, DDSDataObjectStoreBase * data_store, DDSKey key);
+  DDSNodeInterface(const DDSNodeInterface & rhs) = default;
+  DDSNodeInterface(DDSNodeInterface && rhs) = default;
 
   template <typename TargetObject, typename ... Args, typename ... CallArgs>
   void Call(void (TargetObject::* target_func)(Args...), DDSKey key, CallArgs && ... args)
@@ -93,5 +97,6 @@ private:
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg, std::string && message);
 
   DDSNodeState & m_NodeState;
+  DDSDataObjectStoreBase * m_DataStore;
   DDSKey m_Key;
 };

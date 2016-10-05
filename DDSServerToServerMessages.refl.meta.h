@@ -320,13 +320,13 @@ struct StormReflTypeInfo<DDSExportedMessage>
 template <>
 struct StormReflTypeInfo<DDSExportedMessage>::field_data_static<0>
 {
-  using member_type = std::basic_string<char, std::char_traits<char>, std::allocator<char> >;
-  static constexpr auto GetName() { return "m_Message"; }
-  static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xD2BD02E8; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  using member_type = DDSServerToServerMessageType;
+  static constexpr auto GetName() { return "m_Type"; }
+  static constexpr auto GetType() { return "DDSServerToServerMessageType"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x70F58FB9; }
+  static constexpr unsigned GetTypeNameHash() { return 0xBBFBB085; }
   static constexpr auto GetFieldIndex() { return 0; }
-  static constexpr auto GetMemberPtr() { return &DDSExportedMessage::m_Message; }
+  static constexpr auto GetMemberPtr() { return &DDSExportedMessage::m_Type; }
 };
 
 template <typename Self>
@@ -334,21 +334,21 @@ struct StormReflTypeInfo<DDSExportedMessage>::field_data<0, Self> : public Storm
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, std::basic_string<char, std::char_traits<char>, std::allocator<char> >> & Get() { return self.m_Message; }
-  std::add_const_t<std::remove_reference_t<std::basic_string<char, std::char_traits<char>, std::allocator<char> >>> & Get() const { return self.m_Message; }
-  void SetDefault() { self.m_Message = StormReflTypeInfo<DDSExportedMessage>::GetDefault().m_Message; }
+  match_const_t<Self, DDSServerToServerMessageType> & Get() { return self.m_Type; }
+  std::add_const_t<std::remove_reference_t<DDSServerToServerMessageType>> & Get() const { return self.m_Type; }
+  void SetDefault() { self.m_Type = StormReflTypeInfo<DDSExportedMessage>::GetDefault().m_Type; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSExportedMessage>::field_data_static<1>
 {
-  using member_type = DDSResponderData;
-  static constexpr auto GetName() { return "m_Responder"; }
-  static constexpr auto GetType() { return "DDSResponderData"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x9679CCE0; }
-  static constexpr unsigned GetTypeNameHash() { return 0xA9791E88; }
+  using member_type = std::basic_string<char, std::char_traits<char>, std::allocator<char> >;
+  static constexpr auto GetName() { return "m_Message"; }
+  static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD2BD02E8; }
+  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
   static constexpr auto GetFieldIndex() { return 1; }
-  static constexpr auto GetMemberPtr() { return &DDSExportedMessage::m_Responder; }
+  static constexpr auto GetMemberPtr() { return &DDSExportedMessage::m_Message; }
 };
 
 template <typename Self>
@@ -356,9 +356,9 @@ struct StormReflTypeInfo<DDSExportedMessage>::field_data<1, Self> : public Storm
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, DDSResponderData> & Get() { return self.m_Responder; }
-  std::add_const_t<std::remove_reference_t<DDSResponderData>> & Get() const { return self.m_Responder; }
-  void SetDefault() { self.m_Responder = StormReflTypeInfo<DDSExportedMessage>::GetDefault().m_Responder; }
+  match_const_t<Self, std::basic_string<char, std::char_traits<char>, std::allocator<char> >> & Get() { return self.m_Message; }
+  std::add_const_t<std::remove_reference_t<std::basic_string<char, std::char_traits<char>, std::allocator<char> >>> & Get() const { return self.m_Message; }
+  void SetDefault() { self.m_Message = StormReflTypeInfo<DDSExportedMessage>::GetDefault().m_Message; }
 };
 
 template <>
@@ -608,7 +608,7 @@ struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<4, Self> : public St
 template <>
 struct StormReflTypeInfo<DDSResponderCallData>
 {
-  static constexpr int fields_n = 4;
+  static constexpr int fields_n = 5;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -687,16 +687,38 @@ template <>
 struct StormReflTypeInfo<DDSResponderCallData>::field_data_static<3>
 {
   using member_type = std::basic_string<char, std::char_traits<char>, std::allocator<char> >;
-  static constexpr auto GetName() { return "m_MethodArgs"; }
+  static constexpr auto GetName() { return "m_ResponderArgs"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xE5505EE5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xEE5C340B; }
   static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
   static constexpr auto GetFieldIndex() { return 3; }
-  static constexpr auto GetMemberPtr() { return &DDSResponderCallData::m_MethodArgs; }
+  static constexpr auto GetMemberPtr() { return &DDSResponderCallData::m_ResponderArgs; }
 };
 
 template <typename Self>
 struct StormReflTypeInfo<DDSResponderCallData>::field_data<3, Self> : public StormReflTypeInfo<DDSResponderCallData>::field_data_static<3>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, std::basic_string<char, std::char_traits<char>, std::allocator<char> >> & Get() { return self.m_ResponderArgs; }
+  std::add_const_t<std::remove_reference_t<std::basic_string<char, std::char_traits<char>, std::allocator<char> >>> & Get() const { return self.m_ResponderArgs; }
+  void SetDefault() { self.m_ResponderArgs = StormReflTypeInfo<DDSResponderCallData>::GetDefault().m_ResponderArgs; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSResponderCallData>::field_data_static<4>
+{
+  using member_type = std::basic_string<char, std::char_traits<char>, std::allocator<char> >;
+  static constexpr auto GetName() { return "m_MethodArgs"; }
+  static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xE5505EE5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr auto GetFieldIndex() { return 4; }
+  static constexpr auto GetMemberPtr() { return &DDSResponderCallData::m_MethodArgs; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSResponderCallData>::field_data<4, Self> : public StormReflTypeInfo<DDSResponderCallData>::field_data_static<4>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -908,13 +930,13 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponder>::field_data<3, Self> :
 template <>
 struct StormReflTypeInfo<DDSTargetedMessageWithResponder>::field_data_static<4>
 {
-  using member_type = unsigned long long;
-  static constexpr auto GetName() { return "m_ResponderKey"; }
-  static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x47BF66BE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  using member_type = int;
+  static constexpr auto GetName() { return "m_ResponderObjectType"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x6ECD8D43; }
+  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
   static constexpr auto GetFieldIndex() { return 4; }
-  static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponder::m_ResponderKey; }
+  static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponder::m_ResponderObjectType; }
 };
 
 template <typename Self>
@@ -922,21 +944,21 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponder>::field_data<4, Self> :
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_ResponderKey; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_ResponderKey; }
-  void SetDefault() { self.m_ResponderKey = StormReflTypeInfo<DDSTargetedMessageWithResponder>::GetDefault().m_ResponderKey; }
+  match_const_t<Self, int> & Get() { return self.m_ResponderObjectType; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ResponderObjectType; }
+  void SetDefault() { self.m_ResponderObjectType = StormReflTypeInfo<DDSTargetedMessageWithResponder>::GetDefault().m_ResponderObjectType; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSTargetedMessageWithResponder>::field_data_static<5>
 {
-  using member_type = int;
-  static constexpr auto GetName() { return "m_ResponderObjectType"; }
-  static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x6ECD8D43; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  using member_type = unsigned long long;
+  static constexpr auto GetName() { return "m_ResponderKey"; }
+  static constexpr auto GetType() { return "unsigned long long"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x47BF66BE; }
+  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
   static constexpr auto GetFieldIndex() { return 5; }
-  static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponder::m_ResponderObjectType; }
+  static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponder::m_ResponderKey; }
 };
 
 template <typename Self>
@@ -944,9 +966,9 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponder>::field_data<5, Self> :
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, int> & Get() { return self.m_ResponderObjectType; }
-  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ResponderObjectType; }
-  void SetDefault() { self.m_ResponderObjectType = StormReflTypeInfo<DDSTargetedMessageWithResponder>::GetDefault().m_ResponderObjectType; }
+  match_const_t<Self, unsigned long long> & Get() { return self.m_ResponderKey; }
+  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_ResponderKey; }
+  void SetDefault() { self.m_ResponderKey = StormReflTypeInfo<DDSTargetedMessageWithResponder>::GetDefault().m_ResponderKey; }
 };
 
 template <>

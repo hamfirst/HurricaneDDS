@@ -41,12 +41,16 @@ public:
   void GotNewRoutingTable(const DDSRoutingTable & routing_table);
   void GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMessageType type, const char * data);
 
-  void SendTargetedMessage(DDSDataObjectAddress addr, std::string && message);
+  void SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message);
   DDSNodeId GetNodeIdForKey(DDSKey key) const;
 
   int GetDataObjectTypeIdForNameHash(uint32_t name_hash) const;
+  int GetDatabaseObjectTypeIdForNameHash(uint32_t name_hash) const;
 
   DDSDataObjectStoreBase & GetDataObjectStore(int object_type_id);
+
+  bool IsReadyToCreateObjects();
+  bool CreateNewDataObject(int object_type_id, DDSKey & output_key);
 
   DDSNetworkBackend & GetBackend();
   DDSNodeNetworkService & GetNodeNetwork();
@@ -76,7 +80,7 @@ private:
 
   void RecheckOutgoingTargetedMessages();
 
-  void HandleIncomingTargetedMessage(DDSDataObjectAddress addr, std::string & message);
+  void HandleIncomingTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string & message);
 
   DDSNetworkBackend m_Backend;
   DDSNodeNetworkService m_NodeNetwork;
@@ -90,7 +94,7 @@ private:
   DDSKeyRange m_LocalKeyRange;
   std::vector<std::pair<DDSNodeId, DDSKeyRange>> m_RoutingKeyRanges;
 
-  std::map<DDSDataObjectAddress, std::vector<std::string>> m_PendingTargetedMessages;
+  std::map<DDSDataObjectAddress, std::vector<std::pair<DDSServerToServerMessageType, std::string>>> m_PendingTargetedMessages;
 
   std::vector<std::unique_ptr<DDSDataObjectStoreBase>> m_DataObjectList;
 

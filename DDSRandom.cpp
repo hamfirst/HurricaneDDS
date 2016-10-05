@@ -10,3 +10,12 @@ uint32_t DDSGetRandomNumber()
 {
   return s_RandomEngine();
 }
+
+
+uint64_t DDSGetRandomNumber64()
+{
+  uint64_t val = s_RandomEngine();
+  val <<= 32;
+  val |= s_RandomEngine();
+  return val;
+}

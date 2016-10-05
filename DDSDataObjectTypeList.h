@@ -4,6 +4,9 @@
 
 #include "DDSDataObjectStore.h"
 
+template <class DataType, class DatabaseBackedType>
+class DDSDataObjectStore;
+
 template <class DataType, class DatabaseType, class ... Remaining>
 struct DDSCreateDataObjectTypeList
 {
@@ -13,7 +16,7 @@ struct DDSCreateDataObjectTypeList
   {
     return [](DDSNodeState & node_state, std::vector<std::unique_ptr<DDSDataObjectStoreBase>> & list)
     {
-      list.push_back(std::make_unique<typename DDSDataObjectStore<DataType, DatabaseType>>(node_state, (int)list.size()));
+      list.push_back(std::make_unique<DDSDataObjectStore<DataType, DatabaseType>>(node_state, (int)list.size()));
 
       auto next = DDSCreateDataObjectTypeList<Remaining...>();
       auto func = next();
@@ -31,7 +34,7 @@ struct DDSCreateDataObjectTypeList<DataType, DatabaseType>
   {
     return [](DDSNodeState & node_state, std::vector<std::unique_ptr<DDSDataObjectStoreBase>> & list)
     {
-      list.push_back(std::make_unique<typename DDSDataObjectStore<DataType, DatabaseType>>(node_state, (int)list.size()));
+      list.push_back(std::make_unique<DDSDataObjectStore<DataType, DatabaseType>>(node_state, (int)list.size()));
     };
   }
 };

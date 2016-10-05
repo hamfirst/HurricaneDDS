@@ -4,6 +4,8 @@
 
 #include <StormRefl\StormReflJson.h>
 
+#include "DDSServerToServerMessages.refl.meta.h"
+
 template <class T>
 std::string DDSGetServerMessage(const T & t)
 {
@@ -12,4 +14,10 @@ std::string DDSGetServerMessage(const T & t)
   StormReflEncodeJson(t, send_buffer);
   return send_buffer;
 }
+
+inline std::string DDSGetServerMessage(DDSServerToServerMessageType type, const char * data)
+{
+  return std::string(StormReflGetEnumAsString(type)) + " " + data;
+}
+
 

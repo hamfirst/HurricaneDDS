@@ -54,8 +54,8 @@ struct DDSServerToServerHandshakeFinalize
 struct DDSExportedMessage
 {
   STORM_REFL;
+  DDSServerToServerMessageType m_Type;
   std::string m_Message;
-  DDSResponderData m_Responder;
 };
 
 struct DDSExportedObject
@@ -90,6 +90,7 @@ struct DDSResponderCallData
   int m_ObjectType;
 
   int m_MethodId;
+  std::string m_ResponderArgs;
   std::string m_MethodArgs;
 };
 
@@ -114,8 +115,8 @@ struct DDSTargetedMessageWithResponder
   int m_MethodId;
   std::string m_MethodArgs;
 
-  DDSKey m_ResponderKey;
   int m_ResponderObjectType;
+  DDSKey m_ResponderKey;
   int m_ResponderMethodId;
 
   std::string m_ReturnArg;
