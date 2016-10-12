@@ -19,6 +19,10 @@ enum STORM_REFL_ENUM class DDSServerToServerMessageType
   kResponderCall,
   kTargetedMessage,
   kTargetedMessageResponder,
+  kCreateSubscription,
+  kCreateDataSubscription,
+  kDestroySubscription,
+  kSubscriptionDeleted
 };
 
 struct DDSServerToServerHandshakeRequest
@@ -58,15 +62,41 @@ struct DDSExportedMessage
   std::string m_Message;
 };
 
+struct DDSExportedSubscription
+{
+  STORM_REFL;
+  std::string m_DataPath;
+  DDSKey m_SubscriptionId;
+
+  DDSKey m_ResponderKey;
+  int m_ResponderObjectType;
+  int m_ResponderMethodId;
+  std::string m_ResponderArgs;
+
+  bool m_IsDataSubscription;
+  bool m_DeltaOnly;
+};
+
+struct DDSExportedRequestedSubscription
+{
+  STORM_REFL;
+  DDSKey m_Key;
+  int m_ObjectType;
+
+  DDSKey m_SubscriptionId;
+};
+
 struct DDSExportedObject
 {
   STORM_REFL;
   DDSKey m_Key;
+  bool m_IsLoaded;
   std::string m_ActiveObject;
   std::string m_DatabaseObject;
 
   std::vector<DDSExportedMessage> m_PendingMessages;
-  std::vector<DDSExportedMessage> m_PendingQueries;
+  std::vector<DDSExportedSubscription> m_Subscriptions;
+  std::vector<DDSExportedRequestedSubscription> m_RequestedSubscriptions;
 };
 
 struct DDSDataObjectListSync
@@ -122,4 +152,49 @@ struct DDSTargetedMessageWithResponder
   std::string m_ReturnArg;
 };
 
+struct DDSCreateSubscription
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kCreateSubscription;
+
+  std::string m_DataPath;
+
+  DDSKey m_Key;
+  int m_ObjectType;
+  DDSKey m_SubscriptionId;
+  
+  int m_ResponderObjectType;
+  DDSKey m_ResponderKey;
+  int m_ResponderMethodId;
+  std::string m_ReturnArg;
+
+  bool m_DeltaOnly;
+};
+
+struct DDSCreateDataSubscription : public DDSCreateSubscription
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kCreateDataSubscription;
+};
+
+struct DDSDestroySubscription
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kDestroySubscription;
+
+  DDSKey m_Key;
+  int m_ObjectType;
+  DDSKey m_SubscriptionId;
+};
+
+struct DDSSubscriptionDeleted
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kSubscriptionDeleted;
+
+  int m_ResponderObjectType;
+  DDSKey m_ResponderKey;
+  int m_ResponderMethodId;
+  DDSKey m_SubscriptionId;
+};
 

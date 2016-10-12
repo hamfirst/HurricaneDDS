@@ -40,6 +40,21 @@
     <ClInclude Include="DDSNodeInterface.h" />
     <ClInclude Include="DDSDataObject.h" />
     <ClInclude Include="DDSCoordinator.h" />
+    <ClInclude Include="DDSDataObjectStoreHelpers.h" />
+    <ClInclude Include="DDSDatabaseTypes.h" />
+    <ClInclude Include="DDSDatabaseSetup.h" />
+    <ClInclude Include="DDSTimerSystem.h" />
+    <ClInclude Include="DDSEndpointFactoryBase.h" />
+    <ClInclude Include="DDSEndpointFactory.h" />
+    <ClInclude Include="DDSEndpointInterface.h" />
+    <ClInclude Include="DDSEndpointFactoryList.h" />
+    <ClInclude Include="DDSDeferredCallback.h" />
+    <ClInclude Include="DDSDeferredCallbackSystem.h" />
+    <ClInclude Include="DDSHttpClient.h" />
+    <ClInclude Include="DDSHttpUtil.h" />
+    <ClInclude Include="DDSResolverBackend.h" />
+    <ClInclude Include="DDSResolver.h" />
+    <ClInclude Include="DDSResolverRequest.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSNetworkBackend.cpp" />
@@ -63,5 +78,15 @@
     <ClCompile Include="DDSIncomingKeyspaceTransfer.cpp" />
     <ClCompile Include="DDSNodeInterface.cpp" />
     <ClCompile Include="DDSCoordinator.cpp" />
+    <ClCompile Include="DDSVersion.cpp" />
+    <ClCompile Include="DDSDatabaseSetup.cpp" />
+    <ClCompile Include="DDSTimerSystem.cpp" />
+    <ClCompile Include="DDSEndpointFactoryBase.cpp" />
+    <ClCompile Include="DDSEndpointInterface.cpp" />
+    <ClCompile Include="DDSDeferredCallback.cpp" />
+    <ClCompile Include="DDSHttpClient.cpp" />
+    <ClCompile Include="DDSHttpUtil.cpp" />
+    <ClCompile Include="DDSResolverBackend.cpp" />
+    <ClCompile Include="DDSResolver.cpp" />
   </ItemGroup>
 </Project>

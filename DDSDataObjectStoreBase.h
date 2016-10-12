@@ -16,9 +16,15 @@ public:
   virtual DDSKey GetUnusedKeyInRange(DDSKeyRange range) = 0;
 
   virtual void SpawnNewNonDatabaseBackedType(DDSKey key) = 0;
+  virtual bool DestroyNonDatabaseBackedType(DDSKey key) = 0;
+  virtual void * GetDataObjectForKey(DDSKey key) = 0;
 
   virtual void HandleMessage(DDSKey key, DDSServerToServerMessageType message_type, const char * msg) = 0;
-  virtual void HandleQuery(DDSKey key, DDSServerToServerMessageType message_type, const char * msg) = 0;
+  virtual void HandleLoadResult(DDSKey key, const char * data, int ec) = 0;
+  virtual void FinalizeObjectLoad(DDSKey key) = 0;
+
+  virtual void BeginObjectModification(DDSKey key) = 0;
+  virtual void EndObjectModification() = 0;
 
   virtual bool ExportObjectsInRange(DDSKeyRange requested_range, DDSKeyRange & output_range, DDSKeyRange & remainder_range, int max_objects, std::vector<DDSExportedObject> & output) = 0;
   virtual void ProcessExportedObjects(const std::vector<DDSExportedObject> & object_list) = 0;

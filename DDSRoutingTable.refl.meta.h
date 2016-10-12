@@ -161,3 +161,25 @@ struct StormReflTypeInfo<DDSRoutingTable>::field_data<1, Self> : public StormRef
   void SetDefault() { self.m_TableGeneration = StormReflTypeInfo<DDSRoutingTable>::GetDefault().m_TableGeneration; }
 };
 
+namespace StormReflFileInfo
+{
+  struct DDSRoutingTable
+  {
+    static const int types_n = 2;
+    template <int i> struct type_info { using type = void; };
+  };
+
+  template <>
+  struct DDSRoutingTable::type_info<0>
+  {
+    using type = ::DDSNodeElement;
+  };
+
+  template <>
+  struct DDSRoutingTable::type_info<1>
+  {
+    using type = ::DDSRoutingTable;
+  };
+
+}
+

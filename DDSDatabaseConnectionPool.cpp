@@ -20,21 +20,6 @@ extern "C"
 
 #include "DDSDatabaseConnectionPool.h"
 
-enum class DDSDatabaseOperation
-{
-  kKeyQuery,
-  kCustomQuery,
-  kInsert,
-  kUpdate,
-  kUpsert,
-  kDelete,
-};
-
-static volatile bool s_Initialized = false;
-static int s_NumThreads = 0;
-static std::string s_DatabaseName;
-
-static const int kQueueSize = 256;
 
 struct DatabaseQueryInfo
 {
@@ -58,39 +43,38 @@ struct DatabaseConnectionThread
   std::thread m_Thread;
 
   StormSockets::StormSemaphore m_Semaphore;
-  StormSockets::StormMessageQueue<DatabaseQueryInfo> m_InputQueue = StormSockets::StormMessageQueue<DatabaseQueryInfo>(kQueueSize);
-  StormSockets::StormMessageQueue<DatabaseQueryResult> m_OutputQueue = StormSockets::StormMessageQueue<DatabaseQueryResult>(kQueueSize);
+  StormSockets::StormMessageQueue<DatabaseQueryInfo> m_InputQueue = StormSockets::StormMessageQueue<DatabaseQueryInfo>(DDSDatabaseConnectionPool::kQueueSize);
+  StormSockets::StormMessageQueue<DatabaseQueryResult> m_OutputQueue = StormSockets::StormMessageQueue<DatabaseQueryResult>(DDSDatabaseConnectionPool::kQueueSize);
 
   std::queue<DatabaseQueryInfo> m_PendingInputs;
 };
 
-std::unique_ptr<DatabaseConnectionThread[]> s_Threads;
 
-void DDSDatabaseQueueResult(int thread_index, const DatabaseQueryResult & result)
+void DDSDatabaseConnectionPool::QueueResult(int thread_index, const DatabaseQueryResult & result)
 {
-  while (s_Threads[thread_index].m_OutputQueue.Enqueue(result) == false)
+  while (m_Threads[thread_index].m_OutputQueue.Enqueue(result) == false)
   {
     std::this_thread::yield();
-    if (s_Initialized == false)
+    if (m_Initialized == false)
     {
       return;
     }
   }
 }
 
-void DDSDatabaseThread(int thread_index)
+void DDSDatabaseConnectionPool::DatabaseThread(int thread_index)
 {
-  auto & thread_data = s_Threads[thread_index];
+  auto & thread_data = m_Threads[thread_index];
 
   auto client = mongoc_client_new("mongodb://localhost:27017"); 
   auto destroy_client = gsl::finally([&]() { mongoc_client_destroy(client); });
 
-  auto database = mongoc_client_get_database(client, s_DatabaseName.data());
+  auto database = mongoc_client_get_database(client, m_DatabaseName.data());
   auto destroy_database = gsl::finally([&]() { mongoc_database_destroy(database); });
 
   bson_oid_t oid;
 
-  while (s_Initialized)
+  while (m_Initialized)
   {
     thread_data.m_Semaphore.WaitOne(1000);
 
@@ -120,11 +104,11 @@ void DDSDatabaseThread(int thread_index)
             char * str = bson_as_json(doc, NULL);
             auto str_destroy = gsl::finally([&]() { bson_free(str); });
 
-            DDSDatabaseQueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 0, str });
+            QueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 0, str });
           }
           else
           {
-            DDSDatabaseQueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 1 });
+            QueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 1 });
           }
         }
         break;
@@ -138,7 +122,7 @@ void DDSDatabaseThread(int thread_index)
           if (bson_init_from_json(bson, query.m_Data.c_str(), -1, &parse_error) == false)
           {
             DatabaseQueryResult result = { query.m_Callback, parse_error.code };
-            DDSDatabaseQueueResult(thread_index, result);
+            QueueResult(thread_index, result);
             break;
           }
 
@@ -153,11 +137,11 @@ void DDSDatabaseThread(int thread_index)
             char * str = bson_as_json(doc, NULL);
             auto str_destroy = gsl::finally([&]() { bson_free(str); });
 
-            DDSDatabaseQueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 0, str });
+            QueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 0, str });
           }
           else
           {
-            DDSDatabaseQueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 1 });
+            QueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 1 });
           }
         }
         break;
@@ -171,7 +155,7 @@ void DDSDatabaseThread(int thread_index)
           if (bson_init_from_json(bson, query.m_Data.c_str(), -1, &parse_error) == false)
           {
             DatabaseQueryResult result = { query.m_Callback, parse_error.code };
-            DDSDatabaseQueueResult(thread_index, result);
+            QueueResult(thread_index, result);
             break;
           }
 
@@ -182,12 +166,12 @@ void DDSDatabaseThread(int thread_index)
           if (mongoc_collection_insert(collection, MONGOC_INSERT_NONE, bson, nullptr, &insert_error) == false)
           {
             DatabaseQueryResult result = { query.m_Callback, insert_error.code };
-            DDSDatabaseQueueResult(thread_index, result);
+            QueueResult(thread_index, result);
             break;
           }
 
           DatabaseQueryResult result = { query.m_Callback, 0 };
-          DDSDatabaseQueueResult(thread_index, result);
+          QueueResult(thread_index, result);
         }
         break;
       case DDSDatabaseOperation::kUpdate:
@@ -201,7 +185,7 @@ void DDSDatabaseThread(int thread_index)
           if (bson_init_from_json(bson_doc, query.m_Data.c_str(), -1, &parse_error) == false)
           {
             DatabaseQueryResult result = { query.m_Callback, parse_error.code };
-            DDSDatabaseQueueResult(thread_index, result);
+            QueueResult(thread_index, result);
             break;
           }
 
@@ -215,12 +199,12 @@ void DDSDatabaseThread(int thread_index)
           if (mongoc_collection_update(collection, flags, bson_query, bson_doc, nullptr, &update_error) == false)
           {
             DatabaseQueryResult result = { query.m_Callback, update_error.code };
-            DDSDatabaseQueueResult(thread_index, result);
+            QueueResult(thread_index, result);
             break;
           }
 
           DatabaseQueryResult result = { query.m_Callback, 0 };
-          DDSDatabaseQueueResult(thread_index, result);
+          QueueResult(thread_index, result);
         }
         break;
       case DDSDatabaseOperation::kDelete:
@@ -233,12 +217,12 @@ void DDSDatabaseThread(int thread_index)
           if (mongoc_collection_delete(collection, MONGOC_DELETE_NONE, bson, nullptr, &delete_error) == false)
           {
             DatabaseQueryResult result = { query.m_Callback, delete_error.code };
-            DDSDatabaseQueueResult(thread_index, result);
+            QueueResult(thread_index, result);
             break;
           }
 
           DatabaseQueryResult result = { query.m_Callback, 0 };
-          DDSDatabaseQueueResult(thread_index, result);
+          QueueResult(thread_index, result);
         }
         break;
       }
@@ -246,107 +230,98 @@ void DDSDatabaseThread(int thread_index)
   }
 }
 
-void DDSInitDatabaseConnections(DDSDatabaseSettings & settings)
+DDSDatabaseConnectionPool::DDSDatabaseConnectionPool(const DDSDatabaseSettings & settings)
 {
-  if (s_Initialized == true)
-  {
-    return;
-  }
+  m_Initialized = true;
+  m_NumThreads = settings.NumThreads;
+  m_DatabaseName = settings.DatabaseName;
 
-  mongoc_init();
-
-  s_Initialized = true;
-  s_NumThreads = settings.NumThreads;
-  s_DatabaseName = settings.DatabaseName;
-
-  s_Threads = std::make_unique<DatabaseConnectionThread[]>(settings.NumThreads);
+  m_Threads = std::make_unique<DatabaseConnectionThread[]>(settings.NumThreads);
   for (int index = 0; index < settings.NumThreads; index++)
   {
-    s_Threads[index].m_Semaphore.Init(kQueueSize);
-    s_Threads[index].m_Thread = std::thread(&DDSDatabaseThread, index);
+    m_Threads[index].m_Semaphore.Init(kQueueSize);
+    m_Threads[index].m_Thread = std::thread(&DDSDatabaseConnectionPool::DatabaseThread, this, index);
   }
 }
 
-void DDSShutdownDatabaseConnections()
+DDSDatabaseConnectionPool::~DDSDatabaseConnectionPool()
 {
-  if (s_Initialized == false)
+  if (m_Initialized == false)
   {
     return;
   }
 
-  s_Initialized = false;
+  m_Initialized = false;
 
-  for (int index = 0; index < s_NumThreads; index++)
+  for (int index = 0; index < m_NumThreads; index++)
   {
-    s_Threads[index].m_Semaphore.Release();
-    s_Threads[index].m_Thread.join();
+    m_Threads[index].m_Semaphore.Release();
+    m_Threads[index].m_Thread.join();
   }
 
-  s_Threads.release();
-  s_NumThreads = 0;
-
-  mongoc_cleanup();
+  m_Threads.release();
+  m_NumThreads = 0;
 }
 
-void DDSQueryDatabase(DDSKey key, const char * collection, DDSDatabaseOperation operation,
+void DDSDatabaseConnectionPool::QueryDatabase(DDSKey key, const char * collection, DDSDatabaseOperation operation,
                                   const char * data, std::function<void(const char *, int)> && result_callback)
 {
-  int thread_index = key % s_NumThreads;
-  if (s_Threads[thread_index].m_PendingInputs.size() > 0 ||
-      s_Threads[thread_index].m_InputQueue.Enqueue(DatabaseQueryInfo{ key, operation, collection, data ? data : "", result_callback }) == false)
+  int thread_index = key % m_NumThreads;
+  if (m_Threads[thread_index].m_PendingInputs.size() > 0 ||
+      m_Threads[thread_index].m_InputQueue.Enqueue(DatabaseQueryInfo{ key, operation, collection, data ? data : "", result_callback }) == false)
   {
-    s_Threads[thread_index].m_PendingInputs.emplace(DatabaseQueryInfo{ key, operation, collection, data ? data : "", result_callback });
+    m_Threads[thread_index].m_PendingInputs.emplace(DatabaseQueryInfo{ key, operation, collection, data ? data : "", result_callback });
   }
   else
   {
-    s_Threads[thread_index].m_Semaphore.Release();
+    m_Threads[thread_index].m_Semaphore.Release();
   }
 }
 
-void DDSQueryDatabaseByKey(DDSKey key, const char * collection, std::function<void(const char *, int)> && result_callback)
+void DDSDatabaseConnectionPool::QueryDatabaseByKey(DDSKey key, const char * collection, std::function<void(const char *, int)> && result_callback)
 {
-  DDSQueryDatabase(key, collection, DDSDatabaseOperation::kKeyQuery, nullptr, std::move(result_callback));
+  QueryDatabase(key, collection, DDSDatabaseOperation::kKeyQuery, nullptr, std::move(result_callback));
 }
 
-void DDSQueryDatabaseCustom(const char * query, const char * collection, std::function<void(const char *, int)> && result_callback)
+void DDSDatabaseConnectionPool::QueryDatabaseCustom(const char * query, const char * collection, std::function<void(const char *, int)> && result_callback)
 {
-  DDSQueryDatabase(crc32(query), collection, DDSDatabaseOperation::kCustomQuery, query, std::move(result_callback));
+  QueryDatabase(crc32(query), collection, DDSDatabaseOperation::kCustomQuery, query, std::move(result_callback));
 }
 
-void DDSQueryDatabaseInsert(DDSKey key, const char * collection, const char * document, std::function<void(const char *, int)> && result_callback)
+void DDSDatabaseConnectionPool::QueryDatabaseInsert(DDSKey key, const char * collection, const char * document, std::function<void(const char *, int)> && result_callback)
 {
-  DDSQueryDatabase(key, collection, DDSDatabaseOperation::kInsert, document, std::move(result_callback));
+  QueryDatabase(key, collection, DDSDatabaseOperation::kInsert, document, std::move(result_callback));
 }
 
-void DDSQueryDatabaseUpsert(DDSKey key, const char * collection, const char * document, std::function<void(const char *, int)> && result_callback)
+void DDSDatabaseConnectionPool::QueryDatabaseUpsert(DDSKey key, const char * collection, const char * document, std::function<void(const char *, int)> && result_callback)
 {
-  DDSQueryDatabase(key, collection, DDSDatabaseOperation::kUpsert, document, std::move(result_callback));
+  QueryDatabase(key, collection, DDSDatabaseOperation::kUpsert, document, std::move(result_callback));
 }
 
-void DDSQueryDatabaseDelete(DDSKey key, const char * collection, std::function<void(const char *, int)> && result_callback)
+void DDSDatabaseConnectionPool::QueryDatabaseDelete(DDSKey key, const char * collection, std::function<void(const char *, int)> && result_callback)
 {
-  DDSQueryDatabase(key, collection, DDSDatabaseOperation::kDelete, nullptr, std::move(result_callback));
+  QueryDatabase(key, collection, DDSDatabaseOperation::kDelete, nullptr, std::move(result_callback));
 }
 
-void DDSDatabaseTriggerCallbacks()
+void DDSDatabaseConnectionPool::TriggerCallbacks()
 {
-  for (int index = 0; index < s_NumThreads; index++)
+  for (int index = 0; index < m_NumThreads; index++)
   {
     DatabaseQueryResult result;
-    while (s_Threads[index].m_OutputQueue.TryDequeue(result))
+    while (m_Threads[index].m_OutputQueue.TryDequeue(result))
     {
       result.m_Callback(result.m_ResultData.data(), result.m_ErrorCode);
     }
 
-    while(s_Threads[index].m_PendingInputs.size())
+    while(m_Threads[index].m_PendingInputs.size())
     {
-      auto & query = s_Threads[index].m_PendingInputs.back();
-      if (s_Threads[index].m_InputQueue.Enqueue(query) == false)
+      auto & query = m_Threads[index].m_PendingInputs.back();
+      if (m_Threads[index].m_InputQueue.Enqueue(query) == false)
       {
         break;
       }
 
-      s_Threads[index].m_PendingInputs.pop();
+      m_Threads[index].m_PendingInputs.pop();
     }
   }
 }

@@ -179,6 +179,11 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSDatabaseSetup.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseTypes.h" />
     <ClInclude Include="DDSDataObject.h" />
     <ClInclude Include="DDSDataObjectAddress.h" />
     <ClInclude Include="DDSDataObjectStore.h">
@@ -186,7 +191,31 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="DDSDataObjectStoreBase.h" />
+    <ClInclude Include="DDSDataObjectStoreHelpers.h" />
     <ClInclude Include="DDSDataObjectTypeList.h" />
+    <ClInclude Include="DDSDeferredCallback.h" />
+    <ClInclude Include="DDSDeferredCallbackSystem.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSEndpointFactory.h" />
+    <ClInclude Include="DDSEndpointFactoryBase.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSEndpointFactoryList.h" />
+    <ClInclude Include="DDSEndpointInterface.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSHttpClient.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSHttpUtil.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSIncomingKeyspaceTransfer.h">
       <SubType>
       </SubType>
@@ -229,6 +258,15 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSResolver.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSResolverBackend.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSResolverRequest.h" />
     <ClInclude Include="DDSResponder.h" />
     <ClInclude Include="DDSResponder.refl.h">
       <SubType>
@@ -268,6 +306,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSTimerSystem.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSVersion.h" />
   </ItemGroup>
   <ItemGroup>
@@ -292,6 +334,27 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSDatabaseConnectionPool.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSDatabaseSetup.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSDeferredCallback.cpp" />
+    <ClCompile Include="DDSEndpointFactoryBase.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSEndpointInterface.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSHttpClient.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSHttpUtil.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -336,6 +399,14 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="DDSResolver.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSResolverBackend.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSResponder.cpp">
       <SubType>
       </SubType>
@@ -352,6 +423,11 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="DDSTimerSystem.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSVersion.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(SolutionDir)StormRefl\StormRefl.targets" />

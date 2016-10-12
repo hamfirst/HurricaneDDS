@@ -3,6 +3,8 @@
 #include "DDSNodeState.h"
 #include "DDSRoutingTable.h"
 #include "DDSServerMessage.h"
+#include "DDSEndpointFactoryBase.h"
+#include "DDSDatabaseConnectionPool.h"
 
 #include "DDSServerToServerMessages.refl.meta.h"
 
@@ -16,12 +18,16 @@ DDSNodeState::DDSNodeState(
   const StormSockets::StormSocketInitSettings & backend_settings,
   const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings,
   const StormSockets::StormSocketClientFrontendWebsocketSettings & node_client_settings,
-  const DDSCoordinatorClientSettings & coordinator_settings) :
+  const StormSockets::StormSocketClientFrontendHttpSettings & http_client_settings,
+  const DDSCoordinatorClientSettings & coordinator_settings,
+  const DDSDatabaseSettings & database_settings) :
   m_Backend(backend_settings),
   m_NodeNetwork(*this, node_server_settings, node_client_settings),
+  m_HttpClient(*this, http_client_settings),
   m_CoordinatorConnection(*this, coordinator_settings),
   m_IncomingKeyspace(num_data_object_types),
-  m_OutgoingKeyspace(*this, num_data_object_types)
+  m_OutgoingKeyspace(*this, num_data_object_types),
+  m_Database(std::make_unique<DDSDatabaseConnectionPool>(database_settings))
 {
   inet_pton(AF_INET, node_server_settings.ListenSettings.LocalInterface, &m_LocalInterface);
   m_LocalPort = node_server_settings.ListenSettings.Port;
@@ -34,6 +40,11 @@ void DDSNodeState::ProcessEvents()
   m_CoordinatorConnection.ProcessEvents();
   m_NodeNetwork.ProcessEvents();
   m_OutgoingKeyspace.Update();
+
+  for (auto & endpoint_factory : m_EndpointFactoryList)
+  {
+    endpoint_factory->ProcessEvents();
+  }
 }
 
 void DDSNodeState::GotInitialCoordinatorSync(DDSNodeId node_id, const DDSRoutingTable & routing_table, bool initial_node, uint64_t server_secret, uint64_t client_secret)
@@ -172,7 +183,6 @@ int DDSNodeState::GetDataObjectTypeIdForNameHash(uint32_t name_hash) const
   return -1;
 }
 
-
 int DDSNodeState::GetDatabaseObjectTypeIdForNameHash(uint32_t name_hash) const
 {
   for (std::size_t index = 0; index < m_DataObjectList.size(); index++)
@@ -207,6 +217,75 @@ bool DDSNodeState::CreateNewDataObject(int object_type_id, DDSKey & output_key)
   output_key = m_DataObjectList[object_type_id]->GetUnusedKeyInRange(m_LocalKeyRange);
   m_DataObjectList[object_type_id]->SpawnNewNonDatabaseBackedType(output_key);
   return true;
+}
+
+bool DDSNodeState::DestroyDataObject(int object_type_id, DDSKey key)
+{
+  if (IsReadyToCreateObjects() == false)
+  {
+    return false;
+  }
+
+  return m_DataObjectList[object_type_id]->DestroyNonDatabaseBackedType(key);
+}
+
+void DDSNodeState::CreateTimer(std::chrono::system_clock::duration duration, DDSDeferredCallback & callback, std::function<void()> && function)
+{
+  m_TimerSystem.CreateCallback(duration, callback, std::move(function));
+}
+
+void DDSNodeState::CreateTimer(std::chrono::system_clock::duration duration, DDSResponderCallData && responder_data)
+{
+  std::unique_ptr<DDSDeferredCallback> callback = std::make_unique<DDSDeferredCallback>();
+  DDSDeferredCallback * callback_ptr = callback.get();
+
+  std::string responder_str = StormReflEncodeJson(responder_data);
+  DDSDataObjectAddress address{ responder_data.m_ObjectType, responder_data.m_Key };
+
+  m_TimerSystem.CreateCallback(duration, *callback.get(), [=]() mutable { 
+    SendTargetedMessage(address, DDSServerToServerMessageType::kResponderCall, std::move(responder_str));
+    DestroyDeferredCallback(callback_ptr);
+  });
+
+  m_DeferredCallbackList.emplace(std::move(callback));
+}
+
+void DDSNodeState::CreateHttpRequest(const char * url, DDSDeferredCallback & callback, std::function<void(bool, const std::string &)> && function)
+{
+  m_HttpClient.CreateCallback(url, callback, std::move(function));
+}
+
+void DDSNodeState::CreateHttpRequest(const char * url, DDSResponderCallData && responder_data)
+{
+  std::unique_ptr<DDSDeferredCallback> callback = std::make_unique<DDSDeferredCallback>();
+  DDSDeferredCallback * callback_ptr = callback.get();
+
+  DDSDataObjectAddress address{ responder_data.m_ObjectType, responder_data.m_Key };
+
+  m_HttpClient.CreateCallback(url, *callback.get(), [=](bool success, const std::string & data) mutable {
+
+    responder_data.m_MethodArgs = "[" + StormReflEncodeJson(success) + "," + StormReflEncodeJson(data) + "]";
+    std::string responder_str = StormReflEncodeJson(responder_data);
+    SendTargetedMessage(address, DDSServerToServerMessageType::kResponderCall, std::move(responder_str));
+    DestroyDeferredCallback(callback_ptr);
+  });
+
+  m_DeferredCallbackList.emplace(std::move(callback));
+}
+
+void DDSNodeState::CreateResolverRequest(const char * hostname, DDSDeferredCallback & callback, std::function<void(const DDSResolverRequest &)> && function)
+{
+  m_Resolver.CreateCallback(hostname, callback, std::move(function));
+}
+
+void DDSNodeState::QueryObjectData(int object_type_id, DDSKey key, const char * collection)
+{
+  m_Database->QueryDatabaseByKey(key, collection, [&](const char * data, int ec) { HandleQueryByKey(object_type_id, key, data, ec); });
+}
+
+void DDSNodeState::InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData && responder_call)
+{
+  m_Database->QueryDatabaseInsert(key, collection, data, [this, responder_call](const char * data, int ec) mutable { HandleInsertResult(ec, responder_call); });
 }
 
 DDSNetworkBackend & DDSNodeState::GetBackend()
@@ -308,7 +387,35 @@ void DDSNodeState::RecheckOutgoingTargetedMessages()
   }
 }
 
+void DDSNodeState::HandleQueryByKey(int object_type_id, DDSKey key, const char * result_data, int ec)
+{
+  m_DataObjectList[object_type_id]->HandleLoadResult(key, result_data, ec);
+}
+
+void DDSNodeState::HandleInsertResult(int ec, DDSResponderCallData & responder_call)
+{
+  char result_code[128];
+  snprintf(result_code, sizeof(result_code), "[%d]", ec);
+
+  responder_call.m_MethodArgs = result_code;
+
+  SendTargetedMessage(DDSDataObjectAddress{ responder_call.m_ObjectType, responder_call.m_Key },
+    DDSServerToServerMessageType::kResponderCall, DDSGetServerMessage(responder_call));
+}
+
 void DDSNodeState::HandleIncomingTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string & message)
 {
   m_DataObjectList[addr.m_ObjectType]->HandleMessage(addr.m_ObjectKey, type, message.c_str());
+}
+
+void DDSNodeState::DestroyDeferredCallback(DDSDeferredCallback * callback)
+{
+  for(auto itr = m_DeferredCallbackList.begin(); itr != m_DeferredCallbackList.end(); ++itr)
+  {
+    if (itr->get() == callback)
+    {
+      m_DeferredCallbackList.erase(itr);
+      return;
+    }
+  }
 }

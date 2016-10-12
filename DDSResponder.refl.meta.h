@@ -83,3 +83,19 @@ struct StormReflTypeInfo<DDSResponderData>::field_data<2, Self> : public StormRe
   void SetDefault() { self.m_ReturnMethodId = StormReflTypeInfo<DDSResponderData>::GetDefault().m_ReturnMethodId; }
 };
 
+namespace StormReflFileInfo
+{
+  struct DDSResponder
+  {
+    static const int types_n = 1;
+    template <int i> struct type_info { using type = void; };
+  };
+
+  template <>
+  struct DDSResponder::type_info<0>
+  {
+    using type = ::DDSResponderData;
+  };
+
+}
+

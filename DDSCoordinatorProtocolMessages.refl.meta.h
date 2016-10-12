@@ -352,3 +352,37 @@ struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<3, Self> 
   void SetDefault() { self.m_InitialNode = StormReflTypeInfo<DDSCoordinatorNodeInitialization>::GetDefault().m_InitialNode; }
 };
 
+namespace StormReflFileInfo
+{
+  struct DDSCoordinatorProtocolMessages
+  {
+    static const int types_n = 4;
+    template <int i> struct type_info { using type = void; };
+  };
+
+  template <>
+  struct DDSCoordinatorProtocolMessages::type_info<0>
+  {
+    using type = ::DDSCoordinatorHandshakeRequest;
+  };
+
+  template <>
+  struct DDSCoordinatorProtocolMessages::type_info<1>
+  {
+    using type = ::DDSCoordinatorHandshakeResponse;
+  };
+
+  template <>
+  struct DDSCoordinatorProtocolMessages::type_info<2>
+  {
+    using type = ::DDSCoordinatorHandshakeFinalize;
+  };
+
+  template <>
+  struct DDSCoordinatorProtocolMessages::type_info<3>
+  {
+    using type = ::DDSCoordinatorNodeInitialization;
+  };
+
+}
+

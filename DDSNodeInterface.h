@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include <chrono>
 
 #include "DDSKey.h"
 #include "DDSResponder.h"
@@ -18,6 +19,8 @@ public:
   DDSNodeInterface(DDSNodeState & node_state, DDSDataObjectStoreBase * data_store, DDSKey key);
   DDSNodeInterface(const DDSNodeInterface & rhs) = default;
   DDSNodeInterface(DDSNodeInterface && rhs) = default;
+
+  void FinalizeObjectLoad();
 
   template <typename TargetObject, typename ... Args, typename ... CallArgs>
   void Call(void (TargetObject::* target_func)(Args...), DDSKey key, CallArgs && ... args)
@@ -77,6 +80,50 @@ public:
       StormReflEncodeJson(return_arg), SerializeCallData(std::forward<CallArgs>(args)...));
   }
 
+  template <typename DatabaseType, typename ReturnObject>
+  void InsertIntoDatabase(const DatabaseType & data, DDSKey key, void (ReturnObject::*return_func)(int ec), ReturnObject * p_this)
+  {
+    InsertIntoDatabaseWithResponder(DatabaseType::Collection(), GetDataObjectType(StormReflTypeInfo<DatabaseType>::GetNameHash()),
+      StormReflEncodeJson(data), key, GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), m_Key, 
+      StormReflGetMemberFunctionIndex(return_func), std::string());
+  }
+
+  template <typename DatabaseType, typename ReturnObject, typename ReturnArg>
+  void InsertIntoDatabase(const DatabaseType & data, DDSKey key, void (ReturnObject::*return_func)(ReturnArg return_arg, int ec), ReturnObject * p_this, ReturnArg && return_arg)
+  {
+    InsertIntoDatabaseWithResponderReturnArg(DatabaseType::Collection(), GetDataObjectType(StormReflTypeInfo<DatabaseType>::GetNameHash()),
+      StormReflEncodeJson(data), key, GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), m_Key, 
+      StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
+  }
+
+  template <typename TargetObject>
+  void CreateTimer(std::chrono::system_clock::duration duration, DDSKey key, void (TargetObject::*return_func)())
+  {
+    CreateTimer(duration, key, GetDataObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()),
+      StormReflGetMemberFunctionIndex(return_func), std::string());
+  }
+
+  template <typename TargetObject, typename ReturnArg>
+  void CreateTimer(std::chrono::system_clock::duration duration, DDSKey key, void (TargetObject::*return_func)(), ReturnArg && return_arg)
+  {
+    CreateTimer(duration, key, GetDataObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()),
+      StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
+  }
+
+  template <typename TargetObject>
+  void CreateHttpRequest(const char * url, DDSKey key, void (TargetObject::*return_func)(bool success, std::string data))
+  {
+    CreateHttpRequest(url, key, GetDataObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()),
+      StormReflGetMemberFunctionIndex(return_func), std::string());
+  }
+
+  template <typename TargetObject, typename ReturnArg>
+  void CreateHttpRequest(const char * url, DDSKey key, void (TargetObject::*return_func)(bool success, std::string data), ReturnArg && return_arg)
+  {
+    CreateHttpRequest(url, key, GetDataObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()),
+      StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
+  }
+
 private:
 
   template <typename ... CallArgs>
@@ -89,12 +136,19 @@ private:
   }
 
   int GetObjectType(uint32_t object_type_name_hash);
+  int GetDataObjectType(uint32_t object_type_name_hash);
   
   void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message);
   void SendMessageToObjectWithResponder(int target_object_type, DDSKey target_key, int target_method_id,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message);
   void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg, std::string && message);
+
+  void InsertIntoDatabaseWithResponderReturnArg(const char * collection, int data_object_type, std::string && data, DDSKey data_key,
+    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg);
+
+  void CreateTimer(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg);
+  void CreateHttpRequest(const char * url, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg);
 
   DDSNodeState & m_NodeState;
   DDSDataObjectStoreBase * m_DataStore;
