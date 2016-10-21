@@ -17,6 +17,11 @@ public:
 
   }
 
+  bool IsValidConnectionId(StormSockets::StormSocketConnectionId connection_id)
+  {
+    return m_Connections.find(connection_id) != m_Connections.end();
+  }
+
 private:
   void HandleConnect(StormSockets::StormSocketConnectionId connection_id) override
   {

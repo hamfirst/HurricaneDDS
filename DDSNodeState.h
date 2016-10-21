@@ -4,10 +4,14 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <queue>
+#include <tuple>
 
 #include "DDSNodeId.h"
+#include "DDSConnectionId.h"
 #include "DDSDataObjectAddress.h"
 #include "DDSDataObjectStoreBase.h"
+#include "DDSSharedObjectBase.h"
 #include "DDSRoutingTable.h"
 #include "DDSDatabaseTypes.h"
 #include "DDSTimerSystem.h"
@@ -28,9 +32,10 @@ class DDSNodeState
 {
 public:
 
-  template <typename TypeList, typename ... EndpointFactoryTypes>
+  template <typename DataTypeList, typename SharedObjectTypeList, typename ... EndpointFactoryTypes>
   DDSNodeState(
-    const TypeList & type_list,
+    const DataTypeList & data_objects,
+    const SharedObjectTypeList & shared_objects,
     const StormSockets::StormSocketInitSettings & backend_settings,
     const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings,
     const StormSockets::StormSocketClientFrontendWebsocketSettings & node_client_settings,
@@ -38,10 +43,10 @@ public:
     const DDSCoordinatorClientSettings & coordinator_settings,
     const DDSDatabaseSettings & database_settings,
     EndpointFactoryTypes && ... endpoints) :
-    DDSNodeState(TypeList::NumTypes, backend_settings, node_server_settings, node_client_settings, http_client_settings, coordinator_settings, database_settings)
+    DDSNodeState(DataTypeList::NumTypes, backend_settings, node_server_settings, node_client_settings, http_client_settings, coordinator_settings, database_settings)
   {
-    auto func = type_list();
-    func(*this, m_DataObjectList);
+    data_objects(*this, m_DataObjectList);
+    shared_objects(*this, m_SharedObjects, DataTypeList::NumTypes);
 
     InitEndpointFactories(std::forward<EndpointFactoryTypes>(endpoints)...);
   }
@@ -52,6 +57,8 @@ public:
 
   int GetDataObjectTypeIdForNameHash(uint32_t name_hash) const;
   int GetDatabaseObjectTypeIdForNameHash(uint32_t name_hash) const;
+  int GetSharedObjectTypeIdForNameHash(uint32_t name_hash) const;
+  int GetTargetObjectIdForNameHash(uint32_t name_hash) const;
 
   template <typename DataType>
   int GetDataObjectTypeId() const
@@ -129,6 +136,9 @@ private:
   template <class DataType, class DatabaseBackedType>
   friend class DDSDataObjectStore;
 
+  template <typename DataType>
+  friend class DDSSharedObjectCopy;
+
   friend void DDSResponderCallFinalize(const DDSResponder & responder, const DDSResponderCallData & call_data);
 
   DDSNodeState(
@@ -152,14 +162,27 @@ private:
 
   }
 
-  void SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message);
+  void SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message, bool force_process = false);
+  void SendSubscriptionCreate(DDSCreateDataSubscription && req);
+  void SendSubscriptionDestroy(const DDSDestroySubscription & destroy);
+  void ExportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list);
+  void ImportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list);
 
   void GotInitialCoordinatorSync(DDSNodeId node_id, const DDSRoutingTable & routing_table, bool initial_node, uint64_t server_secret, uint64_t client_secret);
   void GotNewRoutingTable(const DDSRoutingTable & routing_table);
+
+  void GotMessageFromCoordinator(DDSServerToServerMessageType type, DDSCoordinatorProtocolMessageType coordinator_type, const char * data);
   void GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMessageType type, const char * data);
 
   void QueryObjectData(int object_type_id, DDSKey key, const char * collection);
+  void QueryObjectData(const char * collection, const char * query, DDSResponderCallData && responder_call);
+
   void InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData && responder_call);
+
+  void UpdateObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData * responder_call);
+
+  void BeginQueueingMessages();
+  void EndQueueingMessages();
 
   DDSNodeId GetNodeIdForKey(DDSKey key) const;
 
@@ -182,6 +205,8 @@ private:
   uint32_t GetLocalInterface() const;
   int GetLocalPort() const;
 
+  bool SendToLocalConnection(DDSConnectionId connection_id, const std::string & data);
+
   void RecheckOutgoingTargetedMessages();
 
   void HandleQueryByKey(int object_type_id, DDSKey key, const char * result_data, int ec);
@@ -201,6 +226,7 @@ private:
   DDSTimerSystem m_TimerSystem;
   DDSHttpClient m_HttpClient;
   DDSResolver m_Resolver;
+  std::set<std::unique_ptr<DDSDeferredCallback>> m_DeferredCallbackList;
 
   DDSNodeId m_LocalNodeId = 0;
   DDSRoutingTable m_RoutingTable;
@@ -209,10 +235,12 @@ private:
 
   std::map<DDSDataObjectAddress, std::vector<std::pair<DDSServerToServerMessageType, std::string>>> m_PendingTargetedMessages;
 
-  std::vector<std::unique_ptr<DDSDataObjectStoreBase>> m_DataObjectList;
-  std::vector<std::unique_ptr<DDSEndpointFactoryBase>> m_EndpointFactoryList;
+  std::queue<std::tuple<DDSDataObjectAddress, DDSServerToServerMessageType, std::string>> m_QueuedTargetedMessages;
+  int m_QueueMessageDepth = 0;
 
-  std::set<std::unique_ptr<DDSDeferredCallback>> m_DeferredCallbackList;
+  std::vector<std::unique_ptr<DDSDataObjectStoreBase>> m_DataObjectList;
+  std::vector<std::unique_ptr<DDSSharedObjectCopyBase>> m_SharedObjects;
+  std::vector<std::unique_ptr<DDSEndpointFactoryBase>> m_EndpointFactoryList;
 
   std::unique_ptr<DDSDatabaseConnectionPool> m_Database;
 

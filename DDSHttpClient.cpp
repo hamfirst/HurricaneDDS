@@ -5,9 +5,8 @@
 
 #include <StormSockets\StormSocketClientFrontendHttp.h>
 
-DDSHttpClient::DDSHttpClient(DDSNodeState & node_state, const StormSockets::StormSocketClientFrontendHttpSettings & settings) :
-  m_HttpClient(std::make_unique<StormSockets::StormSocketClientFrontendHttp>(settings, node_state.m_Backend.m_Backend.get())),
-  m_NodeState(node_state)
+DDSHttpClient::DDSHttpClient(const StormSockets::StormSocketClientFrontendHttpSettings & settings, DDSNetworkBackend & backend) :
+  m_HttpClient(std::make_unique<StormSockets::StormSocketClientFrontendHttp>(settings, backend.m_Backend.get()))
 {
 
 }

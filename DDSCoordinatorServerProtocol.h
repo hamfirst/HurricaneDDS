@@ -14,6 +14,8 @@ public:
 
   bool HandleMessage(const char * msg, int length);
 
+  bool CheckNodeId(DDSNodeId node_id);
+
 private:
 
   template <class T>

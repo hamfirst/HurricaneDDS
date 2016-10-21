@@ -39,7 +39,6 @@
     <ClInclude Include="DDSDataObjectAddress.h" />
     <ClInclude Include="DDSNodeInterface.h" />
     <ClInclude Include="DDSDataObject.h" />
-    <ClInclude Include="DDSCoordinator.h" />
     <ClInclude Include="DDSDataObjectStoreHelpers.h" />
     <ClInclude Include="DDSDatabaseTypes.h" />
     <ClInclude Include="DDSDatabaseSetup.h" />
@@ -55,6 +54,15 @@
     <ClInclude Include="DDSResolverBackend.h" />
     <ClInclude Include="DDSResolver.h" />
     <ClInclude Include="DDSResolverRequest.h" />
+    <ClInclude Include="DDSSharedObject.h" />
+    <ClInclude Include="DDSInterface.h" />
+    <ClInclude Include="DDSSharedObjectBase.h" />
+    <ClInclude Include="DDSSharedObjectInterface.h" />
+    <ClInclude Include="DDSSharedObjectList.h" />
+    <ClInclude Include="DDSDataObjectName.h" />
+    <ClInclude Include="DDSSharedMessages.refl.h" />
+    <ClInclude Include="DDSSharedMessages.refl.meta.h" />
+    <ClInclude Include="DDSConnectionId.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSNetworkBackend.cpp" />
@@ -77,7 +85,6 @@
     <ClCompile Include="DDSServerToServerReceiver.cpp" />
     <ClCompile Include="DDSIncomingKeyspaceTransfer.cpp" />
     <ClCompile Include="DDSNodeInterface.cpp" />
-    <ClCompile Include="DDSCoordinator.cpp" />
     <ClCompile Include="DDSVersion.cpp" />
     <ClCompile Include="DDSDatabaseSetup.cpp" />
     <ClCompile Include="DDSTimerSystem.cpp" />
@@ -88,5 +95,6 @@
     <ClCompile Include="DDSHttpUtil.cpp" />
     <ClCompile Include="DDSResolverBackend.cpp" />
     <ClCompile Include="DDSResolver.cpp" />
+    <ClCompile Include="DDSSharedObjectInterface.cpp" />
   </ItemGroup>
 </Project>

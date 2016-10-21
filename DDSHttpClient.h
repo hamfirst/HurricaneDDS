@@ -7,6 +7,8 @@
 
 #include "DDSDeferredCallbackSystem.h"
 
+class DDSNetworkBackend;
+
 namespace StormSockets
 {
   class StormSocketClientFrontendHttp;
@@ -30,7 +32,7 @@ class DDSNodeState;
 class DDSHttpClient : public DDSDeferredCallbackSystem<const char *, DDSHttpClientData, bool, const std::string &>
 {
 public:
-  DDSHttpClient(DDSNodeState & node_state, const StormSockets::StormSocketClientFrontendHttpSettings & settings);
+  DDSHttpClient(const StormSockets::StormSocketClientFrontendHttpSettings & settings, DDSNetworkBackend & backend);
   ~DDSHttpClient();
 
   void Update() override;
@@ -41,7 +43,5 @@ private:
   DDSHttpClientData GetCallbackData(const char * url) override;
 
   std::unique_ptr<StormSockets::StormSocketClientFrontendHttp> m_HttpClient;
-
-  DDSNodeState & m_NodeState;
 };
 

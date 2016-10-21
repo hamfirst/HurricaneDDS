@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include "DDSKey.h"
+#include "DDSConnectionId.h"
 #include "DDSDeferredCallback.h"
 #include "DDSResolverRequest.h"
 
@@ -29,6 +30,22 @@ public:
 
     int target_object_type = GetObjectType(StormReflTypeInfo<TargetObject>::GetNameHash());
     SendMessageToObject(target_object_type, key, StormReflGetMemberFunctionIndex(func), SerializeCallData(std::forward<CallArgs>(args)...));
+  }
+
+  template <typename TargetObject>
+  bool ConnectToLocalObject(void (TargetObject::*target_func)(DDSConnectionId connection_id), DDSKey target_key)
+  {
+    int target_object_type = GetLocalObject(GetObjectType(StormReflTypeInfo<TargetObject>::GetNameHash());
+
+    TargetObject * data_obj = static_cast<TargetObject>(target_object_type, target_key));
+    if (data_obj == nullptr)
+    {
+      return false;
+    }
+
+    (data_obj->*target_func)(DDSConnectionId{ m_EndpointFactory, m_ConnectionId });
+    FinalizeLocalObject(target_object_type, target_key);
+    return true;
   }
 
   template <typename TargetObject>
@@ -77,7 +94,7 @@ public:
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
   }
 
-  void SendData(std::string && data);
+  bool SendData(const std::string & data);
 
 private:
   template <typename ... CallArgs>
@@ -91,6 +108,9 @@ private:
 
   int GetObjectType(uint32_t object_type_name_hash);
   int GetDataObjectType(uint32_t object_type_name_hash);
+
+  void * GetLocalObject(int target_object_type, DDSKey target_key);
+  void FinalizeLocalObject(int target_object_type, DDSKey target_key);
 
   void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message);
   bool CreateObject(int target_object_type, DDSKey & output_key);

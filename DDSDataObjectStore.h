@@ -26,6 +26,7 @@
 #include <StormData\StormDataJsonUtil.h>
 
 DDS_DECLARE_CALL(BeginLoad);
+DDS_DECLARE_CALL(PreMoveObject);
 DDS_DECLARE_CALL(MoveObject);
 
 template <class DataType, class DatabaseBackedType>
@@ -37,6 +38,7 @@ class DDSDataObjectStore : public DDSDataObjectStoreBase
     kDatabaseOnly,
     kCreating,
     kActive,
+    kLocked,
     kDeleted,
   };
 
@@ -149,7 +151,7 @@ public:
         DDSCreateDeletedSubscriptionResponse(sub, deleted_msg);
 
         m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ deleted_msg.m_ResponderObjectType, deleted_msg.m_ResponderKey },
-          DDSServerToServerMessageType::kSubscriptionDeleted, DDSGetServerMessage(deleted_msg));
+          DDSServerToServerMessageType::kSubscriptionDeleted, StormReflEncodeJson(deleted_msg));
       }
 
       obj_data.m_Subscriptions.clear();
@@ -169,7 +171,7 @@ public:
     }
     else
     {
-      TryProcessAllMessage(key, obj_data);
+      TryProcessAllMessages(key, obj_data);
     }
   }
 
@@ -192,7 +194,7 @@ public:
     }
     else
     {
-      TryProcessAllMessage(key, obj_data);
+      TryProcessAllMessages(key, obj_data);
     }
   }
 
@@ -229,7 +231,10 @@ public:
       ReloadObjectByKey(key, obj_data);
     }
 
-    if (obj_data.m_State == kActive || (obj_data.m_State == kCreating && requires_active_object == false) || (obj_data.m_State != kLoading && requires_full_object == false))
+    if (obj_data.m_State == kActive || 
+      (obj_data.m_State == kCreating && requires_active_object == false) || 
+      (obj_data.m_State != kLoading && requires_full_object == false) ||
+      (message_type == DDSServerToServerMessageType::kUnlockObject))
     {
       ProcessMessage(key, obj_data, message_type, msg);
       return true;
@@ -238,7 +243,7 @@ public:
     return false;
   }
 
-  void TryProcessAllMessage(DDSKey key, ObjectData & obj_data)
+  void TryProcessAllMessages(DDSKey key, ObjectData & obj_data)
   {
     std::vector<DDSExportedMessage> remaining_messages;
     for (auto & msg : obj_data.m_PendingMessages)
@@ -272,7 +277,9 @@ public:
         BeginObjectModification(key);
         DDSTargetedMessage targeted_msg;
         StormReflParseJson(targeted_msg, message);
-        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, targeted_msg) == false)
+
+        DDSNodeInterface node_interface(m_NodeState, this, key);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, targeted_msg) == false)
         {
           DDSLog::LogError("Failed to process message for object");
         }
@@ -284,7 +291,9 @@ public:
         BeginObjectModification(key);
         DDSTargetedMessageWithResponder targeted_msg;
         StormReflParseJson(targeted_msg, message);
-        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, targeted_msg) == false)
+
+        DDSNodeInterface node_interface(m_NodeState, this, key);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, targeted_msg) == false)
         {
           DDSLog::LogError("Failed to process message for object");
         }
@@ -296,7 +305,9 @@ public:
         BeginObjectModification(key);
         DDSResponderCallData responder_call;
         StormReflParseJson(responder_call, message);
-        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, responder_call) == false)
+
+        DDSNodeInterface node_interface(m_NodeState, this, key);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, responder_call) == false)
         {
           DDSLog::LogError("Failed to process message for object");
         }
@@ -339,7 +350,44 @@ public:
         }
 
         m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
-          DDSServerToServerMessageType::kResponderCall, DDSGetServerMessage(responder_call));
+          DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+      }
+      break;
+      case DDSServerToServerMessageType::kDestroySubscription:
+      {
+        DDSDestroySubscription sub_msg;
+        StormReflParseJson(sub_msg, message);
+
+        auto & obj_data = m_Objects.at(sub_msg.m_Key);
+        for (auto sub_itr = obj_data.m_RequestedSubscriptions.begin(); sub_itr != obj_data.m_RequestedSubscriptions.end(); ++sub_itr)
+        {
+          if (sub_itr->m_SubscriptionId == sub_msg.m_SubscriptionId)
+          {
+            obj_data.m_RequestedSubscriptions.erase(sub_itr);
+            break;
+          }
+        }
+      }
+      break;
+      case DDSServerToServerMessageType::kUnlockObject:
+      {
+        DDSUnlockObject unlock;
+        StormReflParseJson(unlock, message);
+
+        auto & obj_data = m_Objects.at(unlock.m_Key);
+
+        if (obj_data.m_State != kLocked)
+        {
+          DDSLog::LogError("Attempted to unlock and object that wasn't locked");
+        }
+
+        if (unlock.m_Data.size() > 0)
+        {
+          StormReflParseJson(*obj_data.m_DatabaseObject.get(), unlock.m_Data.c_str());
+        }
+
+        obj_data.m_State = kActive;
+        TryProcessAllMessages(key, obj_data);
       }
       break;
       default:
@@ -351,68 +399,158 @@ public:
 
   virtual void BeginObjectModification(DDSKey key)
   {
-    m_ChangeQueueDepth++;
+    m_NodeState.BeginQueueingMessages();
     ReflectionPushNotifyCallback([&](const ReflectionChangeNotification & change) { m_Changes.emplace_back(std::make_pair(key, change)); });
   }
 
   virtual void EndObjectModification()
   {
     ReflectionPopNotifyCallback();
-    while (m_ChangeQueueDepth == 1)
+
+    std::vector<std::pair<DDSKey, ReflectionChangeNotification>> changes = std::move(m_Changes);
+    std::vector<DDSKey> dead_keys = std::move(m_DeadObjects);
+
+    for (auto & change_data : changes)
     {
-      std::vector<std::pair<DDSKey, ReflectionChangeNotification>> changes = std::move(m_Changes);
-      std::vector<DDSKey> dead_keys = std::move(m_DeadObjects);
+      DDSKey key = change_data.first;
+      auto & change = change_data.second;
 
-      for (auto & change_data : changes)
+      auto itr = m_Objects.find(key);
+      if (itr == m_Objects.end())
       {
-        DDSKey key = change_data.first;
-        auto & change = change_data.second;
+        DDSLog::LogError("Could not find object");
+      }
 
-        auto itr = m_Objects.find(key);
-        if (itr == m_Objects.end())
+      auto & obj_data = itr->second;
+      bool database_changed = false;
+
+      for (auto & sub : obj_data.m_Subscriptions)
+      {
+        if (DDSCheckChangeSubscription(change, sub))
         {
-          DDSLog::LogError("Could not find object");
-        }
-
-        auto & obj_data = itr->second;
-
-        for (auto & sub : obj_data.m_Subscriptions)
-        {
-          if (DDSCheckChangeSubscription(change, sub))
+          if (change.m_BaseObject == obj_data.m_ActiveObject.get())
           {
-            if (change.m_BaseObject == obj_data.m_ActiveObject.get())
+            DDSResponderCallData call_data;
+            if (DDSCreateSubscriptionResponse(*obj_data.m_ActiveObject.get(), change, sub, call_data))
             {
-              DDSResponderCallData call_data;
-              if (DDSCreateSubscriptionResponse(*obj_data.m_ActiveObject.get(), change, sub, call_data))
-              {
-                DDSLog::LogError("Could not serialize subscription change");
-              }
-
-              m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, DDSGetServerMessage(call_data));
+              DDSLog::LogError("Could not serialize subscription change");
             }
-            else if (change.m_BaseObject == obj_data.m_DatabaseObject.get())
+
+            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, StormReflEncodeJson(call_data));
+          }
+          else if (change.m_BaseObject == obj_data.m_DatabaseObject.get())
+          {
+            database_changed = true;
+
+            DDSResponderCallData call_data;
+            if (DDSCreateSubscriptionResponse(*obj_data.m_DatabaseObject.get(), change, sub, call_data))
             {
-              DDSResponderCallData call_data;
-              if (DDSCreateSubscriptionResponse(*obj_data.m_DatabaseObject.get(), change, sub, call_data))
-              {
-                DDSLog::LogError("Could not serialize subscription change");
-              }
-
-              m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, DDSGetServerMessage(call_data));
+              DDSLog::LogError("Could not serialize subscription change");
             }
+
+            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, StormReflEncodeJson(call_data));
           }
         }
       }
 
-      for (auto & key : dead_keys)
+      if (database_changed)
       {
-        m_Objects.erase(key);
+        std::string database_obj = StormReflEncodeJson(*obj_data.m_DatabaseObject.get());
+        m_NodeState.UpdateObjectData(m_ObjectTypeId, key, DatabaseBackedType::Collection(), database_obj.data(), nullptr);
       }
     }
 
-    m_ChangeQueueDepth--;
+    for (auto & key : dead_keys)
+    {
+      m_Objects.erase(key);
+    }
+
+    m_NodeState.EndQueueingMessages();
   }
 
+  virtual void LockObject(DDSKey key)
+  {
+    auto itr = m_Objects.find(key);
+    if (itr == m_Objects.end())
+    {
+      DDSLog::LogError("Could not find object to lock");
+      return;
+    }
+
+    if (itr->second.m_State != kActive)
+    {
+      DDSLog::LogError("Could not lock an object in invalide state");
+      return;
+    }
+
+    itr->second.m_State = kLocked;
+  }
+
+  void AssignRequestedSubscription(DDSKey key, const DDSExportedRequestedSubscription & requested_sub)
+  {
+    auto itr = m_Objects.find(key);
+    if (itr == m_Objects.end())
+    {
+      DDSLog::LogError("Could not find object to add subscription to");
+      return;
+    }
+
+    itr->second.m_RequestedSubscriptions.emplace_back(requested_sub);
+  }
+
+  void RemoveRequestedSubscription(DDSKey key, DDSKey subscription_id)
+  {
+    auto itr = m_Objects.find(key);
+    if (itr == m_Objects.end())
+    {
+      return;
+    }
+
+    for (auto sub_itr = itr->second.m_RequestedSubscriptions.begin(); sub_itr != itr->second.m_RequestedSubscriptions.end(); ++sub_itr)
+    {
+      if (sub_itr->m_SubscriptionId == subscription_id)
+      {
+        itr->second.m_RequestedSubscriptions.erase(sub_itr);
+        return;
+      }
+    }
+  }
+
+  void PrepareObjectsForMove(DDSKeyRange requested_range)
+  {
+    if (m_Objects.size() == 0)
+    {
+      return;
+    }
+
+    auto start_itr = m_Objects.lower_bound(requested_range.m_Min);
+    auto itr = start_itr;
+
+    while (true)
+    {
+      if (KeyInKeyRange(itr->first, requested_range) == false)
+      {
+        break;
+      }
+
+      auto & obj_data = itr->second;
+
+      BeginObjectModification(itr->first);
+      DDS_CALL_FUNC(PreMoveObject, *obj_data.m_ActiveObject.get());
+      EndObjectModification();
+
+      itr++;
+      if (itr == m_Objects.end())
+      {
+        itr = m_Objects.begin();
+      }
+
+      if (itr == start_itr)
+      {
+        break;
+      }
+    }
+  }
 
   bool ExportObjectsInRange(DDSKeyRange requested_range, DDSKeyRange & output_range, DDSKeyRange & remainder_range, int max_objects, std::vector<DDSExportedObject> & output)
   {
@@ -453,7 +591,21 @@ public:
 
       if (itr->second.m_State == kActive || itr->second.m_State == kCreating || itr->second.m_PendingMessages.size() > 0)
       {
-        DDSExportedObject obj = { itr->first, itr->second.m_State == kActive };
+        DDSExportedObjectState state;
+        if (itr->second.m_State == kActive)
+        {
+          state = DDSExportedObjectState::kLoaded;
+        }
+        else if (itr->second.m_State == kLocked)
+        {
+          state = DDSExportedObjectState::kLocked;
+        }
+        else
+        {
+          state = DDSExportedObjectState::kNotLoaded;
+        }
+
+        DDSExportedObject obj = { itr->first, state };
         if (itr->second.m_ActiveObject)
         {
           StormReflEncodeJson(*itr->second.m_ActiveObject.get(), obj.m_ActiveObject);
@@ -482,6 +634,8 @@ public:
           obj.m_RequestedSubscriptions.emplace_back(req_sub);
         }
 
+        m_NodeState.ExportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, itr->first }, obj.m_SharedSubscriptions);
+
         output.emplace_back(std::move(obj));
         num_objects++;
 
@@ -508,7 +662,7 @@ public:
     return complete;
   }
 
-  void ProcessExportedObjects(const std::vector<DDSExportedObject> & object_list)
+  void ProcessExportedObjects(std::vector<DDSExportedObject> & object_list)
   {
     for (auto & object : object_list)
     {
@@ -537,16 +691,20 @@ public:
             return;
           }
 
-          if (object.m_IsLoaded)
+          if (object.m_State == DDSExportedObjectState::kLoaded)
           {
             obj_data.m_State = kActive;
+          }
+          else if (object.m_State == DDSExportedObjectState::kLocked)
+          {
+            obj_data.m_State = kLocked;
           }
           else
           {
             obj_data.m_State = kCreating;
           }
 
-          DDS_CALL_FUNC(MoveObject, *obj_data.m_ActiveObject.get());
+          m_NodeState.ImportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, object.m_Key }, object.m_SharedSubscriptions);
           m_Objects.emplace(std::make_pair(object.m_Key, std::move(obj_data)));
         }
         else
@@ -561,6 +719,11 @@ public:
         ReloadObjectByKey(object.m_Key, result.first->second);
       }
     }
+
+    for (auto & object : object_list)
+    {
+
+    }
   }
 
 private:
@@ -572,7 +735,6 @@ private:
   std::unordered_map<DDSKey, ObjectData> m_Objects;
   std::vector<std::pair<DDSKey, ReflectionChangeNotification>> m_Changes;
   std::vector<DDSKey> m_DeadObjects;
-  int m_ChangeQueueDepth;
 };
 
 
@@ -720,7 +882,9 @@ public:
         BeginObjectModification(key);
         DDSTargetedMessage targeted_msg;
         StormReflParseJson(targeted_msg, message);
-        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, targeted_msg) == false)
+
+        DDSNodeInterface node_interface(m_NodeState, this, key);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, targeted_msg) == false)
         {
           DDSLog::LogError("Failed to process message for object");
         }
@@ -733,7 +897,9 @@ public:
         BeginObjectModification(key);
         DDSTargetedMessageWithResponder targeted_msg;
         StormReflParseJson(targeted_msg, message);
-        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, targeted_msg) == false)
+
+        DDSNodeInterface node_interface(m_NodeState, this, key);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, targeted_msg) == false)
         {
           DDSLog::LogError("Failed to process message for object");
         }
@@ -746,7 +912,9 @@ public:
         BeginObjectModification(key);
         DDSResponderCallData responder_call;
         StormReflParseJson(responder_call, message);
-        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), m_NodeState, responder_call) == false)
+
+        DDSNodeInterface node_interface(m_NodeState, this, key);
+        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, responder_call) == false)
         {
           DDSLog::LogError("Failed to process message for object");
         }
@@ -763,7 +931,13 @@ public:
         DDSCreateSubscription sub_msg;
         StormReflParseJson(sub_msg, message);
 
-        auto & obj_data = m_Objects.at(sub_msg.m_Key);
+        auto itr = m_Objects.find(sub_msg.m_Key);
+        if (itr == m_Objects.end())
+        {
+          return;
+        }
+
+        auto & obj_data = itr->second;
 
         DDSExportedSubscription sub_data;
         sub_data.m_DataPath = std::move(sub_msg.m_DataPath);
@@ -783,7 +957,29 @@ public:
         }
       
         m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
-          DDSServerToServerMessageType::kResponderCall, DDSGetServerMessage(responder_call));
+          DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+      }
+      break;
+      case DDSServerToServerMessageType::kDestroySubscription:
+      {
+        DDSDestroySubscription sub_msg;
+        StormReflParseJson(sub_msg, message);
+
+        auto itr = m_Objects.find(sub_msg.m_Key);
+        if (itr == m_Objects.end())
+        {
+          return;
+        }
+
+        auto & obj_data = itr->second;
+        for (auto sub_itr = obj_data.m_RequestedSubscriptions.begin(); sub_itr != obj_data.m_RequestedSubscriptions.end(); ++sub_itr)
+        {
+          if (sub_itr->m_SubscriptionId == sub_msg.m_SubscriptionId)
+          {
+            obj_data.m_RequestedSubscriptions.erase(sub_itr);
+            break;
+          }
+        }
       }
       break;
       default:
@@ -795,53 +991,122 @@ public:
 
   virtual void BeginObjectModification(DDSKey key)
   {
-    m_ChangeQueueDepth++;
+    m_NodeState.BeginQueueingMessages();
     ReflectionPushNotifyCallback([&](const ReflectionChangeNotification & change) { m_Changes.emplace_back(std::make_pair(key, change)); });
   }
 
   virtual void EndObjectModification()
   {
     ReflectionPopNotifyCallback();
-    while (m_ChangeQueueDepth == 1)
+
+    std::vector<std::pair<DDSKey, ReflectionChangeNotification>> changes = std::move(m_Changes);
+    std::vector<DDSKey> dead_keys = std::move(m_DeadObjects);
+
+    for (auto & change_data : changes)
     {
-      std::vector<std::pair<DDSKey, ReflectionChangeNotification>> changes = std::move(m_Changes);
-      std::vector<DDSKey> dead_keys = std::move(m_DeadObjects);
+      DDSKey key = change_data.first;
+      auto & change = change_data.second;
 
-      for (auto & change_data : changes)
+      auto itr = m_Objects.find(key);
+      if (itr == m_Objects.end())
       {
-        DDSKey key = change_data.first;
-        auto & change = change_data.second;
-
-        auto itr = m_Objects.find(key);
-        if (itr == m_Objects.end())
-        {
-          DDSLog::LogError("Could not find object");
-        }
-
-        auto & obj_data = itr->second;
-
-        for (auto & sub : obj_data.m_Subscriptions)
-        {
-          if (DDSCheckChangeSubscription(change, sub))
-          {
-            DDSResponderCallData call_data;
-            if (DDSCreateSubscriptionResponse(*obj_data.m_ActiveObject.get(), change, sub, call_data))
-            {
-              DDSLog::LogError("Could not serialize subscription change");
-            }
-
-            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, DDSGetServerMessage(call_data));
-          }
-        }
+        DDSLog::LogError("Could not find object");
       }
 
-      for (auto & key : dead_keys)
+      auto & obj_data = itr->second;
+
+      for (auto & sub : obj_data.m_Subscriptions)
       {
-        m_Objects.erase(key);
+        if (DDSCheckChangeSubscription(change, sub))
+        {
+          DDSResponderCallData call_data;
+          if (DDSCreateSubscriptionResponse(*obj_data.m_ActiveObject.get(), change, sub, call_data))
+          {
+            DDSLog::LogError("Could not serialize subscription change");
+          }
+
+          m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, StormReflEncodeJson(call_data));
+        }
       }
     }
 
-    m_ChangeQueueDepth--;
+    for (auto & key : dead_keys)
+    {
+      m_Objects.erase(key);
+    }
+
+    m_NodeState.EndQueueingMessages();
+  }
+
+  void LockObject(DDSKey key)
+  {
+    DDSLog::LogError("Attempting to lock an unlockable object");
+  }
+
+  void AssignRequestedSubscription(DDSKey key, const DDSExportedRequestedSubscription & requested_sub)
+  {
+    auto itr = m_Objects.find(key);
+    if (itr == m_Objects.end())
+    {
+      DDSLog::LogError("Could not find object to add subscription to");
+      return;
+    }
+
+    itr->second.m_RequestedSubscriptions.emplace_back(requested_sub);
+  }
+
+  void RemoveRequestedSubscription(DDSKey key, DDSKey subscription_id)
+  {
+    auto itr = m_Objects.find(key);
+    if (itr == m_Objects.end())
+    {
+      return;
+    }
+
+    for (auto sub_itr = itr->second.m_RequestedSubscriptions.begin(); sub_itr != itr->second.m_RequestedSubscriptions.end(); ++sub_itr)
+    {
+      if (sub_itr->m_SubscriptionId == subscription_id)
+      {
+        itr->second.m_RequestedSubscriptions.erase(sub_itr);
+        return;
+      }
+    }
+  }
+
+  void PrepareObjectsForMove(DDSKeyRange requested_range)
+  {
+    if (m_Objects.size() == 0)
+    {
+      return;
+    }
+
+    auto start_itr = m_Objects.lower_bound(requested_range.m_Min);
+    auto itr = start_itr;
+
+    while (true)
+    {
+      if (KeyInKeyRange(itr->first, requested_range) == false)
+      {
+        break;
+      }
+
+      auto & obj_data = itr->second;
+
+      BeginObjectModification(itr->first);
+      DDS_CALL_FUNC(PreMoveObject, *obj_data.m_ActiveObject.get());
+      EndObjectModification();
+
+      itr++;
+      if (itr == m_Objects.end())
+      {
+        itr = m_Objects.begin();
+      }
+
+      if (itr == start_itr)
+      {
+        break;
+      }
+    }
   }
 
   bool ExportObjectsInRange(DDSKeyRange requested_range, DDSKeyRange & output_range, DDSKeyRange & remainder_range, 
@@ -882,12 +1147,16 @@ public:
         break;
       }
 
-      DDSExportedObject obj = { itr->first, itr->second.m_Active };
+      DDSExportedObjectState state = itr->second.m_Active ? DDSExportedObjectState::kLoaded : DDSExportedObjectState::kNotLoaded;
+
+      DDSExportedObject obj = { itr->first, state };
       StormReflEncodeJson(*itr->second.m_ActiveObject.get(), obj.m_ActiveObject);
 
       obj.m_PendingMessages = std::move(itr->second.m_PendingMessages);
       obj.m_Subscriptions = std::move(itr->second.m_Subscriptions);
       obj.m_RequestedSubscriptions = std::move(itr->second.m_RequestedSubscriptions);
+
+      m_NodeState.ExportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, itr->first }, obj.m_SharedSubscriptions);
 
       output.emplace_back(std::move(obj));
       num_objects++;
@@ -914,12 +1183,12 @@ public:
     return complete;
   }
 
-  void ProcessExportedObjects(const std::vector<DDSExportedObject> & object_list)
+  void ProcessExportedObjects(std::vector<DDSExportedObject> & object_list)
   {
     for (auto & object : object_list)
     {
       DDSNodeInterface node_interface(m_NodeState, this, object.m_Key);
-      ObjectData obj_data = { object.m_IsLoaded, std::make_unique<DataType>(node_interface) };
+      ObjectData obj_data = { object.m_State == DDSExportedObjectState::kLoaded, std::make_unique<DataType>(node_interface) };
 
       if (StormReflParseJson(*obj_data.m_ActiveObject.get(), object.m_ActiveObject.c_str()) == false)
       {
@@ -930,6 +1199,8 @@ public:
       obj_data.m_PendingMessages = std::move(object.m_PendingMessages);
       obj_data.m_Subscriptions = std::move(object.m_Subscriptions);
       obj_data.m_RequestedSubscriptions = std::move(object.m_RequestedSubscriptions);
+
+      m_NodeState.ImportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, object.m_Key }, object.m_SharedSubscriptions);
 
       DDS_CALL_FUNC(MoveObject, *obj_data.m_ActiveObject.get());
 

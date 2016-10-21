@@ -29,6 +29,8 @@ public:
   bool HandleConnectionEstablished();
   bool HandleMessage(const char * msg, int length);
 
+  void SendMessageToCoordinator(const std::string && data);
+
 private:
 
   template <class T>

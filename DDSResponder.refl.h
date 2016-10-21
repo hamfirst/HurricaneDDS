@@ -16,3 +16,4 @@ public:
 
   int m_ReturnMethodId;
 };
+

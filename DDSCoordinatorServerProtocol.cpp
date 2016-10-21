@@ -136,8 +136,18 @@ bool DDSCoordinatorServerProtocol::HandleMessage(const char * msg, int length)
     {
       return false;
     }
-  break;
+    break;
+  case kConnected:
+    {
+      m_CoordinatorState.GotMessageFromServer(type, msg);
+    }
+    break;
   }
 
   return true;
+}
+
+bool DDSCoordinatorServerProtocol::CheckNodeId(DDSNodeId node_id)
+{
+  return (m_State == kConnected && node_id == m_NodeId);
 }

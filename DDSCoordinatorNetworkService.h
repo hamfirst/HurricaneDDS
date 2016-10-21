@@ -23,8 +23,9 @@ class DDSCoordinatorServerProtocol;
 class DDSCoordinatorNetworkService
 {
 public:
-  DDSCoordinatorNetworkService(DDSCoordinatorState & coordinator_state,
-    const StormSockets::StormSocketInitSettings & backend_settings,
+  DDSCoordinatorNetworkService(
+    DDSNetworkBackend & backend,
+    DDSCoordinatorState & coordinator_state,
     const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings);
 
   void WaitForEvent();
@@ -32,6 +33,7 @@ public:
 
   void SendMessageToClient(StormSockets::StormSocketConnectionId connection_id, const char * message, std::size_t length);
   void SendMessageToAllConnectedClients(const char * message, std::size_t length);
+  bool SendMessageToNode(DDSNodeId node_id, const char * message, std::size_t length);
 
 protected:
 
@@ -40,7 +42,7 @@ protected:
 
 private:
   DDSCoordinatorState & m_CoordinatorState;
-  DDSNetworkBackend m_Backend;
+  DDSNetworkBackend & m_Backend;
 
   std::vector<char> m_RecvBuffer;
 

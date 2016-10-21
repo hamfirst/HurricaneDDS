@@ -20,13 +20,16 @@ public:
   ~DDSEndpointFactoryBase();
 
   void ProcessEvents();
-  void SendData(StormSockets::StormSocketConnectionId connection_id, std::string && data);
+  bool SendData(StormSockets::StormSocketConnectionId connection_id, const std::string & data);
+
+  virtual bool IsValidConnectionId(StormSockets::StormSocketConnectionId connection_id) = 0;
 
 protected:
   virtual void HandleConnect(StormSockets::StormSocketConnectionId connection_id) = 0;
   virtual void HandleHandshakeComplete(StormSockets::StormSocketConnectionId connection_id) = 0;
   virtual void HandleData(StormSockets::StormSocketConnectionId connection_id, StormSockets::StormWebsocketMessageReader & reader) = 0;
   virtual void HandleDisconnect(StormSockets::StormSocketConnectionId connection_id) = 0;
+
 
 protected:
 

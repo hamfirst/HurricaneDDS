@@ -146,6 +146,7 @@ void DDSNodeNetworkService::ProcessEvents()
         m_PendingMessages.erase(sender.GetTargetNodeId());
         m_Senders.erase(event.ConnectionId);
         DDSLog::LogVerbose("Sender %d disconnected", event.ConnectionId.GetIndex());
+        m_ClientFrontend->FinalizeConnection(event.ConnectionId);
       }
       break;
     }
@@ -171,6 +172,7 @@ void DDSNodeNetworkService::ProcessEvents()
       {
         DDSLog::LogVerbose("Receiver %d disconnected", event.ConnectionId.GetIndex());
         m_Receievers.erase(event.ConnectionId);
+        m_ServerFrontend->FinalizeConnection(event.ConnectionId);
       }
       break;
     }

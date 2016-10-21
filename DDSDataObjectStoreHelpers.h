@@ -151,7 +151,7 @@ struct DDSMessageCaller<FuncIndex, true>
 };
 
 template <class DataType>
-bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSTargetedMessage & message)
+bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargetedMessage & message)
 {
   const char * str = message.m_MethodArgs.c_str();
   StormReflJsonAdvanceWhiteSpace(str);
@@ -191,7 +191,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSTar
     }
   };
 
-  DDSResponder responder = { node_state,{ 0, -1, -1 } };
+  DDSResponder responder = { iface, { 0, -1, -1 } };
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -208,7 +208,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSTar
 }
 
 template <class DataType>
-bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSTargetedMessageWithResponder & message)
+bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargetedMessageWithResponder & message)
 {
   const char * str = message.m_MethodArgs.c_str();
   StormReflJsonAdvanceWhiteSpace(str);
@@ -248,7 +248,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSTar
     }
   };
 
-  DDSResponder responder = { node_state,{ message.m_ResponderKey, message.m_ResponderObjectType, message.m_ResponderMethodId } };
+  DDSResponder responder = { iface, { message.m_ResponderKey, message.m_ResponderObjectType, message.m_ResponderMethodId } };
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -265,7 +265,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSTar
 }
 
 template <class DataType>
-bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSResponderCallData & message)
+bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSResponderCallData & message)
 {
   const char * str = message.m_MethodArgs.c_str();
   StormReflJsonAdvanceWhiteSpace(str);
@@ -305,7 +305,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSNodeState & node_state, DDSRes
     }
   };
 
-  DDSResponder responder = { node_state,{ 0, -1, -1 } };
+  DDSResponder responder = { iface, { 0, -1, -1 } };
 
   bool parsed = false;
   auto func_visitor = [&](auto f)

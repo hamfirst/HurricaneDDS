@@ -5,11 +5,12 @@
 
 #include <StormSockets\StormSocketServerFrontendWebsocket.h>
 
-DDSCoordinatorNetworkService::DDSCoordinatorNetworkService(DDSCoordinatorState & coordinator_state,
-  const StormSockets::StormSocketInitSettings & backend_settings,
+DDSCoordinatorNetworkService::DDSCoordinatorNetworkService(
+  DDSNetworkBackend & backend,
+  DDSCoordinatorState & coordinator_state,
   const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings) :
   m_CoordinatorState(coordinator_state),
-  m_Backend(backend_settings),
+  m_Backend(backend),
   m_ServerFrontend(std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(server_settings, m_Backend.m_Backend.get()))
 {
 
@@ -67,6 +68,20 @@ void DDSCoordinatorNetworkService::SendMessageToAllConnectedClients(const char *
   }
 
   m_ServerFrontend->FreeOutgoingPacket(packet);
+}
+
+bool DDSCoordinatorNetworkService::SendMessageToNode(DDSNodeId node_id, const char * message, std::size_t length)
+{
+  for (auto & connection_info : m_ConnectionIdMap)
+  {
+    if (connection_info.second->CheckNodeId(node_id))
+    {
+      SendMessageToClient(connection_info.first, message, length);
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void DDSCoordinatorNetworkService::HandleConnect(StormSockets::StormSocketConnectionId connection_id, uint32_t addr, uint16_t port)

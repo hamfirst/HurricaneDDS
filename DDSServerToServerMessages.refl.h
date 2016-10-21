@@ -9,6 +9,7 @@
 #include "DDSKey.h"
 
 #include "DDSResponder.refl.h"
+#include "DDSSharedMessages.refl.h"
 
 enum STORM_REFL_ENUM class DDSServerToServerMessageType
 {
@@ -16,13 +17,14 @@ enum STORM_REFL_ENUM class DDSServerToServerMessageType
   kHandshakeResponse,
   kHandshakeFinalize,
   kDataObjectListSync,
+  kUnlockObject,
   kResponderCall,
   kTargetedMessage,
   kTargetedMessageResponder,
   kCreateSubscription,
   kCreateDataSubscription,
   kDestroySubscription,
-  kSubscriptionDeleted
+  kSubscriptionDeleted,
 };
 
 struct DDSServerToServerHandshakeRequest
@@ -86,17 +88,26 @@ struct DDSExportedRequestedSubscription
   DDSKey m_SubscriptionId;
 };
 
+enum STORM_REFL_ENUM class DDSExportedObjectState
+{
+  kNotLoaded,
+  kLoaded,
+  kLocked,
+};
+
 struct DDSExportedObject
 {
   STORM_REFL;
   DDSKey m_Key;
-  bool m_IsLoaded;
+  DDSExportedObjectState m_State;
   std::string m_ActiveObject;
   std::string m_DatabaseObject;
 
   std::vector<DDSExportedMessage> m_PendingMessages;
   std::vector<DDSExportedSubscription> m_Subscriptions;
   std::vector<DDSExportedRequestedSubscription> m_RequestedSubscriptions;
+
+  std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> m_SharedSubscriptions;
 };
 
 struct DDSDataObjectListSync
@@ -112,89 +123,54 @@ struct DDSDataObjectListSync
   std::vector<DDSExportedObject> m_Objects;
 };
 
-struct DDSResponderCallData
+struct DDSUnlockObject
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kUnlockObject;
+  DDSKey m_Key;
+  int m_ObjectType;
+  std::string m_Data;
+};
+
+struct DDSResponderCallData : public DDSResponderCallBase
 {
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kResponderCall;
-  DDSKey m_Key;
-  int m_ObjectType;
-
-  int m_MethodId;
-  std::string m_ResponderArgs;
-  std::string m_MethodArgs;
 };
 
-struct DDSTargetedMessage
+struct DDSTargetedMessage : public DDSTargetedMessageBase
 {
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kTargetedMessage;
-  DDSKey m_Key;
-  int m_ObjectType;
-
-  int m_MethodId;
-  std::string m_MethodArgs;
 };
 
-struct DDSTargetedMessageWithResponder
+struct DDSTargetedMessageWithResponder : public DDSTargetedMessageWithResponderBase
 {
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kTargetedMessageResponder;
-  DDSKey m_Key;
-  int m_ObjectType;
-
-  int m_MethodId;
-  std::string m_MethodArgs;
-
-  int m_ResponderObjectType;
-  DDSKey m_ResponderKey;
-  int m_ResponderMethodId;
-
-  std::string m_ReturnArg;
 };
 
-struct DDSCreateSubscription
+struct DDSCreateSubscription : public DDSCreateSubscriptionBase
 {
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kCreateSubscription;
-
-  std::string m_DataPath;
-
-  DDSKey m_Key;
-  int m_ObjectType;
-  DDSKey m_SubscriptionId;
-  
-  int m_ResponderObjectType;
-  DDSKey m_ResponderKey;
-  int m_ResponderMethodId;
-  std::string m_ReturnArg;
-
-  bool m_DeltaOnly;
 };
 
-struct DDSCreateDataSubscription : public DDSCreateSubscription
+struct DDSCreateDataSubscription : public DDSCreateDataSubscriptionBase
 {
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kCreateDataSubscription;
 };
 
-struct DDSDestroySubscription
+struct DDSDestroySubscription : public DDSDestroySubscriptionBase
 {
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kDestroySubscription;
-
-  DDSKey m_Key;
-  int m_ObjectType;
-  DDSKey m_SubscriptionId;
 };
 
-struct DDSSubscriptionDeleted
+struct DDSSubscriptionDeleted : public DDSSubscriptionDeletedBase
 {
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kSubscriptionDeleted;
-
-  int m_ResponderObjectType;
-  DDSKey m_ResponderKey;
-  int m_ResponderMethodId;
-  DDSKey m_SubscriptionId;
 };
 

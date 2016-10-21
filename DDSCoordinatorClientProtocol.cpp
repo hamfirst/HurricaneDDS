@@ -94,6 +94,8 @@ bool DDSCoordinatorClientProtocol::HandleConnectionEstablished()
 
 bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
 {
+  const char * start_msg = msg;
+
   Hash hash = crc32begin();
   while (length > 0)
   {
@@ -204,10 +206,52 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
     }
     else
     {
-      return false;
+      msg = start_msg;
+      Hash hash = crc32begin();
+      while (length > 0)
+      {
+        if (*msg == ' ' || *msg == 0)
+        {
+          break;
+        }
+
+        hash = crc32additive(hash, *msg);
+        msg++;
+      }
+
+      hash = crc32end(hash);
+      msg++;
+
+      if (length == 0)
+      {
+        return false;
+      }
+
+      DDSServerToServerMessageType server_type;
+      if (StormReflGetEnumFromHash(server_type, hash) == false)
+      {
+        return false;
+      }
+
+      m_NodeState.GotMessageFromCoordinator(server_type, type, msg);
     }
     break;
   }
 
   return true;
+}
+
+void DDSCoordinatorClientProtocol::SendMessageToCoordinator(const std::string && data)
+{
+  if (m_State != kConnected)
+  {
+    DDSLog::LogError("Attempting to send data on an unconnected connection");
+    return;
+  }
+
+  auto writer = m_ClientFrontend->CreateOutgoingPacket(StormSockets::StormSocketWebsocketDataType::Text, true);
+  writer.WriteByteBlock(data.data(), 0, data.size());
+  m_ClientFrontend->FinalizeOutgoingPacket(writer);
+  m_ClientFrontend->SendPacketToConnection(writer, m_ConnectionId);
+  m_ClientFrontend->FreeOutgoingPacket(writer);
 }

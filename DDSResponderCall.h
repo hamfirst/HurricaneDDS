@@ -12,7 +12,7 @@ class DDSNodeState;
 template <class ... Args>
 void DDSResponderCall(DDSResponder & responder, Args && ... args)
 {
-  DDSResponderCallData call_data;
+  DDSResponderCallDataBase call_data;
 
   call_data.m_Key = responder.m_Data.m_Key;
   call_data.m_ObjectType = responder.m_Data.m_ObjectType;

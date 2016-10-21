@@ -4,7 +4,7 @@
 
 #include "DDSRandom.h"
 
-static std::default_random_engine s_RandomEngine((unsigned)std::chrono::steady_clock::now().time_since_epoch().count());
+static std::default_random_engine s_RandomEngine(std::random_device{}());
 
 uint32_t DDSGetRandomNumber()
 {

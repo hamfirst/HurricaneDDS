@@ -2,13 +2,13 @@
 
 #include "DDSResponder.refl.h"
 
-class DDSNodeState;
-struct DDSResponderCallData;
+class DDSInterface;
+struct DDSResponderCallBase;
 
 struct DDSResponder
 {
-  DDSNodeState & m_NodeState;
+  DDSInterface & m_Interface;
   DDSResponderData m_Data;
 };
 
-void DDSResponderCallFinalize(const DDSResponder & responder, const DDSResponderCallData & call_data);
+void DDSResponderCallFinalize(const DDSResponder & responder, const DDSResponderCallBase & call_data);

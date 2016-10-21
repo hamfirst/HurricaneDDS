@@ -26,9 +26,9 @@ void DDSEndpointInterface::CreateResolverRequest(DDSDeferredCallback & callback,
   m_NodeState.CreateResolverRequest(hostname, callback, std::move(function));
 }
 
-void DDSEndpointInterface::SendData(std::string && data)
+bool DDSEndpointInterface::SendData(const std::string & data)
 {
-  m_EndpointFactory.SendData(m_ConnectionId, std::move(data));
+  return m_EndpointFactory.SendData(m_ConnectionId, data);
 }
 
 int DDSEndpointInterface::GetObjectType(uint32_t object_type_name_hash)
@@ -39,6 +39,26 @@ int DDSEndpointInterface::GetObjectType(uint32_t object_type_name_hash)
 int DDSEndpointInterface::GetDataObjectType(uint32_t object_type_name_hash)
 {
   return m_NodeState.GetDatabaseObjectTypeIdForNameHash(object_type_name_hash);
+}
+
+void * DDSEndpointInterface::GetLocalObject(int target_object_type, DDSKey target_key)
+{
+  auto & data_store = m_NodeState.GetDataObjectStore(target_object_type);
+  auto data_val = data_store.GetDataObjectForKey(target_key);
+
+  if (data_val == nullptr)
+  {
+    return nullptr;
+  }
+
+  data_store.BeginObjectModification(target_key);
+  return data_val;
+}
+
+void DDSEndpointInterface::FinalizeLocalObject(int target_object_type, DDSKey target_key)
+{
+  auto & data_store = m_NodeState.GetDataObjectStore(target_object_type);
+  data_store.EndObjectModification();
 }
 
 void DDSEndpointInterface::SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message)

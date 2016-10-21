@@ -41,11 +41,17 @@ void DDSEndpointFactoryBase::ProcessEvents()
   }
 }
 
-void DDSEndpointFactoryBase::SendData(StormSockets::StormSocketConnectionId connection_id, std::string && data)
+bool DDSEndpointFactoryBase::SendData(StormSockets::StormSocketConnectionId connection_id, const std::string & data)
 {
+  if (IsValidConnectionId(connection_id))
+  {
+    return false;
+  }
+
   auto packet = m_Frontend->CreateOutgoingPacket(StormSockets::StormSocketWebsocketDataType::Binary, true);
   packet.WriteByteBlock(data.data(), 0, data.length());
   m_Frontend->FinalizeOutgoingPacket(packet);
   m_Frontend->SendPacketToConnectionBlocking(packet, connection_id);
   m_Frontend->FreeOutgoingPacket(packet);
+  return true;
 }

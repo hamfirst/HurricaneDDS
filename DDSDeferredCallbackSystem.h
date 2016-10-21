@@ -72,7 +72,7 @@ protected:
 
   void DestroyCallback(uint32_t id)
   {
-    for (auto itr = m_PendingCallbacks.begin(); itr != m_PendingCallbacks.end(); itr++)
+    for (auto itr = m_PendingCallbacks.begin(); itr != m_PendingCallbacks.end(); ++itr)
     {
       if (itr->m_Id == id)
       {

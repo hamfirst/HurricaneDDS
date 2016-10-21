@@ -147,10 +147,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DDSChallenge.h" />
-    <ClInclude Include="DDSCoordinator.h">
-      <SubType>
-      </SubType>
-    </ClInclude>
+    <ClInclude Include="DDSConnectionId.h" />
     <ClInclude Include="DDSCoordinatorClientProtocol.h">
       <SubType>
       </SubType>
@@ -186,6 +183,7 @@
     <ClInclude Include="DDSDatabaseTypes.h" />
     <ClInclude Include="DDSDataObject.h" />
     <ClInclude Include="DDSDataObjectAddress.h" />
+    <ClInclude Include="DDSDataObjectName.h" />
     <ClInclude Include="DDSDataObjectStore.h">
       <SubType>
       </SubType>
@@ -224,6 +222,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSInterface.h" />
     <ClInclude Include="DDSKey.h" />
     <ClInclude Include="DDSLog.h">
       <SubType>
@@ -306,6 +305,18 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSSharedMessages.refl.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSSharedMessages.refl.meta.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSSharedObject.h" />
+    <ClInclude Include="DDSSharedObjectBase.h" />
+    <ClInclude Include="DDSSharedObjectInterface.h" />
+    <ClInclude Include="DDSSharedObjectList.h" />
     <ClInclude Include="DDSTimerSystem.h">
       <SubType>
       </SubType>
@@ -313,10 +324,6 @@
     <ClInclude Include="DDSVersion.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DDSCoordinator.cpp">
-      <SubType>
-      </SubType>
-    </ClCompile>
     <ClCompile Include="DDSCoordinatorClientProtocol.cpp">
       <SubType>
       </SubType>
@@ -423,6 +430,7 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="DDSSharedObjectInterface.cpp" />
     <ClCompile Include="DDSTimerSystem.cpp">
       <SubType>
       </SubType>

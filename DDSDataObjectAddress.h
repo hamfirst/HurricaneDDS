@@ -27,10 +27,30 @@ struct DDSDataObjectAddress
   }
 };
 
-struct DDSDataObjectAddressHash
+struct DDSDataObjectMethodAddress
 {
-  std::size_t operator()(const DDSDataObjectAddress & addr) const
+  int m_ObjectType;
+  DDSKey m_ObjectKey;
+
+  int m_MethodId;
+
+  bool operator == (const DDSDataObjectMethodAddress & rhs) const
   {
-    return (std::size_t)addr.m_ObjectKey ^ crc64_table[addr.m_ObjectType & 0xFF];
+    return m_ObjectType == rhs.m_ObjectType && m_ObjectKey == rhs.m_ObjectKey && m_MethodId == rhs.m_MethodId;
+  }
+
+  bool operator < (const DDSDataObjectMethodAddress & rhs) const
+  {
+    if (m_ObjectKey < rhs.m_ObjectKey)
+    {
+      return true;
+    }
+
+    if (m_ObjectType < rhs.m_ObjectType)
+    {
+      return true;
+    }
+
+    return m_MethodId < rhs.m_MethodId;
   }
 };
