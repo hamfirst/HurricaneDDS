@@ -9,6 +9,7 @@
 #include <StormData\StormDataJson.h>
 #include <StormData\StormData.h>
 
+#include "DDSKey.h"
 #include "DDSNodeInterface.h"
 #include "DDSSharedObjectInterface.h"
 
@@ -28,4 +29,6 @@
   STORM_REFL_FUNCS; \
   STORM_REFL_NODEFAULT; \
   STORM_CHANGE_NOTIFIER_INFO; \
+
+using RKey = RNumber<DDSKey>;
 
