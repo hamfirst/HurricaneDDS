@@ -43,7 +43,7 @@ public:
   void ProcessEvents();
 
   void CreateTimer(std::chrono::system_clock::duration duration, DDSCoordinatorResponderCallData && responder_data);
-  void CreateHttpRequest(const char * url, DDSCoordinatorResponderCallData && responder_data);
+  void CreateHttpRequest(const DDSHttpRequest & request, DDSCoordinatorResponderCallData && responder_data);
 
 private:
 

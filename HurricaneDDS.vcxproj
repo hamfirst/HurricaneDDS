@@ -146,8 +146,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DDSCall.h" />
     <ClInclude Include="DDSChallenge.h" />
+    <ClInclude Include="DDSConnectionFactoryBase.h" />
     <ClInclude Include="DDSConnectionId.h" />
+    <ClInclude Include="DDSConnectionInterface.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSCoordinatorClientProtocol.h">
       <SubType>
       </SubType>
@@ -169,6 +175,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="DDSCoordinatorState.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseBootstrap.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -210,7 +220,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="DDSHttpUtil.h">
+    <ClInclude Include="DDSHttpRequest.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -222,7 +232,6 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="DDSInterface.h" />
     <ClInclude Include="DDSKey.h" />
     <ClInclude Include="DDSLog.h">
       <SubType>
@@ -245,6 +254,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSObjectInterface.h" />
     <ClInclude Include="DDSOutgoingKeyspaceTransfer.h">
       <SubType>
       </SubType>
@@ -321,9 +331,39 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSTokenBroker.h" />
     <ClInclude Include="DDSVersion.h" />
+    <ClInclude Include="DDSWebsiteFactory.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFactoryBase.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFactoryList.h" />
+    <ClInclude Include="DDSWebsiteFactoryStaticContent.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFilesystem.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFilesystemBuilder.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteInterface.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DDSConnectionInterface.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSCoordinatorClientProtocol.cpp">
       <SubType>
       </SubType>
@@ -337,6 +377,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSCoordinatorState.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSDatabaseBootstrap.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -361,7 +405,7 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="DDSHttpUtil.cpp">
+    <ClCompile Include="DDSHttpRequest.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -436,6 +480,26 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSVersion.cpp" />
+    <ClCompile Include="DDSWebsiteFactoryBase.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFactoryStaticContent.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFilesystem.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFilesystemBuilder.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteInterface.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(SolutionDir)StormRefl\StormRefl.targets" />

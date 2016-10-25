@@ -10,32 +10,13 @@
 #include <StormData\StormDataChangePacket.h>
 #include <StormData\StormDataChangeNotifier.h>
 
-#define DDS_DECLARE_HAS_FUNC(FuncName) \
-template <typename T> class DDSHasFunc##FuncName \
-{  \
-  public :template <typename C> static char test(decltype(&C::FuncName)); template <typename C> static long test(...);  static const bool value = sizeof(test<T>(0)) == sizeof(char); \
-}; \
 
-#define DDS_DECLARE_CALL_FUNC(FuncName) \
-template <bool Enable> struct DDSCallFunc##FuncName \
-{ \
-  template <typename T, typename ... Args> static bool Call(T & t, Args && ... args) { t.FuncName(std::forward<Args>(args)...); return true; } \
-}; \
-template <> struct DDSCallFunc##FuncName<false> \
-{ \
-  template <typename T, typename ... Args> static bool Call(T & t, Args && ... args) { return false; } \
-}; \
-
-#define DDS_DECLARE_CALL(FuncName) \
-  DDS_DECLARE_HAS_FUNC(FuncName) \
-  DDS_DECLARE_CALL_FUNC(FuncName) \
-
-#define DDS_CALL_FUNC(FuncName, Inst, ...) \
-DDSCallFunc##FuncName<DDSHasFunc##FuncName<std::decay_t<decltype(Inst)>>::value>::Call(Inst, __VA_ARGS__)
 
 inline bool DDSRequiresFullObject(DDSServerToServerMessageType type)
 {
-  return type != DDSServerToServerMessageType::kCreateDataSubscription;
+  return type != DDSServerToServerMessageType::kCreateDataSubscription && 
+         type != DDSServerToServerMessageType::kCreateExistSubscription &&
+         type != DDSServerToServerMessageType::kCreateDataExistSubscription;
 }
 
 inline bool DDSRequiresFullObject(const std::vector<DDSExportedMessage> & pending_messages)
@@ -151,7 +132,7 @@ struct DDSMessageCaller<FuncIndex, true>
 };
 
 template <class DataType>
-bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargetedMessage & message)
+bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTargetedMessage & message)
 {
   const char * str = message.m_MethodArgs.c_str();
   StormReflJsonAdvanceWhiteSpace(str);
@@ -208,7 +189,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargeted
 }
 
 template <class DataType>
-bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargetedMessageWithResponder & message)
+bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTargetedMessageWithResponder & message)
 {
   const char * str = message.m_MethodArgs.c_str();
   StormReflJsonAdvanceWhiteSpace(str);
@@ -265,7 +246,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargeted
 }
 
 template <class DataType>
-bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSResponderCallData & message)
+bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSResponderCallData & message)
 {
   const char * str = message.m_MethodArgs.c_str();
   StormReflJsonAdvanceWhiteSpace(str);
@@ -323,6 +304,11 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSResponde
 
 inline bool DDSCheckChangeSubscription(const ReflectionChangeNotification & change_notification, const DDSExportedSubscription & sub)
 {
+  if (sub.m_DataPath == "?")
+  {
+    return false;
+  }
+
   return change_notification.m_Path.compare(0, sub.m_DataPath.length(), sub.m_DataPath) == 0;
 }
 
@@ -399,4 +385,13 @@ inline void DDSCreateDeletedSubscriptionResponse(const DDSExportedSubscription &
   responder_data.m_ResponderObjectType = sub.m_ResponderObjectType;
   responder_data.m_ResponderMethodId = sub.m_ResponderMethodId;
   responder_data.m_SubscriptionId = sub.m_SubscriptionId;
+}
+
+inline void DDSCreateSubscriptionExistResponse(bool exists, const DDSExportedSubscription & sub, DDSResponderCallData & responder_data)
+{
+  responder_data.m_Key = sub.m_ResponderKey;
+  responder_data.m_ObjectType = sub.m_ResponderObjectType;
+  responder_data.m_MethodId = sub.m_ResponderMethodId;
+  responder_data.m_ResponderArgs = sub.m_ResponderArgs;
+  responder_data.m_MethodArgs = exists ? "[true]" : "[false]";
 }

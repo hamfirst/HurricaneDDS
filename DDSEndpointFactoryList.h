@@ -6,6 +6,8 @@
 
 #include <StormSockets\StormSocketServerTypes.h>
 
+class DDSWebsiteFactoryBase;
+
 template <typename EndpointType>
 struct DDSCreateEndpointType
 {
@@ -14,10 +16,11 @@ struct DDSCreateEndpointType
     m_Settings = settings;
   }
 
-  auto operator()(DDSNodeState & node_state, std::vector<std::unique_ptr<DDSEndpointFactoryBase>> & list) const
+  auto operator()(DDSNodeState & node_state, 
+    std::vector<std::unique_ptr<DDSEndpointFactoryBase>> & endpoint_list, std::vector<std::unique_ptr<DDSWebsiteFactoryBase>> & website_list) const
   {
     using EndpointFactoryType = DDSEndpointFactory<EndpointType>;
-    list.push_back(std::make_unique<EndpointFactoryType>(node_state, m_Settings));
+    endpoint_list.push_back(std::make_unique<EndpointFactoryType>(node_state, m_Settings));
   }
 
   StormSockets::StormSocketServerFrontendWebsocketSettings m_Settings;

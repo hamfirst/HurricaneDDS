@@ -12,6 +12,8 @@
 #include "DDSDataObjectAddress.h"
 #include "DDSDataObjectStoreBase.h"
 #include "DDSSharedObjectBase.h"
+#include "DDSEndpointFactoryBase.h"
+#include "DDSWebsiteFactoryBase.h"
 #include "DDSRoutingTable.h"
 #include "DDSDatabaseTypes.h"
 #include "DDSTimerSystem.h"
@@ -23,6 +25,9 @@
 #include "DDSDatabaseConnectionPool.h"
 #include "DDSIncomingKeyspaceTransferManager.h"
 #include "DDSOutgoingKeyspaceTransferManager.h"
+#include "DDSWebsiteFilesystem.h"
+#include "DDSWebsiteFilesystemBuilder.h"
+
 #include "DDSServerToServerMessages.refl.h"
 
 struct DDSResponder;
@@ -32,7 +37,7 @@ class DDSNodeState
 {
 public:
 
-  template <typename DataTypeList, typename SharedObjectTypeList, typename ... EndpointFactoryTypes>
+  template <typename DataTypeList, typename SharedObjectTypeList, typename ... ConnectionFactoryTypes>
   DDSNodeState(
     const DataTypeList & data_objects,
     const SharedObjectTypeList & shared_objects,
@@ -42,13 +47,13 @@ public:
     const StormSockets::StormSocketClientFrontendHttpSettings & http_client_settings,
     const DDSCoordinatorClientSettings & coordinator_settings,
     const DDSDatabaseSettings & database_settings,
-    EndpointFactoryTypes && ... endpoints) :
+    ConnectionFactoryTypes && ... connection_factory_types) :
     DDSNodeState(DataTypeList::NumTypes, backend_settings, node_server_settings, node_client_settings, http_client_settings, coordinator_settings, database_settings)
   {
     data_objects(*this, m_DataObjectList);
     shared_objects(*this, m_SharedObjects, DataTypeList::NumTypes);
 
-    InitEndpointFactories(std::forward<EndpointFactoryTypes>(endpoints)...);
+    InitConnectionFactories(std::forward<ConnectionFactoryTypes>(connection_factory_types)...);
   }
 
   ~DDSNodeState() = default;
@@ -115,10 +120,10 @@ public:
   void CreateTimer(std::chrono::system_clock::duration duration, DDSDeferredCallback & callback, std::function<void()> && function);
   void CreateTimer(std::chrono::system_clock::duration duration, DDSResponderCallData && responder_data);
 
-  void CreateHttpRequest(const char * url, DDSDeferredCallback & callback, std::function<void(bool, const std::string &)> && function);
-  void CreateHttpRequest(const char * url, DDSResponderCallData && responder_data);
+  void CreateHttpRequest(const DDSHttpRequest & request, DDSDeferredCallback & callback, std::function<void(bool, const std::string &, const std::string &)> && function);
+  void CreateHttpRequest(const DDSHttpRequest & request, DDSResponderCallData && responder_data);
 
-  void CreateResolverRequest(const char * hostname, DDSDeferredCallback & callback, std::function<void(const DDSResolverRequest &)> && function);
+  void CreateResolverRequest(const char * hostname, bool reverse_lookup, DDSDeferredCallback & callback, std::function<void(const DDSResolverRequest &)> && function);
 
 private:
 
@@ -129,6 +134,9 @@ private:
   friend class DDSNodeNetworkService;
   friend class DDSNodeInterface;
   friend class DDSEndpointFactoryBase;
+  friend class DDSWebsiteFactoryBase;
+  friend class DDSWebsiteFactoryStaticContent;
+  friend class DDSConnectionInterface;
   friend class DDSEndpointInterface;
   friend class DDSHttpClient;
   friend struct DDSResponder;
@@ -150,14 +158,15 @@ private:
     const DDSCoordinatorClientSettings & coordinator_settings,
     const DDSDatabaseSettings & database_settings);
 
+
   template <typename EndpointFactoryType, typename ... Remaining>
-  void InitEndpointFactories(EndpointFactoryType && factory_type, Remaining && ... remaining)
+  void InitConnectionFactories(EndpointFactoryType && factory_type, Remaining && ... remaining)
   {
-    factory_type(*this, m_EndpointFactoryList);
-    InitEndpointFactories(std::forward<Remaining>(remaining)...);
+    factory_type(*this, m_EndpointFactoryList, m_WebsiteFactoryList);
+    InitConnectionFactories(std::forward<Remaining>(remaining)...);
   }
 
-  void InitEndpointFactories()
+  void InitConnectionFactories()
   {
 
   }
@@ -206,6 +215,7 @@ private:
   int GetLocalPort() const;
 
   bool SendToLocalConnection(DDSConnectionId connection_id, const std::string & data);
+  void DisconnectLocalConnection(DDSConnectionId connection_id);
 
   void RecheckOutgoingTargetedMessages();
 
@@ -241,6 +251,7 @@ private:
   std::vector<std::unique_ptr<DDSDataObjectStoreBase>> m_DataObjectList;
   std::vector<std::unique_ptr<DDSSharedObjectCopyBase>> m_SharedObjects;
   std::vector<std::unique_ptr<DDSEndpointFactoryBase>> m_EndpointFactoryList;
+  std::vector<std::unique_ptr<DDSWebsiteFactoryBase>> m_WebsiteFactoryList;
 
   std::unique_ptr<DDSDatabaseConnectionPool> m_Database;
 

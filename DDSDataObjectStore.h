@@ -6,9 +6,9 @@
 #include <string>
 #include <memory>
 
-
 #include "DDSKey.h"
 #include "DDSLog.h"
+#include "DDSCall.h"
 #include "DDSRandom.h"
 #include "DDSNodeState.h"
 #include "DDSDataObjectStoreBase.h"
@@ -24,10 +24,12 @@
 #include <StormData\StormDataChangeNotifier.h>
 #include <StormData\StormDataPath.h>
 #include <StormData\StormDataJsonUtil.h>
+#include <StormData\StormDataParent.h>
 
 DDS_DECLARE_CALL(BeginLoad);
 DDS_DECLARE_CALL(PreMoveObject);
 DDS_DECLARE_CALL(MoveObject);
+DDS_DECLARE_CALL(PreDestroy);
 
 template <class DataType, class DatabaseBackedType>
 class DDSDataObjectStore : public DDSDataObjectStoreBase
@@ -95,8 +97,7 @@ public:
   {
     while (true)
     {
-      DDSKey size = GetKeyRangeSize(range);
-      DDSKey test_key = (DDSGetRandomNumber64() % size) + range.m_Min;
+      DDSKey test_key = GetRandomKeyInRange(range);
 
       if (m_Objects.find(test_key) == m_Objects.end())
       {
@@ -145,16 +146,31 @@ public:
       obj_data.m_State = kDeleted;
       obj_data.m_PendingMessages.clear();
 
+      std::vector<DDSExportedSubscription> new_subs;
+
       for (auto & sub : obj_data.m_Subscriptions)
       {
-        DDSSubscriptionDeleted deleted_msg;
-        DDSCreateDeletedSubscriptionResponse(sub, deleted_msg);
+        if (sub.m_DataPath == "?")
+        {
+          new_subs.push_back(sub);
 
-        m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ deleted_msg.m_ResponderObjectType, deleted_msg.m_ResponderKey },
-          DDSServerToServerMessageType::kSubscriptionDeleted, StormReflEncodeJson(deleted_msg));
+          DDSResponderCallData responder_call;
+          DDSCreateSubscriptionExistResponse(false, sub, responder_call);
+
+          m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub.m_ResponderObjectType, sub.m_ResponderKey }, 
+            DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+        }
+        else
+        {
+          DDSSubscriptionDeleted deleted_msg;
+          DDSCreateDeletedSubscriptionResponse(sub, deleted_msg);
+
+          m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ deleted_msg.m_ResponderObjectType, deleted_msg.m_ResponderKey },
+            DDSServerToServerMessageType::kSubscriptionDeleted, StormReflEncodeJson(deleted_msg));
+        }
       }
 
-      obj_data.m_Subscriptions.clear();
+      obj_data.m_Subscriptions = new_subs;
       return;
     }
 
@@ -163,6 +179,20 @@ public:
     if (StormReflParseJson(*obj_data.m_DatabaseObject.get(), data) == false)
     {
       DDSLog::LogError("Invalid json coming from database");
+    }
+
+    InitializeParentInfo(*obj_data.m_DatabaseObject.get());
+
+    for (auto & sub : obj_data.m_Subscriptions)
+    {
+      if (sub.m_DataPath == "?" && sub.m_IsDataSubscription)
+      {
+        DDSResponderCallData responder_call;
+        DDSCreateSubscriptionExistResponse(true, sub, responder_call);
+
+        m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub.m_ResponderObjectType, sub.m_ResponderKey },
+          DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+      }
     }
 
     if (DDSRequiresFullObject(obj_data.m_PendingMessages))
@@ -201,6 +231,8 @@ public:
   void FinalizeObjectLoad(DDSKey key)
   {
     auto & obj_data = m_Objects.at(key);
+    InitializeParentInfo(*obj_data.m_ActiveObject.get());
+
     if (obj_data.m_State != kCreating)
     {
       DDSLog::LogError("Incosistent object state");
@@ -212,6 +244,18 @@ public:
     for (auto & msg : obj_data.m_PendingMessages)
     {
       ProcessMessage(key, obj_data, msg.m_Type, msg.m_Message.c_str());
+    }
+
+    for (auto & sub : obj_data.m_Subscriptions)
+    {
+      if (sub.m_DataPath == "?" && sub.m_IsDataSubscription == false)
+      {
+        DDSResponderCallData responder_call;
+        DDSCreateSubscriptionExistResponse(true, sub, responder_call);
+
+        m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub.m_ResponderObjectType, sub.m_ResponderKey },
+          DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+      }
     }
 
     obj_data.m_PendingMessages.clear();
@@ -234,7 +278,9 @@ public:
     if (obj_data.m_State == kActive || 
       (obj_data.m_State == kCreating && requires_active_object == false) || 
       (obj_data.m_State != kLoading && requires_full_object == false) ||
-      (message_type == DDSServerToServerMessageType::kUnlockObject))
+      (message_type == DDSServerToServerMessageType::kUnlockObject) ||
+      (message_type == DDSServerToServerMessageType::kCreateExistSubscription) ||
+      (message_type == DDSServerToServerMessageType::kCreateDataExistSubscription))
     {
       ProcessMessage(key, obj_data, message_type, msg);
       return true;
@@ -351,6 +397,65 @@ public:
 
         m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
           DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+      }
+      break;
+      case DDSServerToServerMessageType::kCreateExistSubscription:
+      case DDSServerToServerMessageType::kCreateDataExistSubscription:
+      {
+        DDSCreateExistSubscription sub_msg;
+        StormReflParseJson(sub_msg, message);
+
+        auto & obj_data = m_Objects.at(sub_msg.m_Key);
+
+        DDSExportedSubscription sub_data;
+        sub_data.m_DataPath = "?";
+        sub_data.m_SubscriptionId = sub_msg.m_SubscriptionId;
+        sub_data.m_ResponderKey = sub_msg.m_ResponderKey;
+        sub_data.m_ResponderObjectType = sub_msg.m_ResponderObjectType;
+        sub_data.m_ResponderMethodId = sub_msg.m_ResponderMethodId;
+        sub_data.m_ResponderArgs = std::move(sub_msg.m_ReturnArg);
+        sub_data.m_IsDataSubscription = (message_type == DDSServerToServerMessageType::kCreateDataExistSubscription);
+        sub_data.m_DeltaOnly = false;
+        obj_data.m_Subscriptions.emplace_back(std::move(sub_data));
+
+        if (obj_data.m_State == kDeleted)
+        {
+          DDSResponderCallData responder_call;
+          DDSCreateSubscriptionExistResponse(false, sub_data, responder_call);
+
+          m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
+            DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+        }
+        else if(sub_data.m_IsDataSubscription)
+        {
+          if (obj_data.m_DatabaseObject.get())
+          {
+            DDSResponderCallData responder_call;
+            DDSCreateSubscriptionExistResponse(true, sub_data, responder_call);
+
+            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
+              DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+          }
+        }
+        else
+        {
+          if (obj_data.m_ActiveObject.get())
+          {
+            DDSResponderCallData responder_call;
+            DDSCreateSubscriptionExistResponse(true, sub_data, responder_call);
+
+            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
+              DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+          }
+          else
+          {
+            DDSResponderCallData responder_call;
+            DDSCreateSubscriptionExistResponse(false, sub_data, responder_call);
+
+            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
+              DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+          }
+        }
       }
       break;
       case DDSServerToServerMessageType::kDestroySubscription:
@@ -775,6 +880,7 @@ public:
     auto & obj_data = itr.first->second;
 
     obj_data.m_ActiveObject = std::make_unique<DataType>(node_interface);
+    InitializeParentInfo(*obj_data.m_ActiveObject.get());
 
     if (DDS_CALL_FUNC(BeginLoad, *obj_data.m_ActiveObject.get()) == false)
     {
@@ -821,8 +927,7 @@ public:
   {
     while (true)
     {
-      DDSKey size = GetKeyRangeSize(range);
-      DDSKey test_key = (DDSGetRandomNumber64() % size) + range.m_Min;
+      DDSKey test_key = GetRandomKeyInRange(range);
 
       if (m_Objects.find(test_key) == m_Objects.end())
       {
@@ -835,7 +940,13 @@ public:
   {
     if (m_Changes.size() == 0)
     {
-      m_Objects.erase(key);
+      auto itr = m_Objects.find(key);
+
+      if (itr != m_Objects.end())
+      {
+        DDS_CALL_FUNC(PreDestroy, *itr);
+        m_Objects.erase(itr);
+      }
     }
     else
     {
@@ -992,7 +1103,7 @@ public:
   virtual void BeginObjectModification(DDSKey key)
   {
     m_NodeState.BeginQueueingMessages();
-    ReflectionPushNotifyCallback([&](const ReflectionChangeNotification & change) { m_Changes.emplace_back(std::make_pair(key, change)); });
+    ReflectionPushNotifyCallback([this, key](const ReflectionChangeNotification & change) { m_Changes.emplace_back(std::make_pair(key, change)); });
   }
 
   virtual void EndObjectModification()
@@ -1032,7 +1143,13 @@ public:
 
     for (auto & key : dead_keys)
     {
-      m_Objects.erase(key);
+      auto itr = m_Objects.find(key);
+
+      if (itr != m_Objects.end())
+      {
+        DDS_CALL_FUNC(PreDestroy, *itr);
+        m_Objects.erase(itr);
+      }
     }
 
     m_NodeState.EndQueueingMessages();

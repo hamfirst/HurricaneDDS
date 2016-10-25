@@ -111,16 +111,16 @@ void DDSCoordinatorState::CreateTimer(std::chrono::system_clock::duration durati
   m_DeferredCallbackList.emplace(std::move(callback));
 }
 
-void DDSCoordinatorState::CreateHttpRequest(const char * url, DDSCoordinatorResponderCallData && responder_data)
+void DDSCoordinatorState::CreateHttpRequest(const DDSHttpRequest & request, DDSCoordinatorResponderCallData && responder_data)
 {
   std::unique_ptr<DDSDeferredCallback> callback = std::make_unique<DDSDeferredCallback>();
   DDSDeferredCallback * callback_ptr = callback.get();
 
   DDSDataObjectAddress address{ responder_data.m_ObjectType, responder_data.m_Key };
 
-  m_HttpClient.CreateCallback(url, *callback.get(), [=](bool success, const std::string & data) mutable {
+  m_HttpClient.CreateCallback(request, *callback.get(), [=](bool success, const std::string & data, const std::string & headers) mutable {
 
-    responder_data.m_MethodArgs = "[" + StormReflEncodeJson(success) + "," + StormReflEncodeJson(data) + "]";
+    responder_data.m_MethodArgs = "[" + StormReflEncodeJson(success) + "," + StormReflEncodeJson(data) + "," + StormReflEncodeJson(headers) + "]";
     std::string responder_str = StormReflEncodeJson(responder_data);
     SendTargetedMessage(address, DDSCoordinatorProtocolMessageType::kResponderCall, std::move(responder_str));
     DestroyDeferredCallback(callback_ptr);
@@ -164,7 +164,10 @@ void DDSCoordinatorState::GotMessageFromServer(DDSCoordinatorProtocolMessageType
 
     SendTargetedMessage(DDSDataObjectAddress{ responder_data.m_ObjectType, responder_data.m_Key }, type, std::string(data));
   }
-  else if (type == DDSCoordinatorProtocolMessageType::kCreateDataSubscription)
+  else if (type == DDSCoordinatorProtocolMessageType::kCreateSubscription ||
+           type == DDSCoordinatorProtocolMessageType::kCreateDataSubscription || 
+           type == DDSCoordinatorProtocolMessageType::kCreateExistSubscription ||
+           type == DDSCoordinatorProtocolMessageType::kCreateDataExistSubscription)
   {
     DDSCoordinatorCreateDataSubscription sub_data;
     if (StormReflParseJson(sub_data, data) == false)
@@ -242,7 +245,13 @@ void DDSCoordinatorState::SendToAllConnectedClients(std::string && message)
 
 void DDSCoordinatorState::ProcessEvents()
 {
+  m_Database->TriggerCallbacks();
+
   m_NetworkService.ProcessEvents();
+
+  m_Resolver.Update();
+  m_HttpClient.Update();
+  m_TimerSystem.Update();
 }
 
 void DDSCoordinatorState::SyncRoutingTable()

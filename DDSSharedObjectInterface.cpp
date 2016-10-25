@@ -77,7 +77,7 @@ void DDSSharedObjectInterface::InsertIntoDatabaseWithResponderReturnArg(const ch
   m_CoordinatorState.InsertObjectData(data_object_type, data_key, collection, data.c_str(), std::move(call_data));
 }
 
-void DDSSharedObjectInterface::QueryDatabase(const char * collection, std::string && query,
+void DDSSharedObjectInterface::QueryDatabaseInternal(const char * collection, std::string && query,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
   DDSResponderCallData call_data;
@@ -89,7 +89,7 @@ void DDSSharedObjectInterface::QueryDatabase(const char * collection, std::strin
   m_CoordinatorState.QueryObjectData(collection, query.c_str(), std::move(call_data));
 }
 
-void DDSSharedObjectInterface::CreateTimer(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
+void DDSSharedObjectInterface::CreateTimerInternal(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
 {
   DDSCoordinatorResponderCallData call_data;
   call_data.m_Key = key;
@@ -100,7 +100,7 @@ void DDSSharedObjectInterface::CreateTimer(std::chrono::system_clock::duration d
   m_CoordinatorState.CreateTimer(duration, std::move(call_data));
 }
 
-void DDSSharedObjectInterface::CreateHttpRequest(const char * url, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
+void DDSSharedObjectInterface::CreateHttpRequestInternal(const DDSHttpRequest & request, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
 {
   DDSCoordinatorResponderCallData call_data;
   call_data.m_Key = key;
@@ -108,10 +108,10 @@ void DDSSharedObjectInterface::CreateHttpRequest(const char * url, DDSKey key, i
   call_data.m_MethodId = target_method_id;
   call_data.m_ResponderArgs = return_arg;
 
-  m_CoordinatorState.CreateHttpRequest(url, std::move(call_data));
+  m_CoordinatorState.CreateHttpRequest(request, std::move(call_data));
 }
 
-DDSKey DDSSharedObjectInterface::CreateSubscription(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
+DDSKey DDSSharedObjectInterface::CreateSubscriptionInternal(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
   DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg)
 {
   DDSKey subscription_id = DDSGetRandomNumber64();
@@ -139,7 +139,7 @@ DDSKey DDSSharedObjectInterface::CreateSubscription(int target_object_type, DDSK
   return subscription_id;
 }
 
-DDSKey DDSSharedObjectInterface::CreateDataSubscription(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
+DDSKey DDSSharedObjectInterface::CreateDataSubscriptionInternal(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
   DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg)
 {
   DDSKey subscription_id = DDSGetRandomNumber64();
@@ -167,7 +167,59 @@ DDSKey DDSSharedObjectInterface::CreateDataSubscription(int target_object_type, 
   return subscription_id;
 }
 
-void DDSSharedObjectInterface::DestroySubscription(int return_object_type, DDSKey return_key, DDSKey subscription_id)
+DDSKey DDSSharedObjectInterface::CreateExistSubscriptionInternal(int target_object_type, DDSKey target_key, int return_object_type,
+  DDSKey return_key, int return_method_id, std::string && return_arg)
+{
+  DDSKey subscription_id = DDSGetRandomNumber64();
+
+  DDSCreateExistSubscription sub_data;
+  sub_data.m_Key = target_key;
+  sub_data.m_ObjectType = target_object_type;
+  sub_data.m_SubscriptionId = subscription_id;
+  sub_data.m_ResponderObjectType = return_object_type;
+  sub_data.m_ResponderKey = return_key;
+  sub_data.m_ResponderMethodId = return_method_id;
+  sub_data.m_ReturnArg = return_arg;
+
+  DDSExportedRequestedSubscription req_sub;
+  req_sub.m_ObjectType = target_object_type;
+  req_sub.m_Key = target_key;
+  req_sub.m_SubscriptionId = subscription_id;
+
+  m_DataStore->AssignRequestedSubscription(req_sub);
+  m_CoordinatorState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key },
+    DDSCoordinatorProtocolMessageType::kCreateExistSubscription, StormReflEncodeJson(sub_data));
+
+  return subscription_id;
+}
+
+DDSKey DDSSharedObjectInterface::CreateDataExistSubscriptionInternal(int target_object_type, DDSKey target_key, int return_object_type,
+  DDSKey return_key, int return_method_id, std::string && return_arg)
+{
+  DDSKey subscription_id = DDSGetRandomNumber64();
+
+  DDSCreateDataExistSubscription sub_data;
+  sub_data.m_Key = target_key;
+  sub_data.m_ObjectType = target_object_type;
+  sub_data.m_SubscriptionId = subscription_id;
+  sub_data.m_ResponderObjectType = return_object_type;
+  sub_data.m_ResponderKey = return_key;
+  sub_data.m_ResponderMethodId = return_method_id;
+  sub_data.m_ReturnArg = return_arg;
+
+  DDSExportedRequestedSubscription req_sub;
+  req_sub.m_ObjectType = target_object_type;
+  req_sub.m_Key = target_key;
+  req_sub.m_SubscriptionId = subscription_id;
+
+  m_DataStore->AssignRequestedSubscription(req_sub);
+  m_CoordinatorState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key },
+    DDSCoordinatorProtocolMessageType::kCreateDataExistSubscription, StormReflEncodeJson(sub_data));
+
+  return subscription_id;
+}
+
+void DDSSharedObjectInterface::DestroySubscriptionInternal(int return_object_type, DDSKey return_key, DDSKey subscription_id)
 {
   DDSDestroySubscription sub_data;
   sub_data.m_Key = return_key;

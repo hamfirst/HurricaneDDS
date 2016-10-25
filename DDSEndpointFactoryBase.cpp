@@ -28,7 +28,7 @@ void DDSEndpointFactoryBase::ProcessEvents()
       HandleConnect(event.ConnectionId);
       break;
     case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
-      HandleHandshakeComplete(event.ConnectionId);
+      HandleHandshakeComplete(event.ConnectionId, event.RemoteIP, event.RemotePort);
       break;
     case StormSockets::StormSocketEventType::Disconnected:
       HandleDisconnect(event.ConnectionId);
@@ -43,15 +43,20 @@ void DDSEndpointFactoryBase::ProcessEvents()
 
 bool DDSEndpointFactoryBase::SendData(StormSockets::StormSocketConnectionId connection_id, const std::string & data)
 {
-  if (IsValidConnectionId(connection_id))
+  if (IsValidConnectionId(connection_id) == false)
   {
     return false;
   }
 
-  auto packet = m_Frontend->CreateOutgoingPacket(StormSockets::StormSocketWebsocketDataType::Binary, true);
+  auto packet = m_Frontend->CreateOutgoingPacket(StormSockets::StormSocketWebsocketDataType::Text, true);
   packet.WriteByteBlock(data.data(), 0, data.length());
   m_Frontend->FinalizeOutgoingPacket(packet);
   m_Frontend->SendPacketToConnectionBlocking(packet, connection_id);
   m_Frontend->FreeOutgoingPacket(packet);
   return true;
+}
+
+void DDSEndpointFactoryBase::ForceDisconnect(StormSockets::StormSocketConnectionId connection_id)
+{
+  m_Frontend->ForceDisconnect(connection_id);
 }

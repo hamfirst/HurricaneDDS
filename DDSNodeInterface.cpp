@@ -25,6 +25,11 @@ bool DDSNodeInterface::SendDataToLocalConnection(DDSConnectionId connection_id, 
   return m_NodeState.SendToLocalConnection(connection_id, data);
 }
 
+void DDSNodeInterface::DisconnectLocalConnection(DDSConnectionId connection_id)
+{
+  return m_NodeState.DisconnectLocalConnection(connection_id);
+}
+
 DDSKey DDSNodeInterface::GetLocalKey()
 {
   return m_Key;
@@ -89,7 +94,7 @@ void DDSNodeInterface::InsertIntoDatabaseWithResponderReturnArg(const char * col
   m_NodeState.InsertObjectData(data_object_type, data_key, collection, data.c_str(), std::move(call_data));
 }
 
-void DDSNodeInterface::QueryDatabase(const char * collection, std::string && query,
+void DDSNodeInterface::QueryDatabaseInternal(const char * collection, std::string && query,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
   DDSResponderCallData call_data;
@@ -101,7 +106,7 @@ void DDSNodeInterface::QueryDatabase(const char * collection, std::string && que
   m_NodeState.QueryObjectData(collection, query.c_str(), std::move(call_data));
 }
 
-void DDSNodeInterface::UpdateDatabase(const char * collection, int data_object_type, std::string && data, DDSKey data_key,
+void DDSNodeInterface::UpdateDatabaseInternal(const char * collection, int data_object_type, std::string && data, DDSKey data_key,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
   DDSResponderCallData call_data;
@@ -113,7 +118,7 @@ void DDSNodeInterface::UpdateDatabase(const char * collection, int data_object_t
   m_NodeState.UpdateObjectData(data_object_type, data_key, collection, data.c_str(), &call_data);
 }
 
-void DDSNodeInterface::CreateTimer(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
+void DDSNodeInterface::CreateTimerInternal(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
 {
   DDSResponderCallData call_data;
   call_data.m_Key = key;
@@ -124,7 +129,7 @@ void DDSNodeInterface::CreateTimer(std::chrono::system_clock::duration duration,
   m_NodeState.CreateTimer(duration, std::move(call_data));
 }
 
-void DDSNodeInterface::CreateHttpRequest(const char * url, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
+void DDSNodeInterface::CreateHttpRequestInternal(const DDSHttpRequest & request, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
 {
   DDSResponderCallData call_data;
   call_data.m_Key = key;
@@ -132,10 +137,10 @@ void DDSNodeInterface::CreateHttpRequest(const char * url, DDSKey key, int data_
   call_data.m_MethodId = target_method_id;
   call_data.m_ResponderArgs = return_arg;
 
-  m_NodeState.CreateHttpRequest(url, std::move(call_data));
+  m_NodeState.CreateHttpRequest(request, std::move(call_data));
 }
 
-DDSKey DDSNodeInterface::CreateSubscription(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
+DDSKey DDSNodeInterface::CreateSubscriptionInternal(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
   DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg)
 {
   DDSKey subscription_id = DDSGetRandomNumber64();
@@ -163,7 +168,7 @@ DDSKey DDSNodeInterface::CreateSubscription(int target_object_type, DDSKey targe
   return subscription_id;
 }
 
-DDSKey DDSNodeInterface::CreateDataSubscription(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
+DDSKey DDSNodeInterface::CreateDataSubscriptionInternal(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
   DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg)
 {
   DDSKey subscription_id = DDSGetRandomNumber64();
@@ -191,7 +196,60 @@ DDSKey DDSNodeInterface::CreateDataSubscription(int target_object_type, DDSKey t
   return subscription_id;
 }
 
-void DDSNodeInterface::DestroySubscription(int return_object_type, DDSKey return_key, DDSKey subscription_id)
+DDSKey DDSNodeInterface::CreateExistSubscriptionInternal(int target_object_type, DDSKey target_key, int return_object_type,
+  DDSKey return_key, int return_method_id, std::string && return_arg)
+{
+  DDSKey subscription_id = DDSGetRandomNumber64();
+
+  DDSCreateExistSubscription sub_data;
+  sub_data.m_Key = target_key;
+  sub_data.m_ObjectType = target_object_type;
+  sub_data.m_SubscriptionId = subscription_id;
+  sub_data.m_ResponderObjectType = return_object_type;
+  sub_data.m_ResponderKey = return_key;
+  sub_data.m_ResponderMethodId = return_method_id;
+  sub_data.m_ReturnArg = return_arg;
+
+  DDSExportedRequestedSubscription req_sub;
+  req_sub.m_ObjectType = target_object_type;
+  req_sub.m_Key = target_key;
+  req_sub.m_SubscriptionId = subscription_id;
+
+  m_DataStore->AssignRequestedSubscription(return_key, req_sub);
+  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key },
+    DDSServerToServerMessageType::kCreateExistSubscription, StormReflEncodeJson(sub_data));
+
+  return subscription_id;
+}
+
+DDSKey DDSNodeInterface::CreateDataExistSubscriptionInternal(int target_object_type, DDSKey target_key, int return_object_type,
+  DDSKey return_key, int return_method_id, std::string && return_arg)
+{
+  DDSKey subscription_id = DDSGetRandomNumber64();
+
+  DDSCreateDataExistSubscription sub_data;
+  sub_data.m_Key = target_key;
+  sub_data.m_ObjectType = target_object_type;
+  sub_data.m_SubscriptionId = subscription_id;
+  sub_data.m_ResponderObjectType = return_object_type;
+  sub_data.m_ResponderKey = return_key;
+  sub_data.m_ResponderMethodId = return_method_id;
+  sub_data.m_ReturnArg = return_arg;
+
+  DDSExportedRequestedSubscription req_sub;
+  req_sub.m_ObjectType = target_object_type;
+  req_sub.m_Key = target_key;
+  req_sub.m_SubscriptionId = subscription_id;
+
+  m_DataStore->AssignRequestedSubscription(return_key, req_sub);
+  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key },
+    DDSServerToServerMessageType::kCreateDataExistSubscription, StormReflEncodeJson(sub_data));
+
+  return subscription_id;
+}
+
+
+void DDSNodeInterface::DestroySubscriptionInternal(int return_object_type, DDSKey return_key, DDSKey subscription_id)
 {
   DDSDestroySubscription sub_data;
   sub_data.m_Key = return_key;

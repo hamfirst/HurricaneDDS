@@ -23,6 +23,8 @@ enum STORM_REFL_ENUM class DDSServerToServerMessageType
   kTargetedMessageResponder,
   kCreateSubscription,
   kCreateDataSubscription,
+  kCreateExistSubscription,
+  kCreateDataExistSubscription,
   kDestroySubscription,
   kSubscriptionDeleted,
 };
@@ -167,10 +169,20 @@ struct DDSDestroySubscription : public DDSDestroySubscriptionBase
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kDestroySubscription;
 };
+struct DDSCreateExistSubscription : public DDSCreateExistSubscriptionBase
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kCreateExistSubscription;
+};
+
+struct DDSCreateDataExistSubscription : public DDSCreateDataExistSubscriptionBase
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kCreateDataExistSubscription;
+};
 
 struct DDSSubscriptionDeleted : public DDSSubscriptionDeletedBase
 {
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kSubscriptionDeleted;
 };
-

@@ -87,3 +87,22 @@ struct DDSSubscriptionDeletedBase
 };
 
 
+struct DDSCreateExistSubscriptionBase
+{
+  STORM_REFL;
+
+  DDSKey m_Key;
+  int m_ObjectType;
+  DDSKey m_SubscriptionId;
+
+  int m_ResponderObjectType;
+  DDSKey m_ResponderKey;
+  int m_ResponderMethodId;
+  std::string m_ReturnArg;
+};
+
+struct DDSCreateDataExistSubscriptionBase : public DDSCreateExistSubscriptionBase
+{
+  STORM_REFL;
+};
+

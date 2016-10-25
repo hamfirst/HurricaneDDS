@@ -12,15 +12,18 @@
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
 
 #include <StormData\StormDataChangePacket.h>
+#include <StormData\StormDataParent.h>
 
 template <typename DataType>
 class DDSSharedObject : public DDSSharedObjectBase
 {
 public:
   DDSSharedObject(DDSCoordinatorState & coordinator_state, int shared_object_type) :
-    m_Coordinator(coordinator_state), m_DataObject(std::make_unique<DataType>(DDSSharedObjectInterface(coordinator_state, this))), m_SharedObjectType(shared_object_type)
+    m_Coordinator(coordinator_state), 
+    m_DataObject(std::make_unique<DataType>(DDSSharedObjectInterface(coordinator_state, this))), 
+    m_SharedObjectType(shared_object_type)
   {
-
+    InitializeParentInfo(*m_DataObject.get());
   }
 
   uint32_t GetObjectClassNameHash() override
@@ -198,7 +201,8 @@ class DDSSharedObjectCopy : public DDSSharedObjectCopyBase
 {
 public:
   DDSSharedObjectCopy(DDSNodeState & node_state, int shared_object_type_id) :
-    m_NodeState(node_state), m_SharedObjectType(shared_object_type_id)
+    m_NodeState(node_state), 
+    m_SharedObjectType(shared_object_type_id)
   {
 
   }

@@ -1,10 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
-#include <StormSockets\StormSocketServerTypes.h>
-#include <StormSockets\StormWebsocketMessageReader.h>
+#include "DDSConnectionFactoryBase.h"
 
 class DDSNodeState;
 
@@ -13,7 +11,7 @@ namespace StormSockets
   class StormSocketServerFrontendWebsocket;
 }
 
-class DDSEndpointFactoryBase
+class DDSEndpointFactoryBase : public DDSConnectionFactoryBase
 {
 public:
   DDSEndpointFactoryBase(DDSNodeState & node_state, const StormSockets::StormSocketServerFrontendWebsocketSettings & settings);
@@ -22,14 +20,13 @@ public:
   void ProcessEvents();
   bool SendData(StormSockets::StormSocketConnectionId connection_id, const std::string & data);
 
-  virtual bool IsValidConnectionId(StormSockets::StormSocketConnectionId connection_id) = 0;
+  void ForceDisconnect(StormSockets::StormSocketConnectionId connection_id) override;
 
 protected:
   virtual void HandleConnect(StormSockets::StormSocketConnectionId connection_id) = 0;
-  virtual void HandleHandshakeComplete(StormSockets::StormSocketConnectionId connection_id) = 0;
+  virtual void HandleHandshakeComplete(StormSockets::StormSocketConnectionId connection_id, uint32_t remote_ip, uint16_t remote_port) = 0;
   virtual void HandleData(StormSockets::StormSocketConnectionId connection_id, StormSockets::StormWebsocketMessageReader & reader) = 0;
   virtual void HandleDisconnect(StormSockets::StormSocketConnectionId connection_id) = 0;
-
 
 protected:
 

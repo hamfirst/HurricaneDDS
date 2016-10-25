@@ -38,13 +38,25 @@ DDSNodeState::DDSNodeState(
 
 void DDSNodeState::ProcessEvents()
 {
+  m_Database->TriggerCallbacks();
+
   m_CoordinatorConnection.ProcessEvents();
   m_NodeNetwork.ProcessEvents();
+
   m_OutgoingKeyspace.Update();
+
+  m_Resolver.Update();
+  m_HttpClient.Update();
+  m_TimerSystem.Update();
 
   for (auto & endpoint_factory : m_EndpointFactoryList)
   {
     endpoint_factory->ProcessEvents();
+  }
+
+  for (auto & website_factor : m_WebsiteFactoryList)
+  {
+    website_factor->ProcessEvents();
   }
 }
 
@@ -179,7 +191,10 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
 
     SendTargetedMessage(DDSDataObjectAddress{ responder_data.m_ObjectType, responder_data.m_Key }, type, std::string(data));
   }
-  else if (type == DDSServerToServerMessageType::kCreateDataSubscription)
+  else if (type == DDSServerToServerMessageType::kCreateSubscription ||
+           type == DDSServerToServerMessageType::kCreateDataSubscription ||
+           type == DDSServerToServerMessageType::kCreateExistSubscription ||
+           type == DDSServerToServerMessageType::kCreateDataExistSubscription)
   {
     DDSCreateDataSubscription sub_data;
     if (StormReflParseJson(sub_data, data) == false)
@@ -233,7 +248,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
     return;
   }
 
-  if (addr.m_ObjectType >= m_DataObjectList.size())
+  if (addr.m_ObjectType >= (int)m_DataObjectList.size())
   {
     m_CoordinatorConnection.SendMessageToCoordinator(DDSGetServerMessage(type, message.c_str()));
     return;
@@ -262,7 +277,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
 
 void DDSNodeState::SendSubscriptionCreate(DDSCreateDataSubscription && req)
 {
-  if (req.m_ObjectType >= m_DataObjectList.size())
+  if (req.m_ObjectType >= (int)m_DataObjectList.size())
   {
     DDSExportedSubscription sub_data;
     sub_data.m_DataPath = std::move(req.m_DataPath);
@@ -283,7 +298,7 @@ void DDSNodeState::SendSubscriptionCreate(DDSCreateDataSubscription && req)
 
 void DDSNodeState::SendSubscriptionDestroy(const DDSDestroySubscription & destroy)
 {
-  if (destroy.m_ObjectType >= m_DataObjectList.size())
+  if (destroy.m_ObjectType >= (int)m_DataObjectList.size())
   {
     m_SharedObjects[destroy.m_ObjectType - m_DataObjectList.size()]->DestroySubscription(DDSDataObjectAddress{ destroy.m_ObjectType, destroy.m_Key }, destroy.m_SubscriptionId);
     return;
@@ -438,21 +453,21 @@ void DDSNodeState::CreateTimer(std::chrono::system_clock::duration duration, DDS
   m_DeferredCallbackList.emplace(std::move(callback));
 }
 
-void DDSNodeState::CreateHttpRequest(const char * url, DDSDeferredCallback & callback, std::function<void(bool, const std::string &)> && function)
+void DDSNodeState::CreateHttpRequest(const DDSHttpRequest & request, DDSDeferredCallback & callback, std::function<void(bool, const std::string &, const std::string &)> && function)
 {
-  m_HttpClient.CreateCallback(url, callback, std::move(function));
+  m_HttpClient.CreateCallback(request, callback, std::move(function));
 }
 
-void DDSNodeState::CreateHttpRequest(const char * url, DDSResponderCallData && responder_data)
+void DDSNodeState::CreateHttpRequest(const DDSHttpRequest & request, DDSResponderCallData && responder_data)
 {
   std::unique_ptr<DDSDeferredCallback> callback = std::make_unique<DDSDeferredCallback>();
   DDSDeferredCallback * callback_ptr = callback.get();
 
   DDSDataObjectAddress address{ responder_data.m_ObjectType, responder_data.m_Key };
 
-  m_HttpClient.CreateCallback(url, *callback.get(), [=](bool success, const std::string & data) mutable {
+  m_HttpClient.CreateCallback(request, *callback.get(), [=](bool success, const std::string & data, const std::string & headers) mutable {
 
-    responder_data.m_MethodArgs = "[" + StormReflEncodeJson(success) + "," + StormReflEncodeJson(data) + "]";
+    responder_data.m_MethodArgs = "[" + StormReflEncodeJson(success) + "," + StormReflEncodeJson(data) + "," + StormReflEncodeJson(headers) + "]";
     std::string responder_str = StormReflEncodeJson(responder_data);
     SendTargetedMessage(address, DDSServerToServerMessageType::kResponderCall, std::move(responder_str));
     DestroyDeferredCallback(callback_ptr);
@@ -461,14 +476,14 @@ void DDSNodeState::CreateHttpRequest(const char * url, DDSResponderCallData && r
   m_DeferredCallbackList.emplace(std::move(callback));
 }
 
-void DDSNodeState::CreateResolverRequest(const char * hostname, DDSDeferredCallback & callback, std::function<void(const DDSResolverRequest &)> && function)
+void DDSNodeState::CreateResolverRequest(const char * hostname, bool reverse_lookup, DDSDeferredCallback & callback, std::function<void(const DDSResolverRequest &)> && function)
 {
-  m_Resolver.CreateCallback(hostname, callback, std::move(function));
+  m_Resolver.CreateCallback(std::make_pair(hostname, reverse_lookup), callback, std::move(function));
 }
 
 void DDSNodeState::QueryObjectData(int object_type_id, DDSKey key, const char * collection)
 {
-  m_Database->QueryDatabaseByKey(key, collection, [&](const char * data, int ec) { HandleQueryByKey(object_type_id, key, data, ec); });
+  m_Database->QueryDatabaseByKey(key, collection, [this, object_type_id, key](const char * data, int ec) { HandleQueryByKey(object_type_id, key, data, ec); });
 }
 
 void DDSNodeState::QueryObjectData(const char * collection, const char * query, DDSResponderCallData && responder_call)
@@ -552,6 +567,8 @@ void DDSNodeState::EndQueueingMessages()
     {
       auto message = m_QueuedTargetedMessages.back();
       SendTargetedMessage(std::get<0>(message), std::get<1>(message), std::move(std::get<2>(message)), true);
+
+      m_QueuedTargetedMessages.pop();
     }
 
     m_QueueMessageDepth--;
@@ -623,7 +640,15 @@ bool DDSNodeState::SendToLocalConnection(DDSConnectionId connection_id, const st
   StormSockets::StormSocketConnectionId id;
   id.m_Index.Raw = connection_id.m_ConnectionId;
 
-  return connection_id.m_EndpointFactory.SendData(id, data);
+  return connection_id.m_EndpointFactory->SendData(id, data);
+}
+
+void DDSNodeState::DisconnectLocalConnection(DDSConnectionId connection_id)
+{
+  StormSockets::StormSocketConnectionId id;
+  id.m_Index.Raw = connection_id.m_ConnectionId;
+
+  connection_id.m_EndpointFactory->ForceDisconnect(id);
 }
 
 void DDSNodeState::RecheckOutgoingTargetedMessages()

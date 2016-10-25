@@ -50,12 +50,10 @@
     <ClInclude Include="DDSDeferredCallback.h" />
     <ClInclude Include="DDSDeferredCallbackSystem.h" />
     <ClInclude Include="DDSHttpClient.h" />
-    <ClInclude Include="DDSHttpUtil.h" />
     <ClInclude Include="DDSResolverBackend.h" />
     <ClInclude Include="DDSResolver.h" />
     <ClInclude Include="DDSResolverRequest.h" />
     <ClInclude Include="DDSSharedObject.h" />
-    <ClInclude Include="DDSInterface.h" />
     <ClInclude Include="DDSSharedObjectBase.h" />
     <ClInclude Include="DDSSharedObjectInterface.h" />
     <ClInclude Include="DDSSharedObjectList.h" />
@@ -63,6 +61,20 @@
     <ClInclude Include="DDSSharedMessages.refl.h" />
     <ClInclude Include="DDSSharedMessages.refl.meta.h" />
     <ClInclude Include="DDSConnectionId.h" />
+    <ClInclude Include="DDSTokenBroker.h" />
+    <ClInclude Include="DDSObjectInterface.h" />
+    <ClInclude Include="DDSConnectionInterface.h" />
+    <ClInclude Include="DDSConnectionFactoryBase.h" />
+    <ClInclude Include="DDSWebsiteFactory.h" />
+    <ClInclude Include="DDSWebsiteFactoryBase.h" />
+    <ClInclude Include="DDSWebsiteInterface.h" />
+    <ClInclude Include="DDSWebsiteFactoryList.h" />
+    <ClInclude Include="DDSHttpRequest.h" />
+    <ClInclude Include="DDSWebsiteFilesystem.h" />
+    <ClInclude Include="DDSWebsiteFilesystemBuilder.h" />
+    <ClInclude Include="DDSWebsiteFactoryStaticContent.h" />
+    <ClInclude Include="DDSCall.h" />
+    <ClInclude Include="DDSDatabaseBootstrap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSNetworkBackend.cpp" />
@@ -92,9 +104,16 @@
     <ClCompile Include="DDSEndpointInterface.cpp" />
     <ClCompile Include="DDSDeferredCallback.cpp" />
     <ClCompile Include="DDSHttpClient.cpp" />
-    <ClCompile Include="DDSHttpUtil.cpp" />
     <ClCompile Include="DDSResolverBackend.cpp" />
     <ClCompile Include="DDSResolver.cpp" />
     <ClCompile Include="DDSSharedObjectInterface.cpp" />
+    <ClCompile Include="DDSConnectionInterface.cpp" />
+    <ClCompile Include="DDSWebsiteFactoryBase.cpp" />
+    <ClCompile Include="DDSWebsiteInterface.cpp" />
+    <ClCompile Include="DDSHttpRequest.cpp" />
+    <ClCompile Include="DDSWebsiteFilesystem.cpp" />
+    <ClCompile Include="DDSWebsiteFilesystemBuilder.cpp" />
+    <ClCompile Include="DDSWebsiteFactoryStaticContent.cpp" />
+    <ClCompile Include="DDSDatabaseBootstrap.cpp" />
   </ItemGroup>
 </Project>

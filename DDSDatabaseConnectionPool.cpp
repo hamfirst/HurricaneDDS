@@ -66,7 +66,7 @@ void DDSDatabaseConnectionPool::DatabaseThread(int thread_index)
 {
   auto & thread_data = m_Threads[thread_index];
 
-  auto client = mongoc_client_new("mongodb://localhost:27017"); 
+  auto client = mongoc_client_new("mongodb://localhost:27017");
   auto destroy_client = gsl::finally([&]() { mongoc_client_destroy(client); });
 
   auto database = mongoc_client_get_database(client, m_DatabaseName.data());

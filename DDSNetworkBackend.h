@@ -22,6 +22,8 @@ private:
   friend class DDSServerToServerSender;
   friend class DDSServerToServerReceiver;
   friend class DDSEndpointFactoryBase;
+  friend class DDSWebsiteFactoryBase;
+  friend class DDSWebsiteFilesystem;
   friend class DDSHttpClient;
 
   std::unique_ptr<StormSockets::StormSocketBackend> m_Backend;

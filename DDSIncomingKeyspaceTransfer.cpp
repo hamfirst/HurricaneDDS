@@ -29,7 +29,7 @@ bool DDSIncomingKeyspaceTransfer::IsComplete() const
 
 bool DDSIncomingKeyspaceTransfer::IsCompleteForKey(DDSDataObjectAddress addr) const
 {
-  for (auto key_range : m_UnsyncedKeys[addr.m_ObjectKey])
+  for (auto key_range : m_UnsyncedKeys[addr.m_ObjectType])
   {
     if (KeyInKeyRange(addr.m_ObjectKey, key_range))
     {

@@ -2,12 +2,12 @@
 
 #include "DDSResponder.refl.h"
 
-class DDSInterface;
+class DDSObjectInterface;
 struct DDSResponderCallBase;
 
 struct DDSResponder
 {
-  DDSInterface & m_Interface;
+  DDSObjectInterface & m_Interface;
   DDSResponderData m_Data;
 };
 

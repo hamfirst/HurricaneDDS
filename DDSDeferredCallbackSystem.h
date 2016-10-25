@@ -1,6 +1,6 @@
 #pragma once
 
-#include <set>
+#include <map>
 
 #include "DDSDeferredCallback.h"
 
@@ -19,25 +19,36 @@ public:
   {
     for (auto & callback : m_PendingCallbacks)
     {
-      auto & crappy_hack = const_cast<Callback &>(callback);
-      crappy_hack.m_Container->Unlink();
+      callback.second.m_Container->Unlink();
     }
   }
 
   virtual void Update()
   {
-    auto itr = m_PendingCallbacks.begin();
-    while(itr != m_PendingCallbacks.end())
+    m_Iterating = true;
+    for(auto & elem : m_PendingCallbacks)
     {
-      if (CompleteCallback(itr->m_CallbackData, itr->m_Callback))
+      if (elem.second.m_Destroyed == false && CompleteCallback(elem.second.m_CallbackData, elem.second.m_Callback))
+      {
+        elem.second.m_Destroyed = true;
+      }
+    }
+
+    m_Iterating = false;
+
+    auto itr = m_PendingCallbacks.begin();
+    while (itr != m_PendingCallbacks.end())
+    {
+      if (itr->second.m_Destroyed)
       {
         auto dead_itr = itr;
-        itr++;
+        ++itr;
+
         m_PendingCallbacks.erase(dead_itr);
       }
       else
       {
-        itr++;
+        ++itr;
       }
     }
   }
@@ -47,7 +58,8 @@ public:
     callback.m_Id = m_NextId;
     callback.m_System = this;
 
-    m_PendingCallbacks.emplace(Callback{ m_NextId, GetCallbackData(creation_data), &callback, std::move(function) });
+    m_PendingCallbacks.emplace(std::make_pair(m_NextId, Callback{ m_NextId, GetCallbackData(creation_data), &callback, std::move(function), false }));
+    m_NextId++;
   }
 
   bool AreAllCallbacksComplete()
@@ -59,26 +71,30 @@ protected:
 
   void MoveCallback(uint32_t id, DDSDeferredCallback * deferred)
   {
-    for (auto & callback : m_PendingCallbacks)
+    auto itr = m_PendingCallbacks.find(id);
+    if (itr == m_PendingCallbacks.end())
     {
-      if (callback.m_Id == id)
-      {
-        auto & crappy_hack = const_cast<Callback &>(callback);
-        crappy_hack.m_Container = deferred;
-        return;
-      }
+      return;
     }
+
+    itr->second.m_Container = deferred;
   }
 
   void DestroyCallback(uint32_t id)
   {
-    for (auto itr = m_PendingCallbacks.begin(); itr != m_PendingCallbacks.end(); ++itr)
+    if (m_Iterating)
     {
-      if (itr->m_Id == id)
+      auto itr = m_PendingCallbacks.find(id);
+      if (itr == m_PendingCallbacks.end())
       {
-        m_PendingCallbacks.erase(itr);
         return;
       }
+
+      itr->second.m_Destroyed = true;
+    }
+    else
+    {
+      m_PendingCallbacks.erase(id);
     }
   }
 
@@ -95,14 +111,11 @@ protected:
     CallbackData m_CallbackData;
     DDSDeferredCallback * m_Container;
     std::function<void(Args...)> m_Callback;
-
-    bool operator < (const Callback & rhs) const
-    {
-      return m_CallbackData < rhs.m_CallbackData;
-    }
+    bool m_Destroyed;
   };
 
-  std::set<Callback> m_PendingCallbacks;
+  std::map<uint32_t, Callback> m_PendingCallbacks;
   uint32_t m_NextId = 0;
+  bool m_Iterating = false;
 };
 

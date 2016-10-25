@@ -1,6 +1,6 @@
 
 #include "DDSResponder.h"
-#include "DDSInterface.h"
+#include "DDSObjectInterface.h"
 #include "DDSServerMessage.h"
 
 #include "DDSServerToServerMessages.refl.meta.h"

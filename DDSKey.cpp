@@ -1,9 +1,23 @@
 
 #include "DDSKey.h"
+#include "DDSRandom.h"
 
 DDSKey GetKeyRangeSize(DDSKeyRange range)
 {
   return (range.m_Max >= range.m_Min ? (range.m_Max - range.m_Min) : (kMaxKey - range.m_Max + range.m_Min)) + 1;
+}
+
+DDSKey GetRandomKeyInRange(DDSKeyRange range)
+{
+  if (range.m_Max + 1 == range.m_Min)
+  {
+    return DDSGetRandomNumber64();
+  }
+
+  DDSKey size = GetKeyRangeSize(range);
+  DDSKey val = DDSGetRandomNumberRange64(0, size);
+
+  return range.m_Min + val;
 }
 
 bool InvertKeyRange(DDSKeyRange range, DDSKeyRange & out)
