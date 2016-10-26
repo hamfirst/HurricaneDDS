@@ -12,11 +12,8 @@
 #include <StormSockets/StormMessageQueue.h>
 #include <StormSockets/StormSemaphore.h>
 
-extern "C"
-{
 #include <mongoc/mongoc.h>
 #include <libbson/bson.h>
-}
 
 #include "DDSDatabaseConnectionPool.h"
 

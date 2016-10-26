@@ -5,11 +5,9 @@
 
 #include "DDSDatabaseSetup.h"
 
-extern "C"
-{
 #include <mongoc/mongoc.h>
 #include <libbson/bson.h>
-}
+
 
 void DDSDatabaseInit()
 {
