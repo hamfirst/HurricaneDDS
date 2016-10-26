@@ -20,5 +20,4 @@ template <> struct DDSCallFunc##FuncName<false> \
   DDS_DECLARE_HAS_FUNC(FuncName) \
   DDS_DECLARE_CALL_FUNC(FuncName) \
 
-#define DDS_CALL_FUNC(FuncName, Inst, ...) \
-DDSCallFunc##FuncName<DDSHasFunc##FuncName<std::decay_t<decltype(Inst)>>::value>::Call(Inst, __VA_ARGS__)
+#define DDS_CALL_FUNC(FuncName, Inst, ...) DDSCallFunc ## FuncName<DDSHasFunc ## FuncName<std::decay_t<decltype(Inst)>>::value>::Call(Inst, ##__VA_ARGS__)

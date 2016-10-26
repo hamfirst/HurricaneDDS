@@ -20,7 +20,7 @@ public:
 
   }
 
-  bool IsValidConnectionId(StormSockets::StormSocketConnectionId connection_id)
+  bool IsValidConnectionId(StormSockets::StormSocketConnectionId connection_id) override
   {
     return m_Connections.find(connection_id) != m_Connections.end();
   }

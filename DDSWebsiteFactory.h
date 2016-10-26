@@ -19,7 +19,7 @@ public:
 
   }
 
-  bool IsValidConnectionId(StormSockets::StormSocketConnectionId connection_id)
+  bool IsValidConnectionId(StormSockets::StormSocketConnectionId connection_id) override
   {
     return m_Connections.find(connection_id) != m_Connections.end();
   }
@@ -39,7 +39,9 @@ private:
     std::string method = StormSockets::ReadMessageAsString(reader.GetMethod());
     std::string uri = StormSockets::ReadMessageAsString(reader.GetURI());
     std::string headers = StormSockets::ReadMessageAsString(reader.GetHeaderReader());
-    std::string body = StormSockets::ReadMessageAsString(reader.GetBodyReader());
+
+    auto body_reader = reader.GetBodyReader();
+    std::string body = StormSockets::ReadMessageAsString(body_reader);
 
     connection_data->HandleRequest(method, uri, headers, body);
   }
