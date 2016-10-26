@@ -20,7 +20,7 @@ struct StormReflTypeInfo<DDSNodeElement>
 template <>
 struct StormReflTypeInfo<DDSNodeElement>::field_data_static<0>
 {
-  using member_type = unsigned int;
+  using member_type = DDSNodeId; // unsigned int
   static constexpr auto GetName() { return "m_Id"; }
   static constexpr auto GetType() { return "unsigned int"; }
   static constexpr unsigned GetFieldNameHash() { return 0x86501E36; }
@@ -34,15 +34,15 @@ struct StormReflTypeInfo<DDSNodeElement>::field_data<0, Self> : public StormRefl
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned int> & Get() { return self.m_Id; }
-  std::add_const_t<std::remove_reference_t<unsigned int>> & Get() const { return self.m_Id; }
+  match_const_t<Self, DDSNodeId> & Get() { return self.m_Id; }
+  std::add_const_t<std::remove_reference_t<DDSNodeId>> & Get() const { return self.m_Id; }
   void SetDefault() { self.m_Id = StormReflTypeInfo<DDSNodeElement>::GetDefault().m_Id; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSNodeElement>::field_data_static<1>
 {
-  using member_type = unsigned int;
+  using member_type = DDSNodeAddr; // unsigned int
   static constexpr auto GetName() { return "m_Addr"; }
   static constexpr auto GetType() { return "unsigned int"; }
   static constexpr unsigned GetFieldNameHash() { return 0x92398073; }
@@ -56,15 +56,15 @@ struct StormReflTypeInfo<DDSNodeElement>::field_data<1, Self> : public StormRefl
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned int> & Get() { return self.m_Addr; }
-  std::add_const_t<std::remove_reference_t<unsigned int>> & Get() const { return self.m_Addr; }
+  match_const_t<Self, DDSNodeAddr> & Get() { return self.m_Addr; }
+  std::add_const_t<std::remove_reference_t<DDSNodeAddr>> & Get() const { return self.m_Addr; }
   void SetDefault() { self.m_Addr = StormReflTypeInfo<DDSNodeElement>::GetDefault().m_Addr; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSNodeElement>::field_data_static<2>
 {
-  using member_type = unsigned short;
+  using member_type = DDSNodePort; // unsigned short
   static constexpr auto GetName() { return "m_Port"; }
   static constexpr auto GetType() { return "unsigned short"; }
   static constexpr unsigned GetFieldNameHash() { return 0x6B7B2786; }
@@ -78,15 +78,15 @@ struct StormReflTypeInfo<DDSNodeElement>::field_data<2, Self> : public StormRefl
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned short> & Get() { return self.m_Port; }
-  std::add_const_t<std::remove_reference_t<unsigned short>> & Get() const { return self.m_Port; }
+  match_const_t<Self, DDSNodePort> & Get() { return self.m_Port; }
+  std::add_const_t<std::remove_reference_t<DDSNodePort>> & Get() const { return self.m_Port; }
   void SetDefault() { self.m_Port = StormReflTypeInfo<DDSNodeElement>::GetDefault().m_Port; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSNodeElement>::field_data_static<3>
 {
-  using member_type = unsigned long long;
+  using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_CentralKey"; }
   static constexpr auto GetType() { return "unsigned long long"; }
   static constexpr unsigned GetFieldNameHash() { return 0x75B64F71; }
@@ -100,8 +100,8 @@ struct StormReflTypeInfo<DDSNodeElement>::field_data<3, Self> : public StormRefl
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_CentralKey; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_CentralKey; }
+  match_const_t<Self, DDSKey> & Get() { return self.m_CentralKey; }
+  std::add_const_t<std::remove_reference_t<DDSKey>> & Get() const { return self.m_CentralKey; }
   void SetDefault() { self.m_CentralKey = StormReflTypeInfo<DDSNodeElement>::GetDefault().m_CentralKey; }
 };
 
@@ -120,7 +120,7 @@ struct StormReflTypeInfo<DDSRoutingTable>
 template <>
 struct StormReflTypeInfo<DDSRoutingTable>::field_data_static<0>
 {
-  using member_type = std::vector<DDSNodeElement, std::allocator<DDSNodeElement> >;
+  using member_type = std::vector<DDSNodeElement>; // std::vector<DDSNodeElement, std::allocator<DDSNodeElement> >
   static constexpr auto GetName() { return "m_Table"; }
   static constexpr auto GetType() { return "std::vector<DDSNodeElement, std::allocator<DDSNodeElement> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0x468693E5; }
@@ -134,15 +134,15 @@ struct StormReflTypeInfo<DDSRoutingTable>::field_data<0, Self> : public StormRef
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, std::vector<DDSNodeElement, std::allocator<DDSNodeElement> >> & Get() { return self.m_Table; }
-  std::add_const_t<std::remove_reference_t<std::vector<DDSNodeElement, std::allocator<DDSNodeElement> >>> & Get() const { return self.m_Table; }
+  match_const_t<Self, std::vector<DDSNodeElement>> & Get() { return self.m_Table; }
+  std::add_const_t<std::remove_reference_t<std::vector<DDSNodeElement>>> & Get() const { return self.m_Table; }
   void SetDefault() { self.m_Table = StormReflTypeInfo<DDSRoutingTable>::GetDefault().m_Table; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSRoutingTable>::field_data_static<1>
 {
-  using member_type = int;
+  using member_type = int; // int
   static constexpr auto GetName() { return "m_TableGeneration"; }
   static constexpr auto GetType() { return "int"; }
   static constexpr unsigned GetFieldNameHash() { return 0x0B85D3D6; }

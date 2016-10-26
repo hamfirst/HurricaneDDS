@@ -20,7 +20,7 @@ struct StormReflTypeInfo<DDSResponderData>
 template <>
 struct StormReflTypeInfo<DDSResponderData>::field_data_static<0>
 {
-  using member_type = unsigned long long;
+  using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_Key"; }
   static constexpr auto GetType() { return "unsigned long long"; }
   static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
@@ -34,15 +34,15 @@ struct StormReflTypeInfo<DDSResponderData>::field_data<0, Self> : public StormRe
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_Key; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_Key; }
+  match_const_t<Self, DDSKey> & Get() { return self.m_Key; }
+  std::add_const_t<std::remove_reference_t<DDSKey>> & Get() const { return self.m_Key; }
   void SetDefault() { self.m_Key = StormReflTypeInfo<DDSResponderData>::GetDefault().m_Key; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSResponderData>::field_data_static<1>
 {
-  using member_type = int;
+  using member_type = int; // int
   static constexpr auto GetName() { return "m_ObjectType"; }
   static constexpr auto GetType() { return "int"; }
   static constexpr unsigned GetFieldNameHash() { return 0xD2FBD4E8; }
@@ -64,7 +64,7 @@ struct StormReflTypeInfo<DDSResponderData>::field_data<1, Self> : public StormRe
 template <>
 struct StormReflTypeInfo<DDSResponderData>::field_data_static<2>
 {
-  using member_type = int;
+  using member_type = int; // int
   static constexpr auto GetName() { return "m_ReturnMethodId"; }
   static constexpr auto GetType() { return "int"; }
   static constexpr unsigned GetFieldNameHash() { return 0x51B94839; }
