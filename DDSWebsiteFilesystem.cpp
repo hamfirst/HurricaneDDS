@@ -24,11 +24,24 @@ DDSWebsiteFilesystem::DDSWebsiteFilesystem(DDSNetworkBackend & backend, const DD
   if (index_itr != m_Responses.end())
   {
     m_Responses.emplace(std::make_pair(crc32("/"), index_itr->second));
+
+    m_Backend.m_Backend->ReferenceOutgoingHttpResponse(index_itr->second);
   }
 
-  m_ErrorResponse.WriteBody(error_msg, strlen(error_msg));
-  m_ErrorResponse.WriteHeader("Connection: Closed");
-  m_ErrorResponse.FinalizeHeaders();
+  auto not_found_itr = m_Responses.find(crc32("/404.html"));
+  if (not_found_itr != m_Responses.end())
+  {
+    m_Backend.m_Backend->FreeOutgoingHttpResponse(m_ErrorResponse);
+    m_ErrorResponse = not_found_itr->second;
+
+    m_Backend.m_Backend->ReferenceOutgoingHttpResponse(m_ErrorResponse);
+  }
+  else
+  {
+    m_ErrorResponse.WriteBody(error_msg, strlen(error_msg));
+    m_ErrorResponse.WriteHeader("Connection: Closed");
+    m_ErrorResponse.FinalizeHeaders();
+  }
 }
 
 
