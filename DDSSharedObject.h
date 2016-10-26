@@ -11,8 +11,8 @@
 #include "DDSServerToServerMessages.refl.meta.h"
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
 
-#include <StormData\StormDataChangePacket.h>
-#include <StormData\StormDataParent.h>
+#include <StormData/StormDataChangePacket.h>
+#include <StormData/StormDataParent.h>
 
 template <typename DataType>
 class DDSSharedObject : public DDSSharedObjectBase

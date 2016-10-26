@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <StormRefl\StormReflMetaFuncs.h>
+#include <StormRefl/StormReflMetaFuncs.h>
 
 #include "DDSDatabaseTypes.h"
 

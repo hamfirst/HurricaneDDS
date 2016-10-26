@@ -3,7 +3,7 @@
 #include "DDSCoordinatorNetworkService.h"
 #include "DDSCoordinatorServerProtocol.h"
 
-#include <StormSockets\StormSocketServerFrontendWebsocket.h>
+#include <StormSockets/StormSocketServerFrontendWebsocket.h>
 
 DDSCoordinatorNetworkService::DDSCoordinatorNetworkService(
   DDSNetworkBackend & backend,

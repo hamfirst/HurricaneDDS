@@ -10,10 +10,10 @@
 #include "DDSNetworkBackend.h"
 #include "DDSServerToServerMessages.refl.meta.h"
 
-#include <StormSockets\StormSocketBackend.h>
-#include <StormSockets\StormSocketClientFrontendWebsocket.h>
+#include <StormSockets/StormSocketBackend.h>
+#include <StormSockets/StormSocketClientFrontendWebsocket.h>
 
-#include <StormRefl\StormReflJson.h>
+#include <StormRefl/StormReflJson.h>
 
 DDSServerToServerReceiver::DDSServerToServerReceiver(DDSNodeState & node_state,
                                                      StormSockets::StormSocketConnectionId connection_id) :

@@ -11,9 +11,9 @@
 #include "DDSResolverRequest.h"
 #include "DDSHttpRequest.h"
 
-#include <StormRefl\StormReflJsonStd.h>
-#include <StormRefl\StormReflMetaCallJson.h>
-#include <StormSockets\StormSocketConnectionId.h>
+#include <StormRefl/StormReflJsonStd.h>
+#include <StormRefl/StormReflMetaCallJson.h>
+#include <StormSockets/StormSocketConnectionId.h>
 
 class DDSNodeState;
 

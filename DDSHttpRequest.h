@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <StormSockets\StormUrlUtil.h>
+#include <StormSockets/StormUrlUtil.h>
 
 class DDSHttpRequest
 {

@@ -9,11 +9,11 @@
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
 #include "DDSRoutingTable.refl.meta.h"
 
-#include <hash\Hash.h>
-#include <StormRefl\StormReflJson.h>
-#include <StormRefl\StormReflMetaEnum.h>
+#include <hash/Hash.h>
+#include <StormRefl/StormReflJson.h>
+#include <StormRefl/StormReflMetaEnum.h>
 
-#include <StormSockets\StormSocketClientFrontendWebsocket.h>
+#include <StormSockets/StormSocketClientFrontendWebsocket.h>
 
 template <class T>
 void DDSCoordinatorClientProtocol::SendMessageToServer(const T & t)

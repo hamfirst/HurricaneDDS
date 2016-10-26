@@ -9,10 +9,10 @@
 #include "DDSServerToServerMessages.refl.meta.h"
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
 
-#include <StormRefl\StormReflJsonStd.h>
+#include <StormRefl/StormReflJsonStd.h>
 
-#include <StormSockets\StormSocketClientFrontendWebsocket.h>
-#include <StormSockets\StormSocketServerFrontendWebsocket.h>
+#include <StormSockets/StormSocketClientFrontendWebsocket.h>
+#include <StormSockets/StormSocketServerFrontendWebsocket.h>
 
 DDSNodeState::DDSNodeState(
   int num_data_object_types,

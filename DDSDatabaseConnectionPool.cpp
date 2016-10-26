@@ -5,17 +5,17 @@
 #include <vector>
 #include <queue>
 
-#include <optional\optional.hpp>
-#include <gsl\gsl_util.h>
+#include <optional/optional.hpp>
+#include <gsl/gsl_util.h>
 
-#include <hash\Hash.h>
-#include <StormSockets\StormMessageQueue.h>
-#include <StormSockets\StormSemaphore.h>
+#include <hash/Hash.h>
+#include <StormSockets/StormMessageQueue.h>
+#include <StormSockets/StormSemaphore.h>
 
 extern "C"
 {
-#include <mongoc\mongoc.h>
-#include <libbson\bson.h>
+#include <mongoc/mongoc.h>
+#include <libbson/bson.h>
 }
 
 #include "DDSDatabaseConnectionPool.h"

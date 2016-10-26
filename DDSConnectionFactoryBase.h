@@ -1,7 +1,7 @@
 #pragma once
 
-#include <StormSockets\StormSocketConnectionId.h>
-#include <StormSockets\StormSocketServerTypes.h>
+#include <StormSockets/StormSocketConnectionId.h>
+#include <StormSockets/StormSocketServerTypes.h>
 
 class DDSConnectionFactoryBase
 {

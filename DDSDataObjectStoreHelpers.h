@@ -4,11 +4,11 @@
 
 #include "DDSServerToServerMessages.refl.meta.h"
 
-#include <StormRefl\StormReflJsonStd.h>
-#include <StormRefl\StormReflMetaCallJson.h>
-#include <StormData\StormDataPath.h>
-#include <StormData\StormDataChangePacket.h>
-#include <StormData\StormDataChangeNotifier.h>
+#include <StormRefl/StormReflJsonStd.h>
+#include <StormRefl/StormReflMetaCallJson.h>
+#include <StormData/StormDataPath.h>
+#include <StormData/StormDataChangePacket.h>
+#include <StormData/StormDataChangeNotifier.h>
 
 
 

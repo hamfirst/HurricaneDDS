@@ -5,7 +5,7 @@
 
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
 
-#include <StormRefl\StormReflJsonStd.h>
+#include <StormRefl/StormReflJsonStd.h>
 
 DDSSharedObjectInterface::DDSSharedObjectInterface(DDSCoordinatorState & coordinator_state, DDSSharedObjectBase * data_store) :
   m_CoordinatorState(coordinator_state), m_DataStore(data_store)

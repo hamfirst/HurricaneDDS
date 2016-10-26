@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <hash\Hash64.h>
+#include <hash/Hash64.h>
 
 inline uint64_t DDSCalculateChallengeResponse(uint64_t challenge)
 {

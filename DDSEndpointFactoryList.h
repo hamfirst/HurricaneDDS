@@ -4,7 +4,7 @@
 
 #include "DDSEndpointFactory.h"
 
-#include <StormSockets\StormSocketServerTypes.h>
+#include <StormSockets/StormSocketServerTypes.h>
 
 class DDSWebsiteFactoryBase;
 

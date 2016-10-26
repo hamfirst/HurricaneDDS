@@ -1,14 +1,14 @@
 
-#include <gsl\gsl_util.h>
+#include <gsl/gsl_util.h>
 
 extern "C"
 {
-#include <mongoc\mongoc.h>
-#include <libbson\bson.h>
+#include <mongoc/mongoc.h>
+#include <libbson/bson.h>
 }
 
-#include <StormRefl\StormReflJsonStd.h>
-#include <StormData\StormDataJsonUtil.h>
+#include <StormRefl/StormReflJsonStd.h>
+#include <StormData/StormDataJsonUtil.h>
 
 #include "DDSDatabaseBootstrap.h"
 #include "DDSDatabaseTypes.h"

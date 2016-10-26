@@ -8,8 +8,8 @@
 #include <cstdint>
 #include <chrono>
 
-#include <StormRefl\StormReflJsonStd.h>
-#include <StormRefl\StormReflMetaCallJson.h>
+#include <StormRefl/StormReflJsonStd.h>
+#include <StormRefl/StormReflMetaCallJson.h>
 
 struct DDSResponderCallBase;
 

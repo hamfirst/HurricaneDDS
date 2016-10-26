@@ -1,6 +1,6 @@
 #pragma once
 
-#include <StormSockets\StormSocketServerTypes.h>
+#include <StormSockets/StormSocketServerTypes.h>
 
 #include <memory>
 

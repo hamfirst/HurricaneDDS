@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include <StormRefl\StormReflMetaInfoBase.h>
+#include <StormRefl/StormReflMetaInfoBase.h>
 
 template <class T>
 uint32_t DDSDataObjectGetNameHash()

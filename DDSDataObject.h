@@ -1,13 +1,13 @@
 #pragma once
 
-#include <StormRefl\StormRefl.h>
-#include <StormData\StormDataNumber.h>
-#include <StormData\StormDataEnum.h>
-#include <StormData\StormDataString.h>
-#include <StormData\StormDataList.h>
-#include <StormData\StormDataMap.h>
-#include <StormData\StormDataJson.h>
-#include <StormData\StormData.h>
+#include <StormRefl/StormRefl.h>
+#include <StormData/StormDataNumber.h>
+#include <StormData/StormDataEnum.h>
+#include <StormData/StormDataString.h>
+#include <StormData/StormDataList.h>
+#include <StormData/StormDataMap.h>
+#include <StormData/StormDataJson.h>
+#include <StormData/StormData.h>
 
 #include "DDSKey.h"
 #include "DDSNodeInterface.h"

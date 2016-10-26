@@ -3,8 +3,8 @@
 #include "DDSNodeNetworkService.h"
 #include "DDSNodeState.h"
 
-#include <StormSockets\StormSocketClientFrontendWebsocket.h>
-#include <StormSockets\StormSocketServerFrontendWebsocket.h>
+#include <StormSockets/StormSocketClientFrontendWebsocket.h>
+#include <StormSockets/StormSocketServerFrontendWebsocket.h>
 
 
 DDSNodeNetworkService::DDSNodeNetworkService(DDSNodeState & node_state,

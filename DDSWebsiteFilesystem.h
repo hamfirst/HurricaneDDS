@@ -1,9 +1,9 @@
 #pragma once
 
 #include <unordered_map>
-#include <hash\Hash.h>
+#include <hash/Hash.h>
 
-#include <StormSockets\StormHttpResponseWriter.h>
+#include <StormSockets/StormHttpResponseWriter.h>
 
 #include "HurricaneDDS\DDSWebsiteInterface.h"
 

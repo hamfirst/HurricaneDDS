@@ -3,7 +3,7 @@
 #include "DDSNodeState.h"
 #include "DDSLog.h"
 
-#include <StormSockets\StormSocketClientFrontendHttp.h>
+#include <StormSockets/StormSocketClientFrontendHttp.h>
 
 DDSHttpClient::DDSHttpClient(const StormSockets::StormSocketClientFrontendHttpSettings & settings, DDSNetworkBackend & backend) :
   m_HttpClient(std::make_unique<StormSockets::StormSocketClientFrontendHttp>(settings, backend.m_Backend.get()))

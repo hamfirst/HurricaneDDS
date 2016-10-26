@@ -5,10 +5,10 @@
 #include "DDSNodeId.h"
 #include "DDSSharedMessages.refl.h"
 
-#include <StormRefl\StormRefl.h>
-#include <StormRefl\StormReflJsonStd.h>
+#include <StormRefl/StormRefl.h>
+#include <StormRefl/StormReflJsonStd.h>
 
-#include <StormData\StormDataChangeType.refl.h>
+#include <StormData/StormDataChangeType.refl.h>
 
 enum STORM_REFL_ENUM class DDSCoordinatorProtocolMessageType
 {

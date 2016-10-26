@@ -19,12 +19,12 @@
 #include "DDSServerMessage.h"
 #include "DDSDataObjectStoreHelpers.h"
 
-#include <StormRefl\StormReflJsonStd.h>
-#include <StormRefl\StormReflMetaCallJson.h>
-#include <StormData\StormDataChangeNotifier.h>
-#include <StormData\StormDataPath.h>
-#include <StormData\StormDataJsonUtil.h>
-#include <StormData\StormDataParent.h>
+#include <StormRefl/StormReflJsonStd.h>
+#include <StormRefl/StormReflMetaCallJson.h>
+#include <StormData/StormDataChangeNotifier.h>
+#include <StormData/StormDataPath.h>
+#include <StormData/StormDataJsonUtil.h>
+#include <StormData/StormDataParent.h>
 
 DDS_DECLARE_CALL(BeginLoad);
 DDS_DECLARE_CALL(PreMoveObject);
