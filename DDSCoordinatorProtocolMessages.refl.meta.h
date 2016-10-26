@@ -1,6 +1,6 @@
 #pragma once
 
-#include <StormRefl\StormReflMetaInfoBase.h>
+#include <StormRefl/StormReflMetaInfoBase.h>
 
 #include "DDSCoordinatorProtocolMessages.refl.h"
 #include "DDSSharedMessages.refl.meta.h"
