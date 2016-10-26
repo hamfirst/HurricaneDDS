@@ -29,14 +29,16 @@ void DDSCoordinatorNetworkService::ProcessEvents()
     switch (event.Type)
     {
     case StormSockets::StormSocketEventType::ClientConnected:
-      DDSLog::LogVerbose("Got client connect from %d", event.ConnectionId);
+      DDSLog::LogVerbose("Got client connect from %d", event.ConnectionId.GetIndex());
       HandleConnect(event.ConnectionId, event.RemoteIP, event.RemotePort);
+      break;
+    case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
       break;
     case StormSockets::StormSocketEventType::Data:
       HandleData(event.ConnectionId, event.GetWebsocketReader());
       break;
     case StormSockets::StormSocketEventType::Disconnected:
-      DDSLog::LogVerbose("Got client disconnect from %d", event.ConnectionId);
+      DDSLog::LogVerbose("Got client disconnect from %d", event.ConnectionId.GetIndex());
       m_ServerFrontend->FinalizeConnection(event.ConnectionId);
       break;
     }
@@ -62,7 +64,7 @@ void DDSCoordinatorNetworkService::SendMessageToAllConnectedClients(const char *
   {
     if (itr.second->IsConnected())
     {
-      DDSLog::LogVerbose("Sending message to client %d", itr.first);
+      DDSLog::LogVerbose("Sending message to client %d", itr.first.GetIndex());
       m_Backend.m_Backend->SendPacketToConnectionBlocking(packet, itr.first);
     }
   }

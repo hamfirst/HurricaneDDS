@@ -80,7 +80,7 @@ void DDSSharedObjectInterface::InsertIntoDatabaseWithResponderReturnArg(const ch
 void DDSSharedObjectInterface::QueryDatabaseInternal(const char * collection, std::string && query,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
-  DDSResponderCallData call_data;
+  DDSCoordinatorResponderCallData call_data;
   call_data.m_Key = responder_key;
   call_data.m_ObjectType = responder_object_type;
   call_data.m_MethodId = responder_method_id;
@@ -116,7 +116,7 @@ DDSKey DDSSharedObjectInterface::CreateSubscriptionInternal(int target_object_ty
 {
   DDSKey subscription_id = DDSGetRandomNumber64();
 
-  DDSCreateSubscription sub_data;
+  DDSCoordinatorCreateSubscription sub_data;
   sub_data.m_DataPath = path;
   sub_data.m_Key = target_key;
   sub_data.m_ObjectType = target_object_type;
@@ -144,7 +144,7 @@ DDSKey DDSSharedObjectInterface::CreateDataSubscriptionInternal(int target_objec
 {
   DDSKey subscription_id = DDSGetRandomNumber64();
 
-  DDSCreateDataSubscription sub_data;
+  DDSCoordinatorCreateSubscription sub_data;
   sub_data.m_DataPath = path;
   sub_data.m_Key = target_key;
   sub_data.m_ObjectType = target_object_type;
@@ -172,7 +172,7 @@ DDSKey DDSSharedObjectInterface::CreateExistSubscriptionInternal(int target_obje
 {
   DDSKey subscription_id = DDSGetRandomNumber64();
 
-  DDSCreateExistSubscription sub_data;
+  DDSCoordinatorCreateExistSubscription sub_data;
   sub_data.m_Key = target_key;
   sub_data.m_ObjectType = target_object_type;
   sub_data.m_SubscriptionId = subscription_id;
@@ -198,7 +198,7 @@ DDSKey DDSSharedObjectInterface::CreateDataExistSubscriptionInternal(int target_
 {
   DDSKey subscription_id = DDSGetRandomNumber64();
 
-  DDSCreateDataExistSubscription sub_data;
+  DDSCoordinatorCreateExistSubscription sub_data;
   sub_data.m_Key = target_key;
   sub_data.m_ObjectType = target_object_type;
   sub_data.m_SubscriptionId = subscription_id;
@@ -221,7 +221,7 @@ DDSKey DDSSharedObjectInterface::CreateDataExistSubscriptionInternal(int target_
 
 void DDSSharedObjectInterface::DestroySubscriptionInternal(int return_object_type, DDSKey return_key, DDSKey subscription_id)
 {
-  DDSDestroySubscription sub_data;
+  DDSCoordinatorDestroySubscription sub_data;
   sub_data.m_Key = return_key;
   sub_data.m_ObjectType = return_object_type;
   sub_data.m_SubscriptionId = subscription_id;

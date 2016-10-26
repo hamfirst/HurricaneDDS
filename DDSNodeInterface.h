@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DDSLog.h"
 #include "DDSObjectInterface.h"
 #include "DDSConnectionId.h"
 
@@ -24,7 +25,7 @@ public:
   template <typename DatabaseType, typename ReturnObject>
   void UpdateDatabase(const DatabaseType & data, void (ReturnObject::*return_func)(bool), ReturnObject * p_this)
   {
-    if (GetObjectTypeId() != GetDataObjectType(StormReflTypeInfo<TargetDataObject>::GetNameHash()))
+    if (GetObjectTypeId() != GetDataObjectType(StormReflTypeInfo<DatabaseType>::GetNameHash()))
     {
       DDSLog::LogError("Attemping to modify database from an external object");
       (p_this->*return_func)(false);
@@ -38,7 +39,7 @@ public:
   template <typename DatabaseType, typename ReturnObject, typename ReturnArg>
   void UpdateDatabase(const DatabaseType & data, void (ReturnObject::*return_func)(ReturnArg, bool), ReturnObject * p_this, ReturnArg && return_arg)
   {
-    if (GetObjectTypeId() != GetDataObjectType(StormReflTypeInfo<TargetDataObject>::GetNameHash()))
+    if (GetObjectTypeId() != GetDataObjectType(StormReflTypeInfo<DatabaseType>::GetNameHash()))
     {
       DDSLog::LogError("Attemping to modify database from an external object");
       (p_this->*return_func)(return_arg, false);

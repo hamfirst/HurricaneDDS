@@ -211,7 +211,7 @@ void DDSDatabaseConnectionPool::DatabaseThread(int thread_index)
           BSON_APPEND_OID(bson, "_id", &oid);
 
           bson_error_t delete_error;
-          if (mongoc_collection_delete(collection, MONGOC_DELETE_NONE, bson, nullptr, &delete_error) == false)
+          if (mongoc_collection_remove(collection, MONGOC_REMOVE_SINGLE_REMOVE, bson, nullptr, &delete_error) == false)
           {
             DatabaseQueryResult result = { query.m_Callback, delete_error.code };
             QueueResult(thread_index, result);

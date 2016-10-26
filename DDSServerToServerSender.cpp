@@ -76,6 +76,8 @@ bool DDSServerToServerSender::HandleIncomingMessage(StormSockets::StormWebsocket
 
   switch (m_State)
   {
+  case kConnecting:
+  break;
   case kHandshake:
   {
     DDSServerToServerHandshakeResponse response;

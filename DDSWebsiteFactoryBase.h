@@ -18,7 +18,7 @@ public:
 
   void ProcessEvents();
 
-  bool SendResponse(StormSockets::StormSocketConnectionId connection_id, int response_code, char * response_phrase, 
+  bool SendResponse(StormSockets::StormSocketConnectionId connection_id, int response_code, const char * response_phrase, 
     const void * header_data, int header_length, const void * body_data, unsigned int body_length);
 
   bool SendResponse(StormSockets::StormSocketConnectionId connection_id, StormSockets::StormHttpResponseWriter & writer);

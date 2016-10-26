@@ -162,6 +162,8 @@ void DDSNodeNetworkService::ProcessEvents()
         m_Receievers.emplace(std::make_pair(event.ConnectionId, DDSServerToServerReceiver(m_NodeState, event.ConnectionId)));
       }
       break;
+      case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
+      break;
       case StormSockets::StormSocketEventType::Data:
       {
         auto & receiver = m_Receievers.at(event.ConnectionId);

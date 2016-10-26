@@ -72,7 +72,7 @@ bool DDSCoordinatorServerProtocol::HandleMessage(const char * msg, int length)
   switch (m_State)
   {
   case kHandshakeRequest:
-    DDSLog::LogVerbose("Got handshake request from %d", m_ConnectionId);
+    DDSLog::LogVerbose("Got handshake request from %d", m_ConnectionId.GetIndex());
     if (type == DDSCoordinatorProtocolMessageType::kHandshakeRequest)
     {
       DDSCoordinatorHandshakeRequest request;
@@ -102,7 +102,7 @@ bool DDSCoordinatorServerProtocol::HandleMessage(const char * msg, int length)
     }
     break;
   case kHandshakeFinalize:
-    DDSLog::LogVerbose("Got handshake finalize from %d", m_ConnectionId);
+    DDSLog::LogVerbose("Got handshake finalize from %d", m_ConnectionId.GetIndex());
     if (type == DDSCoordinatorProtocolMessageType::kHandshakeFinalize)
     {
       DDSCoordinatorHandshakeFinalize finalize;

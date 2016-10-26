@@ -23,6 +23,10 @@ void DDSHttpClient::Update()
   {
     switch (event_info.Type)
     {
+    case StormSockets::StormSocketEventType::ClientConnected:
+      break;
+    case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
+      break;
     case StormSockets::StormSocketEventType::Data:
       for (auto & callback : m_PendingCallbacks)
       {

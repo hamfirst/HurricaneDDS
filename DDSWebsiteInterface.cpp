@@ -13,12 +13,12 @@ DDSWebsiteInterface::DDSWebsiteInterface(DDSNodeState & node_state, DDSWebsiteFa
 
 }
 
-void DDSWebsiteInterface::SendResponse(const char * body, int response_code, char * response_phrase)
+void DDSWebsiteInterface::SendResponse(const char * body, int response_code, const char * response_phrase)
 {
   m_WebsiteFactory.SendResponse(m_ConnectionId, response_code, response_phrase, nullptr, 0, body, strlen(body));
 }
 
-void DDSWebsiteInterface::SendResponse(const char * headers, const char * body, int response_code, char * response_phrase)
+void DDSWebsiteInterface::SendResponse(const char * headers, const char * body, int response_code, const char * response_phrase)
 {
   m_WebsiteFactory.SendResponse(m_ConnectionId, response_code, response_phrase, headers, strlen(headers), body, strlen(body));
 }

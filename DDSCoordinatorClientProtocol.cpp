@@ -69,6 +69,9 @@ void DDSCoordinatorClientProtocol::ProcessEvents()
         DDSLog::LogError("Could not process message data from state %d: %s", m_State, m_MessageBuffer.data());
       }
       break;
+    case StormSockets::StormSocketEventType::Disconnected:
+      DDSLog::LogError("Disconnected from coordinator...panic!");
+      break;
     }
   }
 }
@@ -124,6 +127,8 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
 
   switch (m_State)
   {
+  case kConnecting:
+    break;
   case kHandshakeResponse:
     if (type == DDSCoordinatorProtocolMessageType::kHandshakeResponse)
     {
@@ -235,6 +240,8 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
 
       m_NodeState.GotMessageFromCoordinator(server_type, type, msg);
     }
+    break;
+  case kDisconnected:
     break;
   }
 
