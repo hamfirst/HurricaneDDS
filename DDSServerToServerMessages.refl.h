@@ -66,30 +66,6 @@ struct DDSExportedMessage
   std::string m_Message;
 };
 
-struct DDSExportedSubscription
-{
-  STORM_REFL;
-  std::string m_DataPath;
-  DDSKey m_SubscriptionId;
-
-  DDSKey m_ResponderKey;
-  int m_ResponderObjectType;
-  int m_ResponderMethodId;
-  std::string m_ResponderArgs;
-
-  bool m_IsDataSubscription;
-  bool m_DeltaOnly;
-};
-
-struct DDSExportedRequestedSubscription
-{
-  STORM_REFL;
-  DDSKey m_Key;
-  int m_ObjectType;
-
-  DDSKey m_SubscriptionId;
-};
-
 enum STORM_REFL_ENUM class DDSExportedObjectState
 {
   kNotLoaded,
