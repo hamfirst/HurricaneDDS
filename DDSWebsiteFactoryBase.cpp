@@ -27,6 +27,8 @@ void DDSWebsiteFactoryBase::ProcessEvents()
     case StormSockets::StormSocketEventType::ClientConnected:
       HandleConnect(event.ConnectionId, event.RemoteIP, event.RemotePort);
       break;
+    case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
+      break;
     case StormSockets::StormSocketEventType::Disconnected:
       HandleDisconnect(event.ConnectionId);
       m_Frontend->FinalizeConnection(event.ConnectionId);
@@ -38,7 +40,7 @@ void DDSWebsiteFactoryBase::ProcessEvents()
   }
 }
 
-bool DDSWebsiteFactoryBase::SendResponse(StormSockets::StormSocketConnectionId connection_id, int response_code, char * response_phrase, 
+bool DDSWebsiteFactoryBase::SendResponse(StormSockets::StormSocketConnectionId connection_id, int response_code, const char * response_phrase, 
   const void * header_data, int header_length, const void * body_data, unsigned int body_length)
 {
   if (IsValidConnectionId(connection_id) == false)

@@ -270,7 +270,7 @@ void DDSCoordinatorState::QueryObjectData(int object_type_id, DDSKey key, const 
   m_Database->QueryDatabaseByKey(key, collection, [&](const char * data, int ec) { HandleQueryByKey(object_type_id, key, data, ec); });
 }
 
-void DDSCoordinatorState::QueryObjectData(const char * collection, const char * query, DDSResponderCallData && responder_call)
+void DDSCoordinatorState::QueryObjectData(const char * collection, const char * query, DDSCoordinatorResponderCallData && responder_call)
 {
   DDSDataObjectAddress address{ responder_call.m_ObjectType, responder_call.m_Key };
 

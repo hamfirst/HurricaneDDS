@@ -667,7 +667,7 @@ void DDSNodeState::RecheckOutgoingTargetedMessages()
         {
           for (auto & message : itr_copy->second)
           {
-            HandleIncomingTargetedMessage(itr_copy->first, message.first, std::move(message.second));
+            HandleIncomingTargetedMessage(itr_copy->first, message.first, message.second);
           }
 
           m_PendingTargetedMessages.erase(itr_copy);

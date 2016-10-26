@@ -1,10 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <queue>
 
+#include "DDSDataObjectAddress.h"
 #include "DDSRoutingTable.h"
 #include "DDSCoordinatorNetworkService.h"
-#include "DDSSharedObject.h"
+#include "DDSSharedObjectBase.h"
 #include "DDSDataObjectAddress.h"
 #include "DDSTimerSystem.h"
 #include "DDSHttpClient.h"
@@ -66,7 +68,7 @@ private:
   void SyncRoutingTable();
 
   void QueryObjectData(int object_type_id, DDSKey key, const char * collection);
-  void QueryObjectData(const char * collection, const char * query, DDSResponderCallData && responder_call);
+  void QueryObjectData(const char * collection, const char * query, DDSCoordinatorResponderCallData && responder_call);
   void InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSCoordinatorResponderCallData && responder_call);
 
   void DestroyDeferredCallback(DDSDeferredCallback * callback);

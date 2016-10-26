@@ -11,7 +11,7 @@ class DDSWebsiteFactoryStaticContent : public DDSWebsiteFactoryBase
 public:
   DDSWebsiteFactoryStaticContent(DDSNodeState & node_state, const StormSockets::StormSocketServerFrontendHttpSettings & settings, const DDSWebsiteFilesystemBuilder & fs);
 
-  bool IsValidConnectionId(StormSockets::StormSocketConnectionId connection_id);
+  bool IsValidConnectionId(StormSockets::StormSocketConnectionId connection_id) override;
 
 private:
 

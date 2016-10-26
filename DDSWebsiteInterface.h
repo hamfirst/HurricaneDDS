@@ -18,8 +18,8 @@ public:
   DDSWebsiteInterface(const DDSWebsiteInterface & rhs) = default;
   DDSWebsiteInterface(DDSWebsiteInterface && rhs) = default;
 
-  void SendResponse(const char * body, int response_code = 200, char * response_phrase = "OK");
-  void SendResponse(const char * headers, const char * body, int response_code = 200, char * response_phrase = "OK");
+  void SendResponse(const char * body, int response_code = 200, const char * response_phrase = "OK");
+  void SendResponse(const char * headers, const char * body, int response_code = 200, const char * response_phrase = "OK");
 
   void SendResponse(StormSockets::StormHttpResponseWriter & writer);
 

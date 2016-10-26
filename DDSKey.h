@@ -1,6 +1,8 @@
 #pragma once
 
-using DDSKey = unsigned long long;
+#include <cstdint>
+
+using DDSKey = uint64_t;
 
 struct DDSKeyRange
 {

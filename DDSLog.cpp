@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstdarg>
 
+#include <stdexcept>
+
 void DDSLog::LogInfo(const char * fmt, ...)
 {
   va_list args;

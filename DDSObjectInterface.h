@@ -104,7 +104,7 @@ public:
   template <typename QueryObject, typename ReturnObject>
   void QueryDatabase(const QueryObject & query, void (ReturnObject::*return_func)(int ec, std::string data), ReturnObject * p_this)
   {
-    using DatabaseObject = QueryObject::DatabaseType;
+    using DatabaseObject = typename QueryObject::DatabaseType;
     QueryDatabaseInternal(DatabaseObject::Collection(), StormReflEncodeJson(query), GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), std::string());
   }
@@ -112,7 +112,7 @@ public:
   template <typename QueryObject, typename ReturnObject, typename ReturnArg>
   void QueryDatabase(const QueryObject & query, void (ReturnObject::*return_func)(ReturnArg return_arg, int ec, std::string data), ReturnObject * p_this, ReturnArg && return_arg)
   {
-    using DatabaseObject = QueryObject::DatabaseType;
+    using DatabaseObject = typename QueryObject::DatabaseType;
     QueryDatabaseInternal(DatabaseObject::Collection(), StormReflEncodeJson(query), GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
   }

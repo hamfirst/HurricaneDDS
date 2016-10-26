@@ -218,6 +218,9 @@ public:
     obj_data.m_State = kCreating;
     obj_data.m_ActiveObject = std::make_unique<DataType>(node_interface, *obj_data.m_DatabaseObject.get());
 
+    bool called = 
+      DDSCallFuncBeginLoad<DDSHasFuncBeginLoad<std::decay_t<decltype(*obj_data.m_ActiveObject.get())>>::value>::Call(*obj_data.m_ActiveObject.get());
+
     if (DDS_CALL_FUNC(BeginLoad, *obj_data.m_ActiveObject.get()) == false)
     {
       FinalizeObjectLoad(key);
@@ -837,7 +840,7 @@ private:
   std::string m_Collection;
   int m_ObjectTypeId;
 
-  std::unordered_map<DDSKey, ObjectData> m_Objects;
+  std::map<DDSKey, ObjectData> m_Objects;
   std::vector<std::pair<DDSKey, ReflectionChangeNotification>> m_Changes;
   std::vector<DDSKey> m_DeadObjects;
 };
@@ -1331,7 +1334,7 @@ private:
   std::string m_Collection;
   int m_ObjectTypeId;
 
-  std::unordered_map<DDSKey, ObjectData> m_Objects;
+  std::map<DDSKey, ObjectData> m_Objects;
   std::vector<std::pair<DDSKey, ReflectionChangeNotification>> m_Changes;
   int m_ChangeQueueDepth;
 

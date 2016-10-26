@@ -9,6 +9,7 @@
 
 #include "DDSNodeId.h"
 #include "DDSConnectionId.h"
+#include "DDSNodeInterface.h"
 #include "DDSDataObjectAddress.h"
 #include "DDSDataObjectStoreBase.h"
 #include "DDSSharedObjectBase.h"
