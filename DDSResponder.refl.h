@@ -4,6 +4,8 @@
 
 #include "DDSKey.h"
 
+#include <string>
+
 class DDSNodeState;
 
 class DDSResponderData
@@ -15,5 +17,6 @@ public:
   int m_ObjectType;
 
   int m_ReturnMethodId;
+  std::string m_ReturnArg;
 };
 

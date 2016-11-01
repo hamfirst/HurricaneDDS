@@ -11,6 +11,7 @@
 #include "DDSServerToServerMessages.refl.meta.h"
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
 
+#include <StormRefl/StormReflJsonStd.h>
 #include <StormData/StormDataChangePacket.h>
 #include <StormData/StormDataParent.h>
 
@@ -234,15 +235,9 @@ public:
       {
         for (auto & sub : sub_data.second)
         {
-          if (DDSCheckChangeSubscription(change_notification, sub))
+          if (StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
           {
-            DDSResponderCallData call_data;
-            if (DDSCreateSubscriptionResponse(*m_DataObject.get(), change_notification, sub, call_data))
-            {
-              DDSLog::LogError("Could not serialize subscription change");
-            }
-
-            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, StormReflEncodeJson(call_data));
+            DDSSendChangeSubscription(change_notification, sub, m_DataObject.get(), m_NodeState);
           }
         }
       }

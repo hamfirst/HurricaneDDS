@@ -46,7 +46,6 @@ struct DatabaseConnectionThread
   std::queue<DatabaseQueryInfo> m_PendingInputs;
 };
 
-
 void DDSDatabaseConnectionPool::QueueResult(int thread_index, const DatabaseQueryResult & result)
 {
   while (m_Threads[thread_index].m_OutputQueue.Enqueue(result) == false)

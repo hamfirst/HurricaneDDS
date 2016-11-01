@@ -38,6 +38,7 @@ DDSNodeState::DDSNodeState(
 
 void DDSNodeState::ProcessEvents()
 {
+  BeginQueueingMessages();
   m_Database->TriggerCallbacks();
 
   m_CoordinatorConnection.ProcessEvents();
@@ -58,6 +59,8 @@ void DDSNodeState::ProcessEvents()
   {
     website_factor->ProcessEvents();
   }
+
+  EndQueueingMessages();
 }
 
 void DDSNodeState::GotInitialCoordinatorSync(DDSNodeId node_id, const DDSRoutingTable & routing_table, bool initial_node, uint64_t server_secret, uint64_t client_secret)
@@ -244,6 +247,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
 {
   if (m_QueueMessageDepth && force_process == false)
   {
+    DDSLog::LogVerbose("-- Queueing targeted message %s", StormReflGetEnumAsString(type));
     m_QueuedTargetedMessages.emplace(std::make_tuple(addr, type, message));
     return;
   }
@@ -257,6 +261,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
   {
     if (m_IncomingKeyspace.IsCompleteForKey(addr))
     {
+      DDSLog::LogVerbose("- Sending targeted message %s", StormReflGetEnumAsString(type));
       HandleIncomingTargetedMessage(addr, type, message);
       return;
     }
@@ -565,9 +570,8 @@ void DDSNodeState::EndQueueingMessages()
 
     while (m_QueuedTargetedMessages.size())
     {
-      auto message = m_QueuedTargetedMessages.back();
+      auto & message = m_QueuedTargetedMessages.front();
       SendTargetedMessage(std::get<0>(message), std::get<1>(message), std::move(std::get<2>(message)), true);
-
       m_QueuedTargetedMessages.pop();
     }
 
@@ -637,6 +641,8 @@ int DDSNodeState::GetLocalPort() const
 
 bool DDSNodeState::SendToLocalConnection(DDSConnectionId connection_id, const std::string & data)
 {
+  DDSLog::LogVerbose("Local %d: %s", connection_id.m_ConnectionId, data.c_str());
+
   StormSockets::StormSocketConnectionId id;
   id.m_Index.Raw = connection_id.m_ConnectionId;
 

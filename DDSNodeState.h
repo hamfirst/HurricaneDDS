@@ -126,6 +126,7 @@ public:
 
   void CreateResolverRequest(const char * hostname, bool reverse_lookup, DDSDeferredCallback & callback, std::function<void(const DDSResolverRequest &)> && function);
 
+  void SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message, bool force_process = false);
 private:
 
   friend class DDSCoordinatorClientProtocol;
@@ -172,7 +173,6 @@ private:
 
   }
 
-  void SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message, bool force_process = false);
   void SendSubscriptionCreate(DDSCreateDataSubscription && req);
   void SendSubscriptionDestroy(const DDSDestroySubscription & destroy);
   void ExportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list);

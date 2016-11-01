@@ -94,7 +94,7 @@ struct DDSMessageCallerWithResponder
       return StormReflCallCheck(deserializer, c, func, responder, arg);
     }
 
-    return StormReflCallCheck(deserializer, c, func);
+    return StormReflCallCheck(deserializer, c, func, responder);
   }
 };
 
@@ -229,7 +229,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTa
     }
   };
 
-  DDSResponder responder = { iface, { message.m_ResponderKey, message.m_ResponderObjectType, message.m_ResponderMethodId } };
+  DDSResponder responder = { iface, { message.m_ResponderKey, message.m_ResponderObjectType, message.m_ResponderMethodId, message.m_ReturnArg } };
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -302,14 +302,24 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSRe
   return parsed;
 }
 
-inline bool DDSCheckChangeSubscription(const ReflectionChangeNotification & change_notification, const DDSExportedSubscription & sub)
+template <typename SubscriptionObj, typename NodeState>
+inline bool DDSSendChangeSubscription(const ReflectionChangeNotification & change_notification, const DDSExportedSubscription & sub, SubscriptionObj * base_obj, NodeState & node_state)
 {
-  if (sub.m_DataPath == "?")
+  if (change_notification.m_BaseObject == base_obj)
   {
-    return false;
+    DDSLog::LogVerbose("Sending subscription response from object %s", typeid(SubscriptionObj).name());
+
+    DDSResponderCallData call_data;
+    if (DDSCreateSubscriptionResponse(*base_obj, change_notification, sub, call_data) == false)
+    {
+      DDSLog::LogError("Could not serialize subscription change");
+    }
+
+    node_state.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, StormReflEncodeJson(call_data));
+    return true;
   }
 
-  return change_notification.m_Path.compare(0, sub.m_DataPath.length(), sub.m_DataPath) == 0;
+  return false;
 }
 
 template <class DataType>
@@ -325,7 +335,9 @@ bool DDSCreateSubscriptionResponse(DataType & data_type, const ReflectionChangeN
     ReflectionChangeNotification notification_copy = change_notification;
     notification_copy.m_Path = notification_copy.m_Path.substr(sub.m_DataPath.size());
 
-    responder_data.m_MethodArgs = StormDataCreateChangePacket(notification_copy);
+    responder_data.m_MethodArgs = "[";
+    responder_data.m_MethodArgs += StormReflEncodeJson(StormDataCreateChangePacket(notification_copy));
+    responder_data.m_MethodArgs += "]";
   }
   else
   {
@@ -341,7 +353,9 @@ bool DDSCreateSubscriptionResponse(DataType & data_type, const ReflectionChangeN
       return false;
     }
 
-    responder_data.m_MethodArgs = data;
+    responder_data.m_MethodArgs = "[";
+    responder_data.m_MethodArgs += StormReflEncodeJson(data);
+    responder_data.m_MethodArgs += "]";
   }
 
   return true;
@@ -355,6 +369,8 @@ bool DDSCreateInitialSubscriptionResponse(DataType & data_type, const DDSExporte
   responder_data.m_MethodId = sub.m_ResponderMethodId;
   responder_data.m_ResponderArgs = sub.m_ResponderArgs;
 
+  DDSLog::LogVerbose("Sending initial subscription response from object %s", typeid(DataType).name());
+
   std::string data;
   auto visitor = [&](auto & f, const char * str)
   {
@@ -367,14 +383,17 @@ bool DDSCreateInitialSubscriptionResponse(DataType & data_type, const DDSExporte
     return false;
   }
 
+  responder_data.m_MethodArgs = "[";
   if (sub.m_DeltaOnly)
   {
-    responder_data.m_MethodArgs = StormDataCreateChangePacket(ReflectionNotifyChangeType::kSet, ReflectionChangeNotification::kInvalidSubIndex, "", data);
+    responder_data.m_MethodArgs += 
+      StormReflEncodeJson(StormDataCreateChangePacket(ReflectionNotifyChangeType::kSet, ReflectionChangeNotification::kInvalidSubIndex, "", data));
   }
   else
   {
-    responder_data.m_MethodArgs = data;
+    responder_data.m_MethodArgs += StormReflEncodeJson(data);
   }
+  responder_data.m_MethodArgs += "]";
 
   return true;
 }

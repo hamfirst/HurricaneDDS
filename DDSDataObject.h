@@ -1,13 +1,8 @@
 #pragma once
 
 #include <StormRefl/StormRefl.h>
-#include <StormData/StormDataNumber.h>
-#include <StormData/StormDataEnum.h>
-#include <StormData/StormDataString.h>
-#include <StormData/StormDataList.h>
-#include <StormData/StormDataMap.h>
+#include <StormData/StormDataTypes.h>
 #include <StormData/StormDataJson.h>
-#include <StormData/StormData.h>
 
 #include "DDSKey.h"
 #include "DDSNodeInterface.h"
@@ -23,6 +18,13 @@
   STORM_REFL; \
   STORM_CHANGE_NOTIFIER_INFO; \
   static constexpr const char * Collection() { return #CollectionName; } \
+
+#define DDS_TEMPORARY_OBJECT(AllowImplicitCreate) \
+  STORM_REFL; \
+  STORM_REFL_FUNCS; \
+  STORM_REFL_NODEFAULT; \
+  STORM_CHANGE_NOTIFIER_INFO; \
+  static constexpr bool AllowsImplicitCreate() { return AllowImplicitCreate; } \
 
 #define DDS_SHARED_OBJECT \
   STORM_REFL; \

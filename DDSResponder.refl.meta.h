@@ -8,7 +8,7 @@
 template <>
 struct StormReflTypeInfo<DDSResponderData>
 {
-  static constexpr int fields_n = 3;
+  static constexpr int fields_n = 4;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -81,6 +81,28 @@ struct StormReflTypeInfo<DDSResponderData>::field_data<2, Self> : public StormRe
   match_const_t<Self, int> & Get() { return self.m_ReturnMethodId; }
   std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ReturnMethodId; }
   void SetDefault() { self.m_ReturnMethodId = StormReflTypeInfo<DDSResponderData>::GetDefault().m_ReturnMethodId; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSResponderData>::field_data_static<3>
+{
+  using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
+  static constexpr auto GetName() { return "m_ReturnArg"; }
+  static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xBA1409C0; }
+  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr auto GetFieldIndex() { return 3; }
+  static constexpr auto GetMemberPtr() { return &DDSResponderData::m_ReturnArg; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSResponderData>::field_data<3, Self> : public StormReflTypeInfo<DDSResponderData>::field_data_static<3>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, std::string> & Get() { return self.m_ReturnArg; }
+  std::add_const_t<std::remove_reference_t<std::string>> & Get() const { return self.m_ReturnArg; }
+  void SetDefault() { self.m_ReturnArg = StormReflTypeInfo<DDSResponderData>::GetDefault().m_ReturnArg; }
 };
 
 namespace StormReflFileInfo

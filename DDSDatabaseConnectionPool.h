@@ -7,8 +7,6 @@
 #include <memory>
 #include <string>
 
-
-
 enum class DDSDatabaseOperation
 {
   kKeyQuery,

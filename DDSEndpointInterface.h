@@ -36,7 +36,7 @@ public:
       return false;
     }
 
-    (data_obj->*target_func)(DDSConnectionId{ &m_EndpointFactory, m_ConnectionId });
+    (data_obj->*target_func)(DDSConnectionId{ &m_EndpointFactory, (int)m_ConnectionId.m_Index.Raw });
     FinalizeLocalObject(target_object_type, target_key);
     return true;
   }

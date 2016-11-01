@@ -75,6 +75,8 @@
     <ClInclude Include="DDSWebsiteFactoryStaticContent.h" />
     <ClInclude Include="DDSCall.h" />
     <ClInclude Include="DDSDatabaseBootstrap.h" />
+    <ClInclude Include="DDSDataObjectStoreTemporary.h" />
+    <ClInclude Include="DDSDatabaseConnection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSNetworkBackend.cpp" />
@@ -115,5 +117,6 @@
     <ClCompile Include="DDSWebsiteFilesystemBuilder.cpp" />
     <ClCompile Include="DDSWebsiteFactoryStaticContent.cpp" />
     <ClCompile Include="DDSDatabaseBootstrap.cpp" />
+    <ClCompile Include="DDSDatabaseConnection.cpp" />
   </ItemGroup>
 </Project>

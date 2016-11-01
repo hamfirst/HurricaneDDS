@@ -65,24 +65,24 @@ public:
 
   template <typename TargetObject, typename ReturnObject, typename ReturnArg, typename ... Args, typename ... CallArgs, typename ... ReturnArgs>
   void CallWithResponderReturnArg(void (TargetObject::* target_func)(DDSResponder &, Args...), DDSKey key,
-    void (ReturnObject::* return_func)(ReturnArg, ReturnArgs...), DDSKey return_key, ReturnArg && return_arg, CallArgs && ... args)
+    void (ReturnObject::* return_func)(ReturnArg, ReturnArgs...), DDSKey return_key, const ReturnArg & return_arg, CallArgs && ... args)
   {
     static_assert(std::is_convertible<std::tuple<CallArgs...>, std::tuple<Args...>>::value, "Invalid call args for function");
 
     SendMessageToObjectWithResponderReturnArg(GetObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), key, StormReflGetMemberFunctionIndex(target_func),
       GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), return_key, StormReflGetMemberFunctionIndex(return_func),
-      StormReflEncodeJson(return_arg), SerializeCallData(std::forward<CallArgs>(args)...), StormReflEncodeJson(return_arg));
+      SerializeCallData(std::forward<CallArgs>(args)...), StormReflEncodeJson(return_arg));
   }
 
   template <typename TargetObject, typename ReturnObject, typename ReturnArg, typename ... Args, typename ... CallArgs, typename ... ReturnArgs>
   void CallWithResponderReturnArg(void (TargetObject::* target_func)(DDSResponder &, Args...), DDSKey key,
-    void (ReturnObject::* return_func)(ReturnArg, ReturnArgs...), ReturnObject * p_this, ReturnArg && return_arg, CallArgs && ... args)
+    void (ReturnObject::* return_func)(ReturnArg, ReturnArgs...), ReturnObject * p_this, const ReturnArg & return_arg, CallArgs && ... args)
   {
     static_assert(std::is_convertible<std::tuple<CallArgs...>, std::tuple<Args...>>::value, "Invalid call args for function");
 
     SendMessageToObjectWithResponderReturnArg(GetObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), key, StormReflGetMemberFunctionIndex(target_func),
       GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(), StormReflGetMemberFunctionIndex(return_func),
-      StormReflEncodeJson(return_arg), SerializeCallData(std::forward<CallArgs>(args)...), StormReflEncodeJson(return_arg));
+      SerializeCallData(std::forward<CallArgs>(args)...), StormReflEncodeJson(return_arg));
   }
 
   template <typename DatabaseType, typename ReturnObject>
@@ -156,7 +156,7 @@ public:
 
   template <typename TargetObject, typename ReturnObject, typename ReturnArg>
   DDSKey CreateSubscription(const DDSSubscriptionTarget<TargetObject> & sub, DDSKey target_key, const char * path,
-    void (ReturnObject::* return_func)(ReturnArg return_arg, std::string data), bool delta_only, ReturnArg && return_arg)
+    void (ReturnObject::* return_func)(ReturnArg return_arg, std::string data), bool delta_only, const ReturnArg & return_arg)
   {
     return CreateSubscriptionInternal(GetObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), target_key, path,
       GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()),
@@ -167,16 +167,16 @@ public:
   DDSKey CreateDataSubscription(const DDSSubscriptionTarget<TargetDataObject> & sub, DDSKey target_key, const char * path,
     void (ReturnObject::* return_func)(std::string data), bool delta_only)
   {
-    return CreateSubscriptionInternal(GetDataObjectType(StormReflTypeInfo<TargetDataObject>::GetNameHash()), target_key, path,
+    return CreateDataSubscriptionInternal(GetDataObjectType(StormReflTypeInfo<TargetDataObject>::GetNameHash()), target_key, path,
       GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()),
       GetLocalKey(), StormReflGetMemberFunctionIndex(return_func), delta_only, std::string());
   }
 
   template <typename TargetDataObject, typename ReturnObject, typename ReturnArg>
   DDSKey CreateDataSubscription(const DDSSubscriptionTarget<TargetDataObject> & sub, DDSKey target_key, const char * path,
-    void (ReturnObject::* return_func)(ReturnArg return_arg, std::string data), bool delta_only, ReturnArg && return_arg)
+    void (ReturnObject::* return_func)(ReturnArg return_arg, std::string data), bool delta_only, const ReturnArg & return_arg)
   {
-    return CreateSubscriptionInternal(GetObjectType(StormReflTypeInfo<TargetDataObject>::GetNameHash()), target_key, path,
+    return CreateDataSubscriptionInternal(GetObjectType(StormReflTypeInfo<TargetDataObject>::GetNameHash()), target_key, path,
       GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()),
       GetLocalKey(), StormReflGetMemberFunctionIndex(return_func), delta_only, StormReflEncodeJson(return_arg));
   }
@@ -191,7 +191,7 @@ public:
 
   template <typename TargetObject, typename ReturnObject, typename ReturnArg>
   DDSKey CreateExistSubscription(const DDSSubscriptionTarget<TargetObject> & sub, DDSKey target_key,
-    void (ReturnObject::* return_func)(ReturnArg return_arg, bool exists), ReturnArg && return_arg)
+    void (ReturnObject::* return_func)(ReturnArg return_arg, bool exists), const ReturnArg & return_arg)
   {
     return CreateExistSubscriptionInternal(GetObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), target_key,
       GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()),
@@ -208,7 +208,7 @@ public:
 
   template <typename TargetDataObject, typename ReturnObject, typename ReturnArg>
   DDSKey CreateDataExistSubscription(const DDSSubscriptionTarget<TargetDataObject> & sub, DDSKey target_key,
-    void (ReturnObject::* return_func)(ReturnArg return_arg, bool exists), ReturnArg && return_arg)
+    void (ReturnObject::* return_func)(ReturnArg return_arg, bool exists), const ReturnArg & return_arg)
   {
     return CreateDataExistSubscriptionInternal(GetDataObjectType(StormReflTypeInfo<TargetDataObject>::GetNameHash()), target_key,
       GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()),
@@ -218,13 +218,13 @@ public:
   template <typename TargetDataObject>
   void DestroySubscription(DDSKey target_key, DDSKey subscription_id)
   {
-    DestroySubscription(GetObjectType(StormReflTypeInfo<TargetDataObject>::GetNameHash()), subscription_id);
+    DestroySubscriptionInternal(GetObjectType(StormReflTypeInfo<TargetDataObject>::GetNameHash()), target_key, subscription_id);
   }
 
   template <typename TargetDatabaseObject>
   void DestroyDatabaseSubscription(DDSKey target_key, DDSKey subscription_id)
   {
-    DestroySubscription(GetDataObjectType(StormReflTypeInfo<TargetDatabaseObject>::GetNameHash()), subscription_id);
+    DestroySubscriptionInternal(GetDataObjectType(StormReflTypeInfo<TargetDatabaseObject>::GetNameHash()), target_key, subscription_id);
   }
 
 private:

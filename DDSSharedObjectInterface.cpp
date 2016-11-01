@@ -45,7 +45,7 @@ void DDSSharedObjectInterface::SendMessageToObject(int target_object_type, DDSKe
 }
 
 void DDSSharedObjectInterface::SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
-  int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg, std::string && message)
+  int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg)
 {
   DDSCoordinatorTargetedMessageWithResponder packet;
   packet.m_Key = target_key;
