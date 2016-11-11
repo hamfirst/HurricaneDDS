@@ -11,7 +11,7 @@ uint32_t DDSDataObjectGetNameHash()
 }
 
 template <>
-uint32_t DDSDataObjectGetNameHash<void>()
+inline uint32_t DDSDataObjectGetNameHash<void>()
 {
   return 0;
 }

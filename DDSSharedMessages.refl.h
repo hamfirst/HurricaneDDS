@@ -131,4 +131,3 @@ struct DDSCreateDataExistSubscriptionBase : public DDSCreateExistSubscriptionBas
 {
   STORM_REFL;
 };
-
