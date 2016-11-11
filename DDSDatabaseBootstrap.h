@@ -60,7 +60,7 @@ template <class DataType, class DatabaseType, class ... Remaining>
 struct DDSDataObjectTypeList;
 
 template <class ... Args>
-void DDSDatabaseBoostrapFull(DDSDataObjectTypeList<Args...> & list, const DDSDatabaseSettings & settings)
+void DDSDatabaseBoostrapFull(const DDSDataObjectTypeList<Args...> & list, const DDSDatabaseSettings & settings)
 {
   std::vector<DDSDatabaseBoostrapCollectionInfo> collection_info;
   DDSDatabaseBoostrapInfo<Args...>::Process(collection_info);
@@ -69,7 +69,7 @@ void DDSDatabaseBoostrapFull(DDSDataObjectTypeList<Args...> & list, const DDSDat
 }
 
 template <class ... Args>
-void DDSDatabaseBoostrapIndices(DDSDataObjectTypeList<Args...> & list, const DDSDatabaseSettings & settings)
+void DDSDatabaseBoostrapIndices(const DDSDataObjectTypeList<Args...> & list, const DDSDatabaseSettings & settings)
 {
   std::vector<DDSDatabaseBoostrapCollectionInfo> collection_info;
   DDSDatabaseBoostrapInfo<Args...>::Process(collection_info);
