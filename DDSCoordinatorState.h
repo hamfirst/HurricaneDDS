@@ -47,6 +47,7 @@ public:
   void CreateTimer(std::chrono::system_clock::duration duration, DDSCoordinatorResponderCallData && responder_data);
   void CreateHttpRequest(const DDSHttpRequest & request, DDSCoordinatorResponderCallData && responder_data);
 
+  std::pair<std::string, int> GetNodeHost(DDSKey key);
 private:
 
   friend class DDSCoordinatorServerProtocol;
@@ -82,11 +83,14 @@ private:
   DDSCoordinatorNetworkService & GetNetworkService();
   const DDSRoutingTable & GetRoutingTable() const;
 
+  DDSNodeId GetNodeIdForKey(DDSKey key) const;
+
   DDSNodeId CreateNode(uint32_t addr, uint16_t port);
   void DestroyNode(DDSNodeId id);
 
   uint64_t GetClientSecret() const;
   uint64_t GetServerSecret() const;
+
 
 private:
 

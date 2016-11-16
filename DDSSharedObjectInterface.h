@@ -15,6 +15,8 @@ public:
   DDSKey GetLocalKey() override;
   int GetObjectTypeId() override;
 
+  std::pair<std::string, int> GetNodeHost(DDSKey key) override;
+
 private:
 
   int GetObjectType(uint32_t object_type_name_hash) override;
@@ -45,7 +47,6 @@ private:
     DDSKey return_key, int return_method_id, std::string && return_arg) override;
 
   void DestroySubscriptionInternal(int return_object_type, DDSKey return_key, DDSKey subscription_id) override;
-
 private:
   DDSCoordinatorState & m_CoordinatorState;
   DDSSharedObjectBase * m_DataStore;

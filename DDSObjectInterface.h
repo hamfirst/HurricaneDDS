@@ -227,6 +227,8 @@ public:
     DestroySubscriptionInternal(GetDataObjectType(StormReflTypeInfo<TargetDatabaseObject>::GetNameHash()), target_key, subscription_id);
   }
 
+  virtual std::pair<std::string, int> GetNodeHost(DDSKey key) = 0;
+
 private:
   template <typename ... CallArgs>
   std::string SerializeCallData(CallArgs && ... args)

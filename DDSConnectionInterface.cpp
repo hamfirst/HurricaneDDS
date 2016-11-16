@@ -54,6 +54,16 @@ void DDSConnectionInterface::CreateResolverRequest(DDSDeferredCallback & callbac
   m_NodeState.CreateResolverRequest(hostname, reverse_lookup, callback, std::move(function));
 }
 
+bool DDSConnectionInterface::IsLocalKey(DDSKey key)
+{
+  return KeyInKeyRange(key, m_NodeState.GetLocalKeyRange());
+}
+
+std::pair<std::string, int> DDSConnectionInterface::GetNodeHost(DDSKey key)
+{
+  return m_NodeState.GetNodeHost(key);
+}
+
 void DDSConnectionInterface::ForceDisconnect()
 {
   m_ConnectionFactory.ForceDisconnect(m_ConnectionId);

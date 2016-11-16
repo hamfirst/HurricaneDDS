@@ -129,6 +129,26 @@ void DDSCoordinatorState::CreateHttpRequest(const DDSHttpRequest & request, DDSC
   m_DeferredCallbackList.emplace(std::move(callback));
 }
 
+std::pair<std::string, int> DDSCoordinatorState::GetNodeHost(DDSKey key)
+{
+  DDSNodeId node_id = GetNodeIdForKey(key);
+
+  for (auto & node : m_RoutingTable.m_Table)
+  {
+    if (node.m_Id == node_id)
+    {
+      uint8_t * ip_addr = (uint8_t *)&node.m_Addr;
+
+      char buffer[25];
+      snprintf(buffer, sizeof(buffer), "%d.%d.%d.%d", ip_addr[3], ip_addr[2], ip_addr[1], ip_addr[0]);
+
+      return std::make_pair(std::string(buffer), node.m_Port);
+    }
+  }
+
+  throw std::runtime_error("Invalid routing table");
+}
+
 void DDSCoordinatorState::GotMessageFromServer(DDSCoordinatorProtocolMessageType type, const char * data)
 {
   if (type == DDSCoordinatorProtocolMessageType::kTargetedMessage)
@@ -350,6 +370,19 @@ DDSCoordinatorNetworkService & DDSCoordinatorState::GetNetworkService()
 const DDSRoutingTable & DDSCoordinatorState::GetRoutingTable() const
 {
   return m_RoutingTable;
+}
+
+DDSNodeId DDSCoordinatorState::GetNodeIdForKey(DDSKey key) const
+{
+  for (auto & key_range : m_RoutingKeyRanges)
+  {
+    if (KeyInKeyRange(key, key_range.second))
+    {
+      return key_range.first;
+    }
+  }
+
+  throw std::runtime_error("Invalid routing table");
 }
 
 DDSNodeId DDSCoordinatorState::CreateNode(uint32_t addr, uint16_t port)

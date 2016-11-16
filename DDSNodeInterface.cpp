@@ -260,3 +260,8 @@ void DDSNodeInterface::DestroySubscriptionInternal(int return_object_type, DDSKe
   m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ return_object_type, return_key },
     DDSServerToServerMessageType::kDestroySubscription, StormReflEncodeJson(sub_data));
 }
+
+std::pair<std::string, int> DDSNodeInterface::GetNodeHost(DDSKey key)
+{
+  return m_NodeState.GetNodeHost(key);
+}

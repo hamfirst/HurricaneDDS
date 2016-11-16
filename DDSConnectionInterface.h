@@ -88,6 +88,9 @@ public:
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
   }
 
+  bool IsLocalKey(DDSKey key);
+  std::pair<std::string, int> GetNodeHost(DDSKey key);
+
   void ForceDisconnect();
 
 protected:

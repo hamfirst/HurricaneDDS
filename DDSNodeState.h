@@ -127,6 +127,8 @@ public:
   void CreateResolverRequest(const char * hostname, bool reverse_lookup, DDSDeferredCallback & callback, std::function<void(const DDSResolverRequest &)> && function);
 
   void SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message, bool force_process = false);
+
+  std::pair<std::string, int> GetNodeHost(DDSKey key);
 private:
 
   friend class DDSCoordinatorClientProtocol;

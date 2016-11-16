@@ -280,6 +280,26 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
   result.first->second.emplace_back(std::make_pair(type, message));
 }
 
+std::pair<std::string, int> DDSNodeState::GetNodeHost(DDSKey key)
+{
+  DDSNodeId node_id = GetNodeIdForKey(key);
+
+  for (auto & node : m_RoutingTable.m_Table)
+  {
+    if (node.m_Id == node_id)
+    {
+      uint8_t * ip_addr = (uint8_t *)&node.m_Addr;
+
+      char buffer[25];
+      snprintf(buffer, sizeof(buffer), "%d.%d.%d.%d", ip_addr[3], ip_addr[2], ip_addr[1], ip_addr[0]);
+
+      return std::make_pair(std::string(buffer), node.m_Port);
+    }
+  }
+
+  throw std::runtime_error("Invalid routing table");
+}
+
 void DDSNodeState::SendSubscriptionCreate(DDSCreateDataSubscription && req)
 {
   if (req.m_ObjectType >= (int)m_DataObjectList.size())
