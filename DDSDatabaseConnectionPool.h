@@ -47,6 +47,7 @@ private:
   volatile bool m_Initialized;
   int m_NumThreads;
   std::string m_DatabaseName;
+  std::string m_DatabaseUrl;
 
   std::unique_ptr<DatabaseConnectionThread[]> m_Threads;
 };

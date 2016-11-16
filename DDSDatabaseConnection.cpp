@@ -27,7 +27,9 @@ struct DDSDatabaseConnectionInfo
 DDSDatabaseConnection::DDSDatabaseConnection(const DDSDatabaseSettings & settings) :
   m_Info(std::make_unique<DDSDatabaseConnectionInfo>())
 {
-  m_Info->m_MongoClient = mongoc_client_new("mongodb://localhost:27017");
+  std::string database_url = std::string("mongodb://") + settings.DatabaseHostName + ":" + std::to_string(settings.DatabasePort);
+
+  m_Info->m_MongoClient = mongoc_client_new(database_url.data());
   m_Info->m_Database = mongoc_client_get_database(m_Info->m_MongoClient, settings.DatabaseName);
 }
 

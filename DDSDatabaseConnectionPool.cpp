@@ -62,7 +62,7 @@ void DDSDatabaseConnectionPool::DatabaseThread(int thread_index)
 {
   auto & thread_data = m_Threads[thread_index];
 
-  auto client = mongoc_client_new("mongodb://localhost:27017");
+  auto client = mongoc_client_new(m_DatabaseUrl.data());
   auto destroy_client = gsl::finally([&]() { mongoc_client_destroy(client); });
 
   auto database = mongoc_client_get_database(client, m_DatabaseName.data());
@@ -231,6 +231,7 @@ DDSDatabaseConnectionPool::DDSDatabaseConnectionPool(const DDSDatabaseSettings &
   m_Initialized = true;
   m_NumThreads = settings.NumThreads;
   m_DatabaseName = settings.DatabaseName;
+  m_DatabaseUrl = std::string("mongodb://") + settings.DatabaseHostName + ":" + std::to_string(settings.DatabasePort);
 
   m_Threads = std::make_unique<DatabaseConnectionThread[]>(settings.NumThreads);
   for (int index = 0; index < settings.NumThreads; index++)

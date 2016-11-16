@@ -13,7 +13,9 @@
 
 void DDSDatabaseBoostrapFullInternal(const std::vector<DDSDatabaseBoostrapCollectionInfo> & info, const DDSDatabaseSettings & settings)
 {
-  auto client = mongoc_client_new("mongodb://localhost:27017");
+  std::string database_url = std::string("mongodb://") + settings.DatabaseHostName + ":" + std::to_string(settings.DatabasePort);
+
+  auto client = mongoc_client_new(database_url.data());
   auto destroy_client = gsl::finally([&]() { mongoc_client_destroy(client); });
 
   auto database = mongoc_client_get_database(client, settings.DatabaseName);
@@ -45,7 +47,9 @@ void DDSDatabaseBoostrapFullInternal(const std::vector<DDSDatabaseBoostrapCollec
 
 void DDSDatabaseBoostrapIndicesInternal(const std::vector<DDSDatabaseBoostrapCollectionInfo> & info, const DDSDatabaseSettings & settings)
 {
-  auto client = mongoc_client_new("mongodb://localhost:27017");
+  std::string database_url = std::string("mongodb://") + settings.DatabaseHostName + ":" + std::to_string(settings.DatabasePort);
+
+  auto client = mongoc_client_new(database_url.data());
   auto destroy_client = gsl::finally([&]() { mongoc_client_destroy(client); });
 
   auto database = mongoc_client_get_database(client, settings.DatabaseName);
