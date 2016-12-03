@@ -56,6 +56,8 @@ void DDSNodeState::ProcessEvents()
   m_Resolver.Update();
   m_HttpClient.Update();
   m_TimerSystem.Update();
+  m_TokenValidator.Update();
+  m_TokenBroker.Update();
 
   for (auto & endpoint_factory : m_EndpointFactoryList)
   {
@@ -318,6 +320,36 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
 
     SendTargetedMessage(DDSDataObjectAddress{ obj_data.m_ObjectType, obj_data.m_Key }, type, std::string(data));
   }
+  else if (type == DDSServerToServerMessageType::kValidateTokenRequest)
+  {
+    DDSValidateTokenRequest token_info;
+    if (StormReflParseJson(token_info, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    std::string token_data;
+    bool valid = m_TokenBroker.ValidateToken(token_info.m_Token, token_info.m_Type, token_data);
+
+    DDSValidateTokenResponse response;
+    response.m_RequestId = token_info.m_RequestId;
+    response.m_Success = valid;
+    response.m_TokenData = std::move(token_data);
+
+    m_NodeNetwork.SendMessageToServer(node_id, StormReflEncodeJson(response));
+  }
+  else if (type == DDSServerToServerMessageType::kValidateTokenResponse)
+  {
+    DDSValidateTokenResponse token_info;
+    if (StormReflParseJson(token_info, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    m_TokenValidator.MarkTokenComplete(token_info.m_RequestId, token_info.m_Success, std::move(token_info.m_TokenData));
+  }
 }
 
 void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message, bool force_process)
@@ -578,6 +610,54 @@ void DDSNodeState::CreateHttpRequest(const DDSHttpRequest & request, DDSResponde
 void DDSNodeState::CreateResolverRequest(const char * hostname, bool reverse_lookup, DDSDeferredCallback & callback, std::function<void(const DDSResolverRequest &)> && function)
 {
   m_Resolver.CreateCallback(std::make_pair(hostname, reverse_lookup), callback, std::move(function));
+}
+
+void DDSNodeState::CreateTokenValidatorRequest(uint64_t token, int type, DDSDeferredCallback & callback, std::function<void(bool, const std::string &)> && function)
+{
+  if (!m_LocalNodeId)
+  {
+    DDSLog::LogError("Requesting token before we have a proper node id");
+    return;
+  }
+
+  uint64_t request_id = m_TokenValidator.CreateCallback(token, callback, std::move(function));
+  DDSValidateTokenRequest request;
+
+  DDSNodeId node_id = (DDSNodeId)(token >> 32);
+
+  if (node_id == *m_LocalNodeId)
+  {
+    std::string token_data;
+    bool valid = m_TokenBroker.ValidateToken((uint32_t)token, type, token_data);
+    
+    m_TokenValidator.MarkTokenComplete(request_id, valid, std::move(token_data));
+  }
+  else
+  {
+    request.m_RequestId = request_id;
+    request.m_Token = (uint32_t)token;
+    request.m_Type = type;
+    m_NodeNetwork.SendMessageToServer(node_id, StormReflEncodeJson(request));
+  }
+}
+
+uint64_t DDSNodeState::RequestToken(std::string && token_data, int type, int timeout)
+{
+  if (!m_LocalNodeId)
+  {
+    DDSLog::LogError("Requesting token before we have a proper node id");
+    return 0;
+  }
+
+  uint64_t token = *m_LocalNodeId;
+  token <<= 32;
+  token |= m_TokenBroker.GetToken(std::move(token_data), type, timeout);
+  return token;
+}
+
+bool DDSNodeState::ValidateToken(uint64_t token, int type, std::string & out_token_data)
+{
+  return m_TokenBroker.ValidateToken((uint32_t)token, type, out_token_data);
 }
 
 void DDSNodeState::QueryObjectData(int object_type_id, DDSKey key, const char * collection)

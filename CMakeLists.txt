@@ -42,6 +42,8 @@ add_library(HurricaneDDS STATIC
             DDSSharedObjectInterface.cpp
             DDSShutdown.cpp
             DDSTimerSystem.cpp
+            DDSTokenBroker.cpp
+            DDSTokenValidator.cpp
             DDSVersion.cpp
             DDSWebsiteFactoryBase.cpp
             DDSWebsiteFactoryStaticContent.cpp

@@ -131,3 +131,19 @@ struct DDSCreateDataExistSubscriptionBase : public DDSCreateExistSubscriptionBas
 {
   STORM_REFL;
 };
+
+struct DDSValidateTokenRequestBase
+{
+  STORM_REFL;
+  uint64_t m_RequestId;
+  uint32_t m_Token;
+  int m_Type;
+};
+
+struct DDSValidateTokenResponseBase
+{
+  STORM_REFL;
+  uint64_t m_RequestId;
+  bool m_Success;
+  std::string m_TokenData;
+};

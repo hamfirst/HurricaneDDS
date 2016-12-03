@@ -53,13 +53,15 @@ public:
     }
   }
 
-  void CreateCallback(CreationData creation_data, DDSDeferredCallback & callback, std::function<void(Args...)> && function)
+  const CallbackData & CreateCallback(CreationData creation_data, DDSDeferredCallback & callback, std::function<void(Args...)> && function)
   {
     callback.m_Id = m_NextId;
     callback.m_System = this;
 
-    m_PendingCallbacks.emplace(std::make_pair(m_NextId, Callback{ m_NextId, GetCallbackData(creation_data), &callback, std::move(function), false }));
+    auto result = m_PendingCallbacks.emplace(std::make_pair(m_NextId, Callback{ m_NextId, GetCallbackData(creation_data), &callback, std::move(function), false }));
     m_NextId++;
+
+    return result.first->second.m_CallbackData;
   }
 
   bool AreAllCallbacksComplete()

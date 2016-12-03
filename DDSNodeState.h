@@ -22,6 +22,8 @@
 #include "DDSTimerSystem.h"
 #include "DDSHttpClient.h"
 #include "DDSResolver.h"
+#include "DDSTokenBroker.h"
+#include "DDSTokenValidator.h"
 #include "DDSNetworkBackend.h"
 #include "DDSNodeNetworkService.h"
 #include "DDSCoordinatorClientProtocol.h"
@@ -134,6 +136,11 @@ public:
   void CreateHttpRequest(const DDSHttpRequest & request, DDSResponderCallData && responder_data);
 
   void CreateResolverRequest(const char * hostname, bool reverse_lookup, DDSDeferredCallback & callback, std::function<void(const DDSResolverRequest &)> && function);
+
+  void CreateTokenValidatorRequest(uint64_t token, int type, DDSDeferredCallback & callback, std::function<void(bool, const std::string &)> && function);
+
+  uint64_t RequestToken(std::string && token_data, int type, int timeout);
+  bool ValidateToken(uint64_t token, int type, std::string & out_token_data);
 
   void SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message, bool force_process = false);
 
@@ -256,6 +263,8 @@ private:
   DDSTimerSystem m_TimerSystem;
   DDSHttpClient m_HttpClient;
   DDSResolver m_Resolver;
+  DDSTokenBroker m_TokenBroker;
+  DDSTokenValidator m_TokenValidator;
   std::set<std::unique_ptr<DDSDeferredCallback>> m_DeferredCallbackList;
 
   Optional<DDSNodeId> m_LocalNodeId;

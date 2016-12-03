@@ -60,6 +60,10 @@ public:
   void CreateTimer(DDSDeferredCallback & callback, std::chrono::system_clock::duration duration, std::function<void()> && function);
   void CreateHttpRequest(DDSDeferredCallback & callback, const DDSHttpRequest & request, std::function<void(bool, const std::string &, const std::string &)> && function);
   void CreateResolverRequest(DDSDeferredCallback & callback, const char * hostname, bool reverse_lookup, std::function<void(const DDSResolverRequest &)> && function);
+  void CreateTokenValidationRequest(DDSDeferredCallback & callback, uint64_t token, int type, std::function<void(bool, const std::string &)> && function);
+
+  bool NodeIsReady();
+  uint64_t CreateToken(std::string && token_data, int type, int timeout_secs);
 
   template <typename TargetObject>
   void CreateTimer(std::chrono::system_clock::duration duration, DDSKey key, void (TargetObject::*return_func)())

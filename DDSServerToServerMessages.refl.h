@@ -27,6 +27,8 @@ enum STORM_REFL_ENUM class DDSServerToServerMessageType
   kCreateDataExistSubscription,
   kDestroySubscription,
   kSubscriptionDeleted,
+  kValidateTokenRequest,
+  kValidateTokenResponse,
 };
 
 struct DDSServerToServerHandshakeRequest
@@ -161,4 +163,16 @@ struct DDSSubscriptionDeleted : public DDSSubscriptionDeletedBase
 {
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kSubscriptionDeleted;
+};
+
+struct DDSValidateTokenRequest : public DDSValidateTokenRequestBase
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kValidateTokenRequest;
+};
+
+struct DDSValidateTokenResponse : public DDSValidateTokenResponseBase
+{
+  STORM_REFL;
+  static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kValidateTokenResponse;
 };

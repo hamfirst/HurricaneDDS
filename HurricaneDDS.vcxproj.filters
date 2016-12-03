@@ -235,6 +235,9 @@
     <ClInclude Include="DDSNodeSharedObjectResolver.h">
       <Filter>Node</Filter>
     </ClInclude>
+    <ClInclude Include="DDSTokenValidator.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSCoordinatorNetworkService.cpp">
@@ -359,6 +362,12 @@
     </ClCompile>
     <ClCompile Include="DDSNodeSharedObjectResolver.cpp">
       <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTokenBroker.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTokenValidator.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

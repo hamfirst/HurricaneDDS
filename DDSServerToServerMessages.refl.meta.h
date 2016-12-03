@@ -10,7 +10,7 @@
 template <>
 struct StormReflEnumInfo<DDSServerToServerMessageType>
 {
-  static constexpr int elems_n = 14;
+  static constexpr int elems_n = 16;
   static constexpr auto GetName() { return "DDSServerToServerMessageType"; }
   static constexpr auto GetNameHash() { return 0xBBFBB085; }
   template <int N> struct elems { };
@@ -126,6 +126,22 @@ struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<13>
   static constexpr auto GetName() { return "kSubscriptionDeleted"; }
   static constexpr auto GetNameHash() { return 0xA823DCCA; }
   static constexpr auto GetValue() { return DDSServerToServerMessageType::kSubscriptionDeleted; }
+};
+
+template <>
+struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<14>
+{
+  static constexpr auto GetName() { return "kValidateTokenRequest"; }
+  static constexpr auto GetNameHash() { return 0x415645E9; }
+  static constexpr auto GetValue() { return DDSServerToServerMessageType::kValidateTokenRequest; }
+};
+
+template <>
+struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<15>
+{
+  static constexpr auto GetName() { return "kValidateTokenResponse"; }
+  static constexpr auto GetNameHash() { return 0x353318E1; }
+  static constexpr auto GetValue() { return DDSServerToServerMessageType::kValidateTokenResponse; }
 };
 
 template <>
@@ -983,11 +999,43 @@ struct StormReflTypeInfo<DDSSubscriptionDeleted>
   static DDSSubscriptionDeleted & GetDefault() { static DDSSubscriptionDeleted def; return def; }
 };
 
+template <>
+struct StormReflTypeInfo<DDSValidateTokenRequest>
+{
+  using MyBase = DDSValidateTokenRequestBase;
+  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
+  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
+  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
+  {
+    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
+  };
+  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
+  static constexpr auto GetName() { return "DDSValidateTokenRequest"; }
+  static constexpr auto GetNameHash() { return 0x66F90832; }
+  static DDSValidateTokenRequest & GetDefault() { static DDSValidateTokenRequest def; return def; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSValidateTokenResponse>
+{
+  using MyBase = DDSValidateTokenResponseBase;
+  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
+  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
+  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
+  {
+    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
+  };
+  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
+  static constexpr auto GetName() { return "DDSValidateTokenResponse"; }
+  static constexpr auto GetNameHash() { return 0x3D798A81; }
+  static DDSValidateTokenResponse & GetDefault() { static DDSValidateTokenResponse def; return def; }
+};
+
 namespace StormReflFileInfo
 {
   struct DDSServerToServerMessages
   {
-    static const int types_n = 16;
+    static const int types_n = 18;
     template <int i> struct type_info { using type = void; };
   };
 
@@ -1085,6 +1133,18 @@ namespace StormReflFileInfo
   struct DDSServerToServerMessages::type_info<15>
   {
     using type = ::DDSSubscriptionDeleted;
+  };
+
+  template <>
+  struct DDSServerToServerMessages::type_info<16>
+  {
+    using type = ::DDSValidateTokenRequest;
+  };
+
+  template <>
+  struct DDSServerToServerMessages::type_info<17>
+  {
+    using type = ::DDSValidateTokenResponse;
   };
 
 }

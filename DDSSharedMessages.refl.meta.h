@@ -1267,11 +1267,167 @@ struct StormReflTypeInfo<DDSCreateDataExistSubscriptionBase>
   static DDSCreateDataExistSubscriptionBase & GetDefault() { static DDSCreateDataExistSubscriptionBase def; return def; }
 };
 
+template <>
+struct StormReflTypeInfo<DDSValidateTokenRequestBase>
+{
+  static constexpr int fields_n = 3;
+  template <int N> struct field_data_static {};
+  template <int N, typename Self> struct field_data {};
+  template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
+  static constexpr auto GetName() { return "DDSValidateTokenRequestBase"; }
+  static constexpr auto GetNameHash() { return 0x67C18764; }
+  static DDSValidateTokenRequestBase & GetDefault() { static DDSValidateTokenRequestBase def; return def; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data_static<0>
+{
+  using member_type = uint64_t; // unsigned long long
+  static constexpr auto GetName() { return "m_RequestId"; }
+  static constexpr auto GetType() { return "unsigned long long"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x6DDE17CC; }
+  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr auto GetFieldIndex() { return 0; }
+  static constexpr auto GetMemberPtr() { return &DDSValidateTokenRequestBase::m_RequestId; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data<0, Self> : public StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data_static<0>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, uint64_t> & Get() { return self.m_RequestId; }
+  std::add_const_t<std::remove_reference_t<uint64_t>> & Get() const { return self.m_RequestId; }
+  void SetDefault() { self.m_RequestId = StormReflTypeInfo<DDSValidateTokenRequestBase>::GetDefault().m_RequestId; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data_static<1>
+{
+  using member_type = uint32_t; // unsigned int
+  static constexpr auto GetName() { return "m_Token"; }
+  static constexpr auto GetType() { return "unsigned int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD094062A; }
+  static constexpr unsigned GetTypeNameHash() { return 0xB306EEF4; }
+  static constexpr auto GetFieldIndex() { return 1; }
+  static constexpr auto GetMemberPtr() { return &DDSValidateTokenRequestBase::m_Token; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data<1, Self> : public StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data_static<1>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, uint32_t> & Get() { return self.m_Token; }
+  std::add_const_t<std::remove_reference_t<uint32_t>> & Get() const { return self.m_Token; }
+  void SetDefault() { self.m_Token = StormReflTypeInfo<DDSValidateTokenRequestBase>::GetDefault().m_Token; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data_static<2>
+{
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_Type"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x70F58FB9; }
+  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr auto GetFieldIndex() { return 2; }
+  static constexpr auto GetMemberPtr() { return &DDSValidateTokenRequestBase::m_Type; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data<2, Self> : public StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data_static<2>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_Type; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_Type; }
+  void SetDefault() { self.m_Type = StormReflTypeInfo<DDSValidateTokenRequestBase>::GetDefault().m_Type; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSValidateTokenResponseBase>
+{
+  static constexpr int fields_n = 3;
+  template <int N> struct field_data_static {};
+  template <int N, typename Self> struct field_data {};
+  template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
+  static constexpr auto GetName() { return "DDSValidateTokenResponseBase"; }
+  static constexpr auto GetNameHash() { return 0x2B768F1B; }
+  static DDSValidateTokenResponseBase & GetDefault() { static DDSValidateTokenResponseBase def; return def; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data_static<0>
+{
+  using member_type = uint64_t; // unsigned long long
+  static constexpr auto GetName() { return "m_RequestId"; }
+  static constexpr auto GetType() { return "unsigned long long"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x6DDE17CC; }
+  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr auto GetFieldIndex() { return 0; }
+  static constexpr auto GetMemberPtr() { return &DDSValidateTokenResponseBase::m_RequestId; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data<0, Self> : public StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data_static<0>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, uint64_t> & Get() { return self.m_RequestId; }
+  std::add_const_t<std::remove_reference_t<uint64_t>> & Get() const { return self.m_RequestId; }
+  void SetDefault() { self.m_RequestId = StormReflTypeInfo<DDSValidateTokenResponseBase>::GetDefault().m_RequestId; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data_static<1>
+{
+  using member_type = bool; // bool
+  static constexpr auto GetName() { return "m_Success"; }
+  static constexpr auto GetType() { return "bool"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x5F99A014; }
+  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr auto GetFieldIndex() { return 1; }
+  static constexpr auto GetMemberPtr() { return &DDSValidateTokenResponseBase::m_Success; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data<1, Self> : public StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data_static<1>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, bool> & Get() { return self.m_Success; }
+  std::add_const_t<std::remove_reference_t<bool>> & Get() const { return self.m_Success; }
+  void SetDefault() { self.m_Success = StormReflTypeInfo<DDSValidateTokenResponseBase>::GetDefault().m_Success; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data_static<2>
+{
+  using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
+  static constexpr auto GetName() { return "m_TokenData"; }
+  static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x92972060; }
+  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr auto GetFieldIndex() { return 2; }
+  static constexpr auto GetMemberPtr() { return &DDSValidateTokenResponseBase::m_TokenData; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data<2, Self> : public StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data_static<2>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, std::string> & Get() { return self.m_TokenData; }
+  std::add_const_t<std::remove_reference_t<std::string>> & Get() const { return self.m_TokenData; }
+  void SetDefault() { self.m_TokenData = StormReflTypeInfo<DDSValidateTokenResponseBase>::GetDefault().m_TokenData; }
+};
+
 namespace StormReflFileInfo
 {
   struct DDSSharedMessages
   {
-    static const int types_n = 11;
+    static const int types_n = 13;
     template <int i> struct type_info { using type = void; };
   };
 
@@ -1339,6 +1495,18 @@ namespace StormReflFileInfo
   struct DDSSharedMessages::type_info<10>
   {
     using type = ::DDSCreateDataExistSubscriptionBase;
+  };
+
+  template <>
+  struct DDSSharedMessages::type_info<11>
+  {
+    using type = ::DDSValidateTokenRequestBase;
+  };
+
+  template <>
+  struct DDSSharedMessages::type_info<12>
+  {
+    using type = ::DDSValidateTokenResponseBase;
   };
 
 }

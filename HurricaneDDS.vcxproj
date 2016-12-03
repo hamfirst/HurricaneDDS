@@ -345,6 +345,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="DDSTokenBroker.h" />
+    <ClInclude Include="DDSTokenValidator.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSVersion.h" />
     <ClInclude Include="DDSWebsiteFactory.h">
       <SubType>
@@ -501,6 +505,11 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSTimerSystem.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSTokenBroker.cpp" />
+    <ClCompile Include="DDSTokenValidator.cpp">
       <SubType>
       </SubType>
     </ClCompile>

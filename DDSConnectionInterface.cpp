@@ -54,6 +54,21 @@ void DDSConnectionInterface::CreateResolverRequest(DDSDeferredCallback & callbac
   m_NodeState.CreateResolverRequest(hostname, reverse_lookup, callback, std::move(function));
 }
 
+void DDSConnectionInterface::CreateTokenValidationRequest(DDSDeferredCallback & callback, uint64_t token, int type, std::function<void(bool, const std::string &)> && function)
+{
+  m_NodeState.CreateTokenValidatorRequest(token, type, callback, std::move(function));
+}
+
+bool DDSConnectionInterface::NodeIsReady()
+{
+  return m_NodeState.m_IsReady && m_NodeState.m_IsDefunct == false;
+}
+
+uint64_t DDSConnectionInterface::CreateToken(std::string && token_data, int type, int timeout_secs)
+{
+  return m_NodeState.RequestToken(std::move(token_data), type, timeout_secs);
+}
+
 bool DDSConnectionInterface::IsLocalKey(DDSKey key)
 {
   return KeyInKeyRange(key, m_NodeState.GetLocalKeyRange());
