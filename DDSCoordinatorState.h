@@ -47,7 +47,7 @@ public:
   void CreateTimer(std::chrono::system_clock::duration duration, DDSCoordinatorResponderCallData && responder_data);
   void CreateHttpRequest(const DDSHttpRequest & request, DDSCoordinatorResponderCallData && responder_data);
 
-  std::pair<std::string, int> GetNodeHost(DDSKey key);
+  DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key);
 private:
 
   friend class DDSCoordinatorServerProtocol;
@@ -62,7 +62,7 @@ private:
     const StormSockets::StormSocketClientFrontendHttpSettings & http_client_settings,
     const DDSDatabaseSettings & database_settings);
 
-  void GotMessageFromServer(DDSCoordinatorProtocolMessageType type, const char * data);
+  void GotMessageFromServer(DDSNodeId server_id, DDSCoordinatorProtocolMessageType type, const char * data);
   bool SendTargetedMessage(DDSDataObjectAddress addr, DDSCoordinatorProtocolMessageType type, std::string && message, bool force_process = false);
   void SendToAllConnectedClients(std::string && message);
 
@@ -85,7 +85,8 @@ private:
 
   DDSNodeId GetNodeIdForKey(DDSKey key) const;
 
-  DDSNodeId CreateNode(uint32_t addr, uint16_t port);
+  DDSNodeId CreateNode(uint32_t addr, uint16_t port, const std::vector<DDSNodePort> & endpoint_ports, const std::vector<DDSNodePort> & website_ports);
+  void SetNodeDefunct(DDSNodeId id);
   void DestroyNode(DDSNodeId id);
 
   uint64_t GetClientSecret() const;

@@ -25,6 +25,14 @@ public:
     m_SharedObjectType(shared_object_type)
   {
     InitializeParentInfo(*m_DataObject.get());
+
+    auto data_obj_callback = [](void * user_ptr, const ReflectionChangeNotification & change)
+    {
+      DDSSharedObject<DataType> * store = (DDSSharedObject<DataType> *)user_ptr;
+      store->HandleDataObjectChange(change);
+    };
+
+    SetNotifyCallback(*m_DataObject.get(), data_obj_callback, this);
   }
 
   uint32_t GetObjectClassNameHash() override
@@ -37,16 +45,18 @@ public:
     return m_SharedObjectType;
   }
 
+  void HandleDataObjectChange(const ReflectionChangeNotification & change)
+  {
+    m_Changes.emplace_back(change);
+  }
+
   virtual void BeginObjectModification()
   {
-    ReflectionPushNotifyCallback([&](const ReflectionChangeNotification & change) { m_Changes.emplace_back(change); });
     m_Coordinator.BeginQueueingMessages();
   }
 
   virtual void EndObjectModification()
   {
-    ReflectionPopNotifyCallback();
-
     std::vector<ReflectionChangeNotification> changes = std::move(m_Changes);
 
     if (changes.size() > 0)
@@ -218,28 +228,34 @@ public:
     return m_SharedObjectType;
   }
 
+
+
   void ProcessDelta(const DDSCoordinatorSharedObjectDelta & delta) override
   {
-    for (auto & change : delta.m_Deltas)
+    for (auto & elem : delta.m_Deltas)
     {
       ReflectionChangeNotification change_notification;
-      change_notification.m_Type = change.m_Type;
-      change_notification.m_BaseObject = m_DataObject.get();
-      change_notification.m_Data = change.m_Data;
-      change_notification.m_SubIndex = change.m_Index;
-      change_notification.m_Path = change.m_Path;
+      change_notification.m_Type = elem.m_Type;
+      change_notification.m_Data = elem.m_Data;
+      change_notification.m_SubIndex = elem.m_Index;
+      change_notification.m_Path = elem.m_Path;
 
-      StormDataApplyChangePacket(*m_DataObject.get(), change.m_Type, change.m_Path.data(), change.m_Index, change.m_Data.data());
+      StormDataApplyChangePacket(*m_DataObject.get(), elem.m_Type, elem.m_Path.data(), elem.m_Index, elem.m_Data.data());
 
       for (auto & sub_data : m_Subscriptions)
       {
-        for (auto & sub : sub_data.second)
-        {
-          if (StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
-          {
-            DDSSendChangeSubscription(change_notification, sub, m_DataObject.get(), m_NodeState);
-          }
-        }
+        ProcessDeltaElem(change_notification, sub_data.second, elem);
+      }
+    }
+  }
+
+  void ProcessDeltaElem(ReflectionChangeNotification & change_notification, std::vector<DDSExportedSubscription> & subs, const DDSCoordinatorSharedObjectDeltaMessage & elem)
+  {
+    for (auto & sub : subs)
+    {
+      if (StormDataMatchPathPartial(elem.m_Path.data(), sub.m_DataPath.data()))
+      {
+        DDSSendChangeSubscription(change_notification, sub, m_DataObject.get(), m_NodeState);
       }
     }
   }
@@ -299,9 +315,28 @@ public:
     m_Subscriptions.erase(itr);
   }
 
-  void ImportSubscriptions(DDSDataObjectAddress addr, std::vector<DDSExportedSubscription> && subs) override
+  void ImportSubscriptions(DDSDataObjectAddress addr, std::vector<DDSExportedSubscription> && subs, DDSNodeSharedObjectResolver & resolver, int table_gen) override
   {
-    m_Subscriptions.emplace(std::make_pair(addr, subs));
+    m_Subscriptions.emplace(std::make_pair(addr, std::move(subs)));
+
+    auto change_lists = resolver.GetChangeList(table_gen, addr.m_ObjectKey);
+
+    for (auto change_list : change_lists)
+    {
+      for (auto delta_list : *change_list)
+      {
+        for (auto elem : delta_list.m_Deltas)
+        {
+          ReflectionChangeNotification change_notification;
+          change_notification.m_Type = elem.m_Type;
+          change_notification.m_Data = elem.m_Data;
+          change_notification.m_SubIndex = elem.m_Index;
+          change_notification.m_Path = elem.m_Path;
+
+          ProcessDeltaElem(change_notification, subs, elem);
+        }
+      }
+    }
   }
 
 private:

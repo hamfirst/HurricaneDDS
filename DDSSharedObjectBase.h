@@ -2,6 +2,7 @@
 
 #include "DDSKey.h"
 #include "DDSResponder.h"
+#include "DDSNodeSharedObjectResolver.h"
 #include "DDSCoordinatorProtocolMessages.refl.h"
 
 class DDSSharedObjectBase
@@ -28,6 +29,6 @@ public:
   virtual void DestroySubscription(DDSDataObjectAddress addr, DDSKey subscription_id) = 0;
 
   virtual void ExportSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list) = 0;
-  virtual void ImportSubscriptions(DDSDataObjectAddress addr, std::vector<DDSExportedSubscription> && subs) = 0;
+  virtual void ImportSubscriptions(DDSDataObjectAddress addr, std::vector<DDSExportedSubscription> && subs, DDSNodeSharedObjectResolver & resolver, int table_gen) = 0;
 };
 

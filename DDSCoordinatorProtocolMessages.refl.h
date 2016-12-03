@@ -18,6 +18,7 @@ enum STORM_REFL_ENUM class DDSCoordinatorProtocolMessageType
   kHandshakeFinalize,
   kNodeInit,
   kRoutingTable,
+  kShutDown,
   kSharedObjectDelta,
   kResponderCall,
   kTargetedMessage,
@@ -54,7 +55,10 @@ struct DDSCoordinatorHandshakeFinalize
 
   uint64_t m_ChallengeResponse;
   uint32_t m_PublicIp;
-  uint16_t m_PublicPort;
+  uint16_t m_NodePort;
+
+  std::vector<DDSNodePort> m_EndpointPorts;
+  std::vector<DDSNodePort> m_WebsitePorts;
 };
 
 struct DDSCoordinatorNodeInitialization
@@ -68,6 +72,12 @@ struct DDSCoordinatorNodeInitialization
   bool m_InitialNode;
 
   std::vector<std::string> m_SharedObjects;
+};
+
+struct DDSCoordinatorNodeShutdown
+{
+  STORM_REFL;
+  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kShutDown;
 };
 
 struct DDSCoordinatorSharedObjectDeltaMessage

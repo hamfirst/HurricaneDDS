@@ -261,7 +261,7 @@ void DDSNodeInterface::DestroySubscriptionInternal(int return_object_type, DDSKe
     DDSServerToServerMessageType::kDestroySubscription, StormReflEncodeJson(sub_data));
 }
 
-std::pair<std::string, int> DDSNodeInterface::GetNodeHost(DDSKey key)
+DDSRoutingTableNodeInfo DDSNodeInterface::GetNodeInfo(DDSKey key)
 {
-  return m_NodeState.GetNodeHost(key);
+  return m_NodeState.GetNodeInfo(key);
 }

@@ -24,6 +24,12 @@ void DDSDatabaseBoostrapFullInternal(const std::vector<DDSDatabaseBoostrapCollec
   bson_error_t err;
   mongoc_database_drop(database, &err);
 
+  if (err.code != 0)
+  {
+    fprintf(stderr, "Could not connect to database");
+    std::terminate();
+  }
+
   for (auto & collection_info : info)
   {
     auto collection = mongoc_database_create_collection(database, collection_info.m_CollectionName.c_str(), nullptr, &err);

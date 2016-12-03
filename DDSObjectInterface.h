@@ -3,6 +3,7 @@
 #include "DDSKey.h"
 #include "DDSResponder.h"
 #include "DDSHttpRequest.h"
+#include "DDSRoutingTable.h"
 
 #include <string>
 #include <cstdint>
@@ -227,7 +228,7 @@ public:
     DestroySubscriptionInternal(GetDataObjectType(StormReflTypeInfo<TargetDatabaseObject>::GetNameHash()), target_key, subscription_id);
   }
 
-  virtual std::pair<std::string, int> GetNodeHost(DDSKey key) = 0;
+  virtual DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) = 0;
 
 private:
   template <typename ... CallArgs>

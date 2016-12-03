@@ -15,7 +15,7 @@ public:
   DDSKey GetLocalKey() override;
   int GetObjectTypeId() override;
 
-  std::pair<std::string, int> GetNodeHost(DDSKey key) override;
+  DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) override;
 
 private:
 

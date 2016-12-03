@@ -24,6 +24,7 @@ public:
   bool SendResponse(StormSockets::StormSocketConnectionId connection_id, StormSockets::StormHttpResponseWriter & writer);
 
   void ForceDisconnect(StormSockets::StormSocketConnectionId connection_id) override;
+  DDSNodePort GetListenPort() override;
 
 protected:
   virtual void HandleConnect(StormSockets::StormSocketConnectionId connection_id, uint32_t remote_ip, uint16_t remote_port) = 0;
@@ -34,4 +35,5 @@ protected:
 
   std::unique_ptr<StormSockets::StormSocketServerFrontendHttp> m_Frontend;
   DDSNodeState & m_NodeState;
+  DDSNodePort m_Port;
 };

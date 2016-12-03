@@ -44,12 +44,18 @@ class DDSDataObjectStore : public DDSDataObjectStoreBase
     kDeleted,
   };
 
+  struct CallbackData
+  {
+    DDSKey m_Key;
+    DDSDataObjectStore<DataType, DatabaseBackedType> * m_DataStore;
+  };
 
   struct ObjectData
   {
     ObjectState m_State;
     std::unique_ptr<DataType> m_ActiveObject;
     std::unique_ptr<DatabaseBackedType> m_DatabaseObject;
+    std::unique_ptr<CallbackData> m_CallbackData;
     std::vector<DDSExportedMessage> m_PendingMessages;
     std::vector<DDSExportedSubscription> m_Subscriptions;
     std::vector<DDSExportedRequestedSubscription> m_RequestedSubscriptions;
@@ -183,6 +189,18 @@ public:
 
     InitializeParentInfo(*obj_data.m_DatabaseObject.get());
 
+    obj_data.m_CallbackData = std::make_unique<CallbackData>();
+    obj_data.m_CallbackData->m_Key = key;
+    obj_data.m_CallbackData->m_DataStore = this;
+
+    auto database_callback = [](void * user_ptr, const ReflectionChangeNotification & change)
+    {
+      CallbackData * cb = (CallbackData *)user_ptr;
+      cb->m_DataStore->HandleDatabaseObjectChange(cb->m_Key, change);
+    };
+
+    SetNotifyCallback(*obj_data.m_DatabaseObject.get(), database_callback, obj_data.m_CallbackData.get());
+
     for (auto & sub : obj_data.m_Subscriptions)
     {
       if (sub.m_DataPath == "?" && sub.m_IsDataSubscription)
@@ -238,6 +256,14 @@ public:
     auto & obj_data = m_Objects.at(key);
     InitializeParentInfo(*obj_data.m_ActiveObject.get());
 
+    auto data_obj_callback = [](void * user_ptr, const ReflectionChangeNotification & change)
+    {
+      CallbackData * cb = (CallbackData *)user_ptr;
+      cb->m_DataStore->HandleDataObjectChange(cb->m_Key, change);
+    };
+
+    SetNotifyCallback(*obj_data.m_ActiveObject.get(), data_obj_callback, obj_data.m_CallbackData.get());
+
     if (obj_data.m_State != kCreating)
     {
       DDSLog::LogError("Incosistent object state");
@@ -251,6 +277,8 @@ public:
       ProcessMessage(key, obj_data, msg.m_Type, msg.m_Message.c_str());
     }
 
+    obj_data.m_PendingMessages.clear();
+
     for (auto & sub : obj_data.m_Subscriptions)
     {
       if (sub.m_DataPath == "?" && sub.m_IsDataSubscription == false)
@@ -263,7 +291,6 @@ public:
       }
     }
 
-    obj_data.m_PendingMessages.clear();
   }
 
   bool TryProcessMessage(DDSKey key, ObjectData & obj_data, DDSServerToServerMessageType message_type, const char * msg)
@@ -512,6 +539,26 @@ public:
     }
   }
 
+  void HandleDataObjectChange(DDSKey key, const ReflectionChangeNotification & change)
+  {   
+    if (m_Modifying == false)
+    {
+      DDSLog::LogError("Invalid modification");
+    }
+
+    m_Changes.emplace_back(std::make_tuple(key, false, change));
+  }
+
+  void HandleDatabaseObjectChange(DDSKey key, const ReflectionChangeNotification & change)
+  {
+    if (m_Modifying == false)
+    {
+      DDSLog::LogError("Invalid modification");
+    }
+
+    m_Changes.emplace_back(std::make_tuple(key, true, change));
+  }
+
   virtual void BeginObjectModification(DDSKey key)
   {
     if (m_Modifying)
@@ -520,23 +567,20 @@ public:
     }
 
     m_Modifying = true;
-
     m_NodeState.BeginQueueingMessages();
-    ReflectionPushNotifyCallback([this, key](const ReflectionChangeNotification & change) { m_Changes.emplace_back(std::make_pair(key, change)); });
   }
 
   virtual void EndObjectModification()
   {
-    ReflectionPopNotifyCallback();
-
-    std::vector<std::pair<DDSKey, ReflectionChangeNotification>> changes = std::move(m_Changes);
-    std::vector<DDSKey> dead_keys = std::move(m_DeadObjects);
-    std::vector<DDSKey> finalized_objects = std::move(m_FinalizedObjects);
+    auto changes = std::move(m_Changes);
+    auto dead_keys = std::move(m_DeadObjects);
+    auto finalized_objects = std::move(m_FinalizedObjects);
 
     for (auto & change_data : changes)
     {
-      DDSKey key = change_data.first;
-      auto & change = change_data.second;
+      DDSKey key = std::get<DDSKey>(change_data);
+      bool database_changed = std::get<bool>(change_data);
+      auto & change = std::get<ReflectionChangeNotification>(change_data);
 
       auto itr = m_Objects.find(key);
       if (itr == m_Objects.end())
@@ -545,26 +589,29 @@ public:
       }
 
       auto & obj_data = itr->second;
-      if (change.m_BaseObject != obj_data.m_ActiveObject.get() && change.m_BaseObject != obj_data.m_DatabaseObject.get())
-      {
-        continue;
-      }
-
-      bool database_changed = false;
-
-      for (auto & sub : obj_data.m_Subscriptions)
-      {
-        if (StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
-        {
-          DDSSendChangeSubscription(change, sub, obj_data.m_ActiveObject.get(), m_NodeState);
-          DDSSendChangeSubscription(change, sub, obj_data.m_DatabaseObject.get(), m_NodeState);
-        }
-      }
 
       if (database_changed)
       {
+        for (auto & sub : obj_data.m_Subscriptions)
+        {
+          if (sub.m_IsDataSubscription && StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
+          {
+            DDSSendChangeSubscription(change, sub, obj_data.m_DatabaseObject.get(), m_NodeState);
+          }
+        }
+
         std::string database_obj = StormReflEncodeJson(*obj_data.m_DatabaseObject.get());
         m_NodeState.UpdateObjectData(m_ObjectTypeId, key, DatabaseBackedType::Collection(), database_obj.data(), nullptr);
+      }
+      else
+      {
+        for (auto & sub : obj_data.m_Subscriptions)
+        {
+          if (sub.m_IsDataSubscription == false && StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
+          {
+            DDSSendChangeSubscription(change, sub, obj_data.m_ActiveObject.get(), m_NodeState);
+          }
+        }
       }
     }
 
@@ -645,6 +692,11 @@ public:
     }
 
     auto start_itr = m_Objects.lower_bound(requested_range.m_Min);
+    if (start_itr == m_Objects.end())
+    {
+      start_itr = m_Objects.begin();
+    }
+
     auto itr = start_itr;
 
     while (true)
@@ -686,12 +738,12 @@ public:
     }
 
     auto start_itr = m_Objects.lower_bound(requested_range.m_Min);
-    auto itr = start_itr;
-
-    if (itr == m_Objects.end())
+    if (start_itr == m_Objects.end())
     {
-      itr = m_Objects.begin();
+      start_itr = m_Objects.begin();
     }
+
+    auto itr = start_itr;
 
     std::vector<decltype(itr)> saved_itrs;
 
@@ -783,7 +835,7 @@ public:
     return complete;
   }
 
-  void ProcessExportedObjects(std::vector<DDSExportedObject> & object_list)
+  void ProcessExportedObjects(std::vector<DDSExportedObject> & object_list, int routing_table_gen)
   {
     for (auto & object : object_list)
     {
@@ -802,6 +854,8 @@ public:
           continue;
         }
 
+        DDSLog::LogVerbose("Processing incoming db object:\n%s", StormReflEncodePrettyJson(*obj_data.m_DatabaseObject.get()).data());
+
         if (object.m_ActiveObject.size() > 0)
         {
           DDSNodeInterface node_interface(m_NodeState, this, object.m_Key);
@@ -811,6 +865,8 @@ public:
             DDSLog::LogError("Could not properly parse external sync message");
             return;
           }
+
+          DDSLog::LogVerbose("Processing incoming data objtect:\n%s", StormReflEncodePrettyJson(*obj_data.m_ActiveObject.get()).data());
 
           if (object.m_State == DDSExportedObjectState::kLoaded)
           {
@@ -825,7 +881,7 @@ public:
             obj_data.m_State = kCreating;
           }
 
-          m_NodeState.ImportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, object.m_Key }, object.m_SharedSubscriptions);
+          m_NodeState.ImportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, object.m_Key }, object.m_SharedSubscriptions, routing_table_gen);
           m_Objects.emplace(std::make_pair(object.m_Key, std::move(obj_data)));
         }
         else
@@ -834,16 +890,11 @@ public:
           m_Objects.emplace(std::make_pair(object.m_Key, std::move(obj_data)));
         }
       }
+      else
       {
         obj_data.m_State = kDeleted;
         auto result = m_Objects.emplace(std::make_pair(object.m_Key, std::move(obj_data)));
-        ReloadObjectByKey(object.m_Key, result.first->second);
       }
-    }
-
-    for (auto & object : object_list)
-    {
-
     }
   }
 
@@ -856,7 +907,7 @@ private:
   bool m_Modifying;
 
   std::map<DDSKey, ObjectData> m_Objects;
-  std::vector<std::pair<DDSKey, ReflectionChangeNotification>> m_Changes;
+  std::vector<std::tuple<DDSKey, bool, ReflectionChangeNotification>> m_Changes;
   std::vector<DDSKey> m_DeadObjects;
   std::vector<DDSKey> m_FinalizedObjects;
 };

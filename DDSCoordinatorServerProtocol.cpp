@@ -121,8 +121,10 @@ bool DDSCoordinatorServerProtocol::HandleMessage(const char * msg, int length)
         finalize.m_PublicIp = m_RemoteIp;
       }
 
+      m_NodeId = m_CoordinatorState.CreateNode(finalize.m_PublicIp, finalize.m_NodePort, finalize.m_EndpointPorts, finalize.m_WebsitePorts);
+
       DDSCoordinatorNodeInitialization response;
-      response.m_NodeId = m_CoordinatorState.CreateNode(finalize.m_PublicIp, finalize.m_PublicPort);
+      response.m_NodeId = m_NodeId;
       response.m_InitialNode = m_CoordinatorState.GetRoutingTable().m_Table.size() == 1;
       response.m_ClientSecret = m_CoordinatorState.GetClientSecret();
       response.m_ServerSecret = m_CoordinatorState.GetServerSecret();
@@ -139,7 +141,7 @@ bool DDSCoordinatorServerProtocol::HandleMessage(const char * msg, int length)
     break;
   case kConnected:
     {
-      m_CoordinatorState.GotMessageFromServer(type, msg);
+      m_CoordinatorState.GotMessageFromServer(m_NodeId, type, msg);
     }
     break;
   }
@@ -147,7 +149,12 @@ bool DDSCoordinatorServerProtocol::HandleMessage(const char * msg, int length)
   return true;
 }
 
-bool DDSCoordinatorServerProtocol::CheckNodeId(DDSNodeId node_id)
+bool DDSCoordinatorServerProtocol::CheckNodeId(DDSNodeId node_id) const
 {
   return (m_State == kConnected && node_id == m_NodeId);
+}
+
+DDSNodeId DDSCoordinatorServerProtocol::GetNodeId() const
+{
+  return m_NodeId;
 }

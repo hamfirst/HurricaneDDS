@@ -1,122 +1,393 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="DDSNodeId.h" />
-    <ClInclude Include="DDSKey.h" />
-    <ClInclude Include="DDSRoutingTable.refl.h" />
-    <ClInclude Include="DDSRoutingTable.refl.meta.h" />
-    <ClInclude Include="DDSNetworkBackend.h" />
-    <ClInclude Include="DDSNodeNetworkService.h" />
-    <ClInclude Include="DDSDataObjectStore.h" />
-    <ClInclude Include="DDSDatabaseConnectionPool.h" />
-    <ClInclude Include="DDSRoutingTable.h" />
-    <ClInclude Include="DDSServerToServerSender.h" />
-    <ClInclude Include="DDSServerToServerMessages.refl.h" />
-    <ClInclude Include="DDSServerToServerMessages.refl.meta.h" />
-    <ClInclude Include="DDSNodeState.h" />
-    <ClInclude Include="DDSCoordinatorState.h" />
-    <ClInclude Include="DDSCoordinatorNetworkService.h" />
-    <ClInclude Include="DDSCoordinatorServerProtocol.h" />
-    <ClInclude Include="DDSCoordinatorProtocolMessages.refl.h" />
-    <ClInclude Include="DDSCoordinatorProtocolMessages.refl.meta.h" />
-    <ClInclude Include="DDSCoordinatorClientProtocol.h" />
-    <ClInclude Include="DDSDataObjectStoreBase.h" />
-    <ClInclude Include="DDSLog.h" />
-    <ClInclude Include="DDSChallenge.h" />
-    <ClInclude Include="DDSVersion.h" />
-    <ClInclude Include="DDSRandom.h" />
-    <ClInclude Include="DDSIncomingKeyspaceTransferManager.h" />
-    <ClInclude Include="DDSOutgoingKeyspaceTransferManager.h" />
-    <ClInclude Include="DDSOutgoingKeyspaceTransfer.h" />
-    <ClInclude Include="DDSServerToServerReceiver.h" />
-    <ClInclude Include="DDSServerMessage.h" />
-    <ClInclude Include="DDSDataObjectTypeList.h" />
-    <ClInclude Include="DDSResponder.refl.h" />
-    <ClInclude Include="DDSResponder.refl.meta.h" />
-    <ClInclude Include="DDSResponderCall.h" />
-    <ClInclude Include="DDSResponder.h" />
-    <ClInclude Include="DDSIncomingKeyspaceTransfer.h" />
-    <ClInclude Include="DDSDataObjectAddress.h" />
-    <ClInclude Include="DDSNodeInterface.h" />
-    <ClInclude Include="DDSDataObject.h" />
-    <ClInclude Include="DDSDataObjectStoreHelpers.h" />
-    <ClInclude Include="DDSDatabaseTypes.h" />
-    <ClInclude Include="DDSDatabaseSetup.h" />
-    <ClInclude Include="DDSTimerSystem.h" />
-    <ClInclude Include="DDSEndpointFactoryBase.h" />
-    <ClInclude Include="DDSEndpointFactory.h" />
-    <ClInclude Include="DDSEndpointInterface.h" />
-    <ClInclude Include="DDSEndpointFactoryList.h" />
-    <ClInclude Include="DDSDeferredCallback.h" />
-    <ClInclude Include="DDSDeferredCallbackSystem.h" />
-    <ClInclude Include="DDSHttpClient.h" />
-    <ClInclude Include="DDSResolverBackend.h" />
-    <ClInclude Include="DDSResolver.h" />
-    <ClInclude Include="DDSResolverRequest.h" />
-    <ClInclude Include="DDSSharedObject.h" />
-    <ClInclude Include="DDSSharedObjectBase.h" />
-    <ClInclude Include="DDSSharedObjectInterface.h" />
-    <ClInclude Include="DDSSharedObjectList.h" />
-    <ClInclude Include="DDSDataObjectName.h" />
-    <ClInclude Include="DDSSharedMessages.refl.h" />
-    <ClInclude Include="DDSSharedMessages.refl.meta.h" />
-    <ClInclude Include="DDSConnectionId.h" />
-    <ClInclude Include="DDSTokenBroker.h" />
-    <ClInclude Include="DDSObjectInterface.h" />
-    <ClInclude Include="DDSConnectionInterface.h" />
-    <ClInclude Include="DDSConnectionFactoryBase.h" />
-    <ClInclude Include="DDSWebsiteFactory.h" />
-    <ClInclude Include="DDSWebsiteFactoryBase.h" />
-    <ClInclude Include="DDSWebsiteInterface.h" />
-    <ClInclude Include="DDSWebsiteFactoryList.h" />
-    <ClInclude Include="DDSHttpRequest.h" />
-    <ClInclude Include="DDSWebsiteFilesystem.h" />
-    <ClInclude Include="DDSWebsiteFilesystemBuilder.h" />
-    <ClInclude Include="DDSWebsiteFactoryStaticContent.h" />
-    <ClInclude Include="DDSCall.h" />
-    <ClInclude Include="DDSDatabaseBootstrap.h" />
-    <ClInclude Include="DDSDataObjectStoreTemporary.h" />
-    <ClInclude Include="DDSDatabaseConnection.h" />
+    <ClInclude Include="DDSCoordinatorNetworkService.h">
+      <Filter>Coordinator</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorProtocolMessages.refl.h">
+      <Filter>Coordinator</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorProtocolMessages.refl.meta.h">
+      <Filter>Coordinator</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorServerProtocol.h">
+      <Filter>Coordinator</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorState.h">
+      <Filter>Coordinator</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseBootstrap.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseConnection.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseConnectionPool.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseSetup.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseTypes.h">
+      <Filter>Database</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDataObject.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDataObjectAddress.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDataObjectName.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDataObjectStore.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDataObjectStoreBase.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDataObjectStoreHelpers.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDataObjectStoreTemporary.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDataObjectTypeList.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSChallenge.h">
+      <Filter>Security</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSCall.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSConnectionFactoryBase.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSConnectionId.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSConnectionInterface.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSCoordinatorClientProtocol.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSEndpointFactory.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSEndpointFactoryBase.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSEndpointFactoryList.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSEndpointInterface.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSIncomingKeyspaceTransfer.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSIncomingKeyspaceTransferManager.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSNodeId.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSNodeInterface.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSNodeState.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSNodeNetworkService.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSOutgoingKeyspaceTransferManager.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSOutgoingKeyspaceTransfer.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSServerToServerMessages.refl.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSServerToServerMessages.refl.meta.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSServerToServerReceiver.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSServerToServerSender.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedObject.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedObjectBase.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedObjectInterface.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedObjectList.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFactory.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFactoryBase.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFactoryList.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFactoryStaticContent.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFilesystem.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFilesystemBuilder.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteInterface.h">
+      <Filter>Endpoint</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSObjectInterface.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSResolver.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSResolverBackend.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSResolverRequest.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSHttpClient.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSHttpRequest.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTimerSystem.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTokenBroker.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDeferredCallback.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSDeferredCallbackSystem.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSKey.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSLog.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSRandom.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSResponder.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSResponder.refl.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSResponder.refl.meta.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSResponderCall.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSRoutingTable.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSRoutingTable.refl.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSRoutingTable.refl.meta.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSShutdown.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSVersion.h">
+      <Filter>Foundation</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSNetworkBackend.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSServerMessage.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedMessages.refl.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedMessages.refl.meta.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSNodeSharedObjectResolver.h">
+      <Filter>Node</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DDSNetworkBackend.cpp" />
-    <ClCompile Include="DDSNodeNetworkService.cpp" />
-    <ClCompile Include="DDSDatabaseConnectionPool.cpp" />
-    <ClCompile Include="DDSRoutingTable.cpp" />
-    <ClCompile Include="DDSKey.cpp" />
-    <ClCompile Include="DDSServerToServerSender.cpp" />
-    <ClCompile Include="DDSNodeState.cpp" />
-    <ClCompile Include="DDSCoordinatorState.cpp" />
-    <ClCompile Include="DDSCoordinatorNetworkService.cpp" />
-    <ClCompile Include="DDSCoordinatorServerProtocol.cpp" />
-    <ClCompile Include="DDSCoordinatorClientProtocol.cpp" />
-    <ClCompile Include="DDSResponder.cpp" />
-    <ClCompile Include="DDSLog.cpp" />
-    <ClCompile Include="DDSRandom.cpp" />
-    <ClCompile Include="DDSIncomingKeyspaceTransferManager.cpp" />
-    <ClCompile Include="DDSOutgoingKeyspaceTransferManager.cpp" />
-    <ClCompile Include="DDSOutgoingKeyspaceTransfer.cpp" />
-    <ClCompile Include="DDSServerToServerReceiver.cpp" />
-    <ClCompile Include="DDSIncomingKeyspaceTransfer.cpp" />
-    <ClCompile Include="DDSNodeInterface.cpp" />
-    <ClCompile Include="DDSVersion.cpp" />
-    <ClCompile Include="DDSDatabaseSetup.cpp" />
-    <ClCompile Include="DDSTimerSystem.cpp" />
-    <ClCompile Include="DDSEndpointFactoryBase.cpp" />
-    <ClCompile Include="DDSEndpointInterface.cpp" />
-    <ClCompile Include="DDSDeferredCallback.cpp" />
-    <ClCompile Include="DDSHttpClient.cpp" />
-    <ClCompile Include="DDSResolverBackend.cpp" />
-    <ClCompile Include="DDSResolver.cpp" />
-    <ClCompile Include="DDSSharedObjectInterface.cpp" />
-    <ClCompile Include="DDSConnectionInterface.cpp" />
-    <ClCompile Include="DDSWebsiteFactoryBase.cpp" />
-    <ClCompile Include="DDSWebsiteInterface.cpp" />
-    <ClCompile Include="DDSHttpRequest.cpp" />
-    <ClCompile Include="DDSWebsiteFilesystem.cpp" />
-    <ClCompile Include="DDSWebsiteFilesystemBuilder.cpp" />
-    <ClCompile Include="DDSWebsiteFactoryStaticContent.cpp" />
-    <ClCompile Include="DDSDatabaseBootstrap.cpp" />
-    <ClCompile Include="DDSDatabaseConnection.cpp" />
+    <ClCompile Include="DDSCoordinatorNetworkService.cpp">
+      <Filter>Coordinator</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSCoordinatorServerProtocol.cpp">
+      <Filter>Coordinator</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSCoordinatorState.cpp">
+      <Filter>Coordinator</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSDatabaseBootstrap.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSDatabaseConnection.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSDatabaseConnectionPool.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSDatabaseSetup.cpp">
+      <Filter>Database</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSConnectionInterface.cpp">
+      <Filter>Endpoint</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSCoordinatorClientProtocol.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSEndpointFactoryBase.cpp">
+      <Filter>Endpoint</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSEndpointInterface.cpp">
+      <Filter>Endpoint</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSIncomingKeyspaceTransfer.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSIncomingKeyspaceTransferManager.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSNodeInterface.cpp">
+      <Filter>DataObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSNodeState.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSNodeNetworkService.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSOutgoingKeyspaceTransfer.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSOutgoingKeyspaceTransferManager.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSServerToServerReceiver.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSServerToServerSender.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSSharedObjectInterface.cpp">
+      <Filter>DataObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFactoryBase.cpp">
+      <Filter>Endpoint</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFactoryStaticContent.cpp">
+      <Filter>Endpoint</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFilesystem.cpp">
+      <Filter>Endpoint</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFilesystemBuilder.cpp">
+      <Filter>Endpoint</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteInterface.cpp">
+      <Filter>Endpoint</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSResolver.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSResolverBackend.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSHttpClient.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSHttpRequest.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTimerSystem.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSDeferredCallback.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSKey.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSLog.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSResponder.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSRoutingTable.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSShutdown.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSRandom.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSVersion.cpp">
+      <Filter>Foundation</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSNetworkBackend.cpp">
+      <Filter>Shared</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSNodeSharedObjectResolver.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Coordinator">
+      <UniqueIdentifier>{b2f7c9e7-7e0d-4802-99ec-a5578bf80607}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Database">
+      <UniqueIdentifier>{934aa2ff-37c8-48e9-82b0-403af52d92f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataObject">
+      <UniqueIdentifier>{834a7c30-a6e4-43d4-baec-65572b4b1c81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Security">
+      <UniqueIdentifier>{3627f691-f695-445a-a9ef-be728c1fa3c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Endpoint">
+      <UniqueIdentifier>{1de9af87-550b-4447-86d3-6634ec9672f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Node">
+      <UniqueIdentifier>{76ece48a-4924-4bf5-ad74-dcea4707effb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{8336e223-1608-4ae6-89ba-f933e60b780e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Foundation">
+      <UniqueIdentifier>{8acd946b-a6bb-4a9b-9092-e30a6e1251a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{49a58f87-4c5f-4c85-a1f9-de15cba9f119}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

@@ -6,6 +6,15 @@
 #include <algorithm>
 
 
+std::string GetNodeAddrAsString(DDSNodeAddr addr)
+{
+  uint8_t * ip_addr = (uint8_t *)&addr;
+
+  char buffer[25];
+  snprintf(buffer, sizeof(buffer), "%d.%d.%d.%d", ip_addr[3], ip_addr[2], ip_addr[1], ip_addr[0]);
+  return buffer;
+}
+
 DDSKeyRange GetKeyRange(DDSNodeId node_id, const DDSRoutingTable & routing_table)
 {
   DDSKey local_key;
@@ -63,6 +72,8 @@ DDSKeyRange GetKeyRange(DDSNodeId node_id, const DDSRoutingTable & routing_table
 
 void GetKeyRanges(const DDSRoutingTable & routing_table, std::vector<std::pair<DDSNodeId, DDSKeyRange>> & key_ranges)
 {
+  key_ranges.clear();
+
   auto table_copy = routing_table.m_Table;
   sort(table_copy.begin(), table_copy.end(), [](const DDSNodeElement & a, const DDSNodeElement & b) { return a.m_CentralKey < b.m_CentralKey; });
 
@@ -94,4 +105,53 @@ void GetKeyRanges(const DDSRoutingTable & routing_table, std::vector<std::pair<D
     key_ranges.emplace_back(std::make_pair(cur_elem.m_Id,
       DDSKeyRange{ cur_elem.m_CentralKey - lower_key_space / 2, cur_elem.m_CentralKey + upper_key_space / 2 }));
   }
+}
+
+DDSNodeId GetNodeIdForKey(DDSKey key, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & key_ranges)
+{
+  for (auto & node_data : key_ranges)
+  {
+    if (KeyInKeyRange(key, node_data.second))
+    {
+      return node_data.first;
+    }
+  }
+
+  DDSLog::LogError("Attempting to get node id for emtpy routing table");
+  return{};
+}
+
+DDSRoutingTableNodeInfo GetNodeDataForNodeId(DDSNodeId node_id, const DDSRoutingTable & routing_table)
+{
+  for (auto & node_data : routing_table.m_Table)
+  {
+    if (node_data.m_Id == node_id)
+    {
+      return node_data;
+    }
+  }
+
+  for (auto & node_data : routing_table.m_Defunct)
+  {
+    if (node_data.m_Id == node_id)
+    {
+      return node_data;
+    }
+  }
+
+  return{};
+}
+
+DDSRoutingTableNodeInfo GetNodeDataForKey(DDSKey key, const DDSRoutingTable & routing_table, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & key_ranges)
+{
+  auto node_id = GetNodeIdForKey(key, key_ranges);
+  for (auto & node : routing_table.m_Table)
+  {
+    if (node.m_Id == node_id)
+    {
+      return node;
+    }
+  }
+
+  return{};
 }

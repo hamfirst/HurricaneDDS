@@ -305,21 +305,16 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSRe
 template <typename SubscriptionObj, typename NodeState>
 inline bool DDSSendChangeSubscription(const ReflectionChangeNotification & change_notification, const DDSExportedSubscription & sub, SubscriptionObj * base_obj, NodeState & node_state)
 {
-  if (change_notification.m_BaseObject == base_obj)
+  DDSLog::LogVerbose("Sending subscription response from object %s", typeid(SubscriptionObj).name());
+
+  DDSResponderCallData call_data;
+  if (DDSCreateSubscriptionResponse(*base_obj, change_notification, sub, call_data) == false)
   {
-    DDSLog::LogVerbose("Sending subscription response from object %s", typeid(SubscriptionObj).name());
-
-    DDSResponderCallData call_data;
-    if (DDSCreateSubscriptionResponse(*base_obj, change_notification, sub, call_data) == false)
-    {
-      DDSLog::LogError("Could not serialize subscription change");
-    }
-
-    node_state.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, StormReflEncodeJson(call_data));
-    return true;
+    DDSLog::LogError("Could not serialize subscription change");
   }
 
-  return false;
+  node_state.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, StormReflEncodeJson(call_data));
+  return true;
 }
 
 template <class DataType>

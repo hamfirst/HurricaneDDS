@@ -7,7 +7,8 @@
 
 DDSWebsiteFactoryBase::DDSWebsiteFactoryBase(DDSNodeState & node_state, const StormSockets::StormSocketServerFrontendHttpSettings & settings) :
   m_NodeState(node_state),
-  m_Frontend(std::make_unique<StormSockets::StormSocketServerFrontendHttp>(settings, node_state.GetBackend().m_Backend.get()))
+  m_Frontend(std::make_unique<StormSockets::StormSocketServerFrontendHttp>(settings, node_state.GetBackend().m_Backend.get())),
+  m_Port(settings.ListenSettings.Port)
 {
 
 }
@@ -71,4 +72,9 @@ bool DDSWebsiteFactoryBase::SendResponse(StormSockets::StormSocketConnectionId c
 void DDSWebsiteFactoryBase::ForceDisconnect(StormSockets::StormSocketConnectionId connection_id)
 {
   m_Frontend->ForceDisconnect(connection_id);
+}
+
+DDSNodePort DDSWebsiteFactoryBase::GetListenPort()
+{
+  return m_Port;
 }

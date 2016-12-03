@@ -31,6 +31,9 @@ public:
 
   void SendMessageToCoordinator(const std::string && data);
 
+  bool ShutDown();
+  void Disconnect();
+
 private:
 
   template <class T>
@@ -51,7 +54,7 @@ private:
 
   State m_State;
 
-  StormSockets::StormSocketConnectionId m_ConnectionId;
+  StormSockets::StormSocketConnectionId m_ConnectionId = StormSockets::StormSocketConnectionId::InvalidConnectionId;
   uint64_t m_ExpectedChallengeResponse;
 
   std::string m_CoordinatorIpAddr;

@@ -16,6 +16,7 @@ public:
 
   DDSOutgoingKeyspaceTransfer & operator = (DDSOutgoingKeyspaceTransfer && rhs) = default;
 
+  bool IsReady(DDSNodeState & node_state);
   bool Send(DDSNodeState & node_state);
 
 private:
@@ -23,5 +24,8 @@ private:
   int m_NumObjectTypes;
   int m_TableGen;
 
+  bool m_TransferBegun;
+
+  std::vector<DDSKeyRange> m_PendingKeyRanges;
   std::vector<std::tuple<DDSNodeId, int, DDSKeyRange>> m_PendingTransfers;
 };

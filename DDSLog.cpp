@@ -39,6 +39,8 @@ void DDSLog::LogError(const char * fmt, ...)
   vsnprintf(buffer, sizeof(buffer), fmt, args);
   va_end(args);
 
+  fprintf(stderr, "!!FATAL ERROR: %s\n", buffer);
+
   throw std::runtime_error(buffer);
 }
 

@@ -50,7 +50,7 @@ public:
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
   }
 
-  std::pair<std::string, int> GetNodeHost(DDSKey key) override;
+  DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) override;
 
 private:
 

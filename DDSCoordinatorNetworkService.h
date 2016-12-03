@@ -39,6 +39,7 @@ protected:
 
   void HandleConnect(StormSockets::StormSocketConnectionId connection_id, uint32_t addr, uint16_t port);
   void HandleData(StormSockets::StormSocketConnectionId connection_id, StormSockets::StormWebsocketMessageReader & reader);
+  void HandleDisconnect(StormSockets::StormSocketConnectionId connection_id);
 
 private:
   DDSCoordinatorState & m_CoordinatorState;

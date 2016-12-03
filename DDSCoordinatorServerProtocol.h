@@ -14,7 +14,8 @@ public:
 
   bool HandleMessage(const char * msg, int length);
 
-  bool CheckNodeId(DDSNodeId node_id);
+  bool CheckNodeId(DDSNodeId node_id) const;
+  DDSNodeId GetNodeId() const;
 
 private:
 

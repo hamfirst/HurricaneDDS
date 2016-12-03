@@ -97,3 +97,8 @@ bool DDSIncomingKeyspaceTransferManager::IsCompleteForKeyRange(DDSKeyRange key_r
 
   return true;
 }
+
+bool DDSIncomingKeyspaceTransferManager::IsComplete() const
+{
+  return m_PendingTransfers.size() == 0;
+}

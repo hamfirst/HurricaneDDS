@@ -54,10 +54,10 @@ void DDSCoordinatorClientProtocol::ProcessEvents()
     switch (event.Type)
     {
     case StormSockets::StormSocketEventType::ClientConnected:
-      m_ConnectionId = event.ConnectionId;
       break;
     case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
       HandleConnectionEstablished();
+      DDSLog::LogInfo("Connected to coordinator");
       break;
     case StormSockets::StormSocketEventType::Data:
       m_MessageBuffer.resize(event.GetWebsocketReader().GetDataLength() + 1);
@@ -70,7 +70,15 @@ void DDSCoordinatorClientProtocol::ProcessEvents()
       }
       break;
     case StormSockets::StormSocketEventType::Disconnected:
-      DDSLog::LogError("Disconnected from coordinator...panic!");
+      if (m_State == kConnecting)
+      {
+        m_ClientFrontend->FinalizeConnection(event.ConnectionId);
+        RequestConnect();
+      }
+      else
+      {
+        DDSLog::LogError("Disconnected from coordinator...panic!");
+      }
       break;
     }
   }
@@ -78,7 +86,8 @@ void DDSCoordinatorClientProtocol::ProcessEvents()
 
 void DDSCoordinatorClientProtocol::RequestConnect()
 {
-  m_ClientFrontend->RequestConnect(m_CoordinatorIpAddr.c_str(), m_CoordinatorPort, StormSockets::StormSocketClientFrontendWebsocketRequestData{});
+  DDSLog::LogInfo("Requesting connect to coordinator");
+  m_ConnectionId = m_ClientFrontend->RequestConnect(m_CoordinatorIpAddr.c_str(), m_CoordinatorPort, StormSockets::StormSocketClientFrontendWebsocketRequestData{});
   m_State = kConnecting;
 }
 
@@ -146,7 +155,8 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
       DDSCoordinatorHandshakeFinalize finalize;
       finalize.m_ChallengeResponse = DDSCalculateChallengeResponse(response.m_ChallengeRequest);
       finalize.m_PublicIp = m_NodeState.GetLocalInterface();
-      finalize.m_PublicPort = m_NodeState.GetLocalPort();
+      finalize.m_NodePort = m_NodeState.GetLocalPort();
+      m_NodeState.GetConnectionFactoryPorts(finalize.m_EndpointPorts, finalize.m_WebsitePorts);
 
       m_State = kNodeInit;
 
@@ -241,6 +251,7 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
       m_NodeState.GotMessageFromCoordinator(server_type, type, msg);
     }
     break;
+
   case kDisconnected:
     break;
   }
@@ -261,4 +272,30 @@ void DDSCoordinatorClientProtocol::SendMessageToCoordinator(const std::string &&
   m_ClientFrontend->FinalizeOutgoingPacket(writer);
   m_ClientFrontend->SendPacketToConnection(writer, m_ConnectionId);
   m_ClientFrontend->FreeOutgoingPacket(writer);
+}
+
+bool DDSCoordinatorClientProtocol::ShutDown()
+{
+  if (m_State >= kHandshakeResponse)
+  {
+    DDSLog::LogInfo("Beginning node shutdown");
+    DDSCoordinatorNodeShutdown shutdown{};
+    SendMessageToServer(shutdown);
+
+    return false;
+  }
+  else
+  {
+    Disconnect();
+    return true;
+  }
+}
+
+void DDSCoordinatorClientProtocol::Disconnect()
+{
+  if (m_State != kDisconnected)
+  {
+    m_ClientFrontend->ForceDisconnect(m_ConnectionId);
+    m_State = kDisconnected;
+  }
 }

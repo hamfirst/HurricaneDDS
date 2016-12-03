@@ -129,27 +129,12 @@ void DDSCoordinatorState::CreateHttpRequest(const DDSHttpRequest & request, DDSC
   m_DeferredCallbackList.emplace(std::move(callback));
 }
 
-std::pair<std::string, int> DDSCoordinatorState::GetNodeHost(DDSKey key)
+DDSRoutingTableNodeInfo DDSCoordinatorState::GetNodeInfo(DDSKey key)
 {
-  DDSNodeId node_id = GetNodeIdForKey(key);
-
-  for (auto & node : m_RoutingTable.m_Table)
-  {
-    if (node.m_Id == node_id)
-    {
-      uint8_t * ip_addr = (uint8_t *)&node.m_Addr;
-
-      char buffer[25];
-      snprintf(buffer, sizeof(buffer), "%d.%d.%d.%d", ip_addr[3], ip_addr[2], ip_addr[1], ip_addr[0]);
-
-      return std::make_pair(std::string(buffer), node.m_Port);
-    }
-  }
-
-  throw std::runtime_error("Invalid routing table");
+  return GetNodeDataForKey(key, m_RoutingTable, m_RoutingKeyRanges);
 }
 
-void DDSCoordinatorState::GotMessageFromServer(DDSCoordinatorProtocolMessageType type, const char * data)
+void DDSCoordinatorState::GotMessageFromServer(DDSNodeId server_id, DDSCoordinatorProtocolMessageType type, const char * data)
 {
   if (type == DDSCoordinatorProtocolMessageType::kTargetedMessage)
   {
@@ -219,6 +204,11 @@ void DDSCoordinatorState::GotMessageFromServer(DDSCoordinatorProtocolMessageType
     }
 
     SendTargetedMessage(DDSDataObjectAddress{ sub_data.m_ResponderObjectType, sub_data.m_ResponderKey }, type, std::string(data));
+  }
+  else if (type == DDSCoordinatorProtocolMessageType::kShutDown)
+  {
+    SetNodeDefunct(server_id);
+    SyncRoutingTable();
   }
 }
 
@@ -385,33 +375,43 @@ DDSNodeId DDSCoordinatorState::GetNodeIdForKey(DDSKey key) const
   throw std::runtime_error("Invalid routing table");
 }
 
-DDSNodeId DDSCoordinatorState::CreateNode(uint32_t addr, uint16_t port)
+DDSNodeId DDSCoordinatorState::CreateNode(uint32_t addr, uint16_t port, const std::vector<DDSNodePort> & endpoint_ports, const std::vector<DDSNodePort> & website_ports)
 {
   DDSLog::LogInfo("Creating new node");
 
   m_RoutingTable.m_TableGeneration++;
 
+  DDSNodeElement node;
+  node.m_Id = m_NextNodeId;
+  node.m_Addr = addr;
+  node.m_Port = port;
+  node.m_EndpointPorts = endpoint_ports;
+  node.m_WebsitePorts = website_ports;
+
   std::size_t table_size = m_RoutingTable.m_Table.size();
   if (table_size == 0)
   {
-    DDSNodeId new_node_id = 1;
-    m_RoutingTable.m_Table.emplace_back(DDSNodeElement{ new_node_id, addr, port, 0 });
+    node.m_CentralKey = 0x0000000000000000;
+    node.m_Id = 1;
+
+    m_RoutingTable.m_Table.emplace_back(node);
 
     m_NextNodeId = 2;
 
     GetKeyRanges(m_RoutingTable, m_RoutingKeyRanges);
-    return new_node_id;
+    return node.m_Id;
   }
 
   if (table_size == 1)
   {
-    DDSNodeId new_node_id = m_NextNodeId;
-    m_RoutingTable.m_Table.emplace_back(DDSNodeElement{ new_node_id, addr, port, m_RoutingTable.m_Table[0].m_CentralKey + 0x8000000000000000 });
+    node.m_CentralKey = m_RoutingTable.m_Table[0].m_CentralKey + 0x8000000000000000;
+
+    m_RoutingTable.m_Table.emplace_back(node);
 
     m_NextNodeId++;
 
     GetKeyRanges(m_RoutingTable, m_RoutingKeyRanges);
-    return new_node_id;
+    return node.m_Id;
   }
 
   DDSKey biggest_gap = 0;
@@ -431,18 +431,19 @@ DDSNodeId DDSCoordinatorState::CreateNode(uint32_t addr, uint16_t port)
     }
   }
 
-  DDSNodeId new_node_id = m_NextNodeId;
-  m_RoutingTable.m_Table.emplace_back(DDSNodeElement{ new_node_id, addr, port, best_key });
+  node.m_CentralKey = best_key;
+
+  m_RoutingTable.m_Table.emplace_back(node);
   m_RoutingTable.m_TableGeneration++;
 
   m_NextNodeId++;
   GetKeyRanges(m_RoutingTable, m_RoutingKeyRanges);
-  return new_node_id;
+  return node.m_Id;
 }
 
-void DDSCoordinatorState::DestroyNode(DDSNodeId id)
+void DDSCoordinatorState::SetNodeDefunct(DDSNodeId id)
 {
-  DDSLog::LogInfo("Destroying node");
+  DDSLog::LogInfo("Coordinator is shutting down node");
 
   m_RoutingTable.m_TableGeneration++;
   std::size_t table_size = m_RoutingTable.m_Table.size();
@@ -450,10 +451,31 @@ void DDSCoordinatorState::DestroyNode(DDSNodeId id)
   {
     if (m_RoutingTable.m_Table[index].m_Id == id)
     {
+      m_RoutingTable.m_Defunct.push_back(m_RoutingTable.m_Table[index]);
       m_RoutingTable.m_Table.erase(m_RoutingTable.m_Table.begin() + index);
       return;
     }
   }
+
+  DDSLog::LogError("Node was set to defunct, but not in the actual node list");
+}
+
+void DDSCoordinatorState::DestroyNode(DDSNodeId id)
+{
+  DDSLog::LogInfo("Destroying node");
+
+  m_RoutingTable.m_TableGeneration++;
+  std::size_t table_size = m_RoutingTable.m_Defunct.size();
+  for (std::size_t index = 0; index < table_size; index++)
+  {
+    if (m_RoutingTable.m_Defunct[index].m_Id == id)
+    {
+      m_RoutingTable.m_Defunct.erase(m_RoutingTable.m_Defunct.begin() + index);
+      return;
+    }
+  }
+
+  DDSLog::LogError("Node was set to destroy, but not in the actual node list");
 }
 
 uint64_t DDSCoordinatorState::GetClientSecret() const

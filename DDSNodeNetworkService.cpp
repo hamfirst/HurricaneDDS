@@ -88,29 +88,25 @@ void DDSNodeNetworkService::NodeConnectionReady(DDSNodeId id, DDSServerToServerS
 
 void DDSNodeNetworkService::CreateNodeConnection(DDSNodeId id)
 {
-  for (auto & node_data : m_NodeState.GetRoutingTable().m_Table)
+  auto node_data = GetNodeDataForNodeId(id, m_NodeState.GetRoutingTable());
+
+  char ip_addr[128];
+  snprintf(ip_addr, sizeof(ip_addr), "%d.%d.%d.%d",
+    (node_data->m_Addr >> 24) & 0xFF,
+    (node_data->m_Addr >> 16) & 0xFF,
+    (node_data->m_Addr >> 8) & 0xFF,
+    (node_data->m_Addr >> 0) & 0xFF);
+
+  DDSLog::LogInfo("Creating connection to %s:%d", ip_addr, node_data->m_Port);
+
+  auto connection_id = m_ClientFrontend->RequestConnect(ip_addr, node_data->m_Port, StormSockets::StormSocketClientFrontendWebsocketRequestData{});
+  if (connection_id == StormSockets::StormSocketConnectionId::InvalidConnectionId)
   {
-    if (node_data.m_Id == id)
-    {
-      char ip_addr[128];
-      snprintf(ip_addr, sizeof(ip_addr), "%d.%d.%d.%d",
-        (node_data.m_Addr >> 24) & 0xFF,
-        (node_data.m_Addr >> 16) & 0xFF,
-        (node_data.m_Addr >> 8) & 0xFF,
-        (node_data.m_Addr >> 0) & 0xFF);
-
-      DDSLog::LogInfo("Creating connection to %s:%d", ip_addr, node_data.m_Port);
-
-      auto connection_id = m_ClientFrontend->RequestConnect(ip_addr, node_data.m_Port, StormSockets::StormSocketClientFrontendWebsocketRequestData{});
-      if (connection_id == StormSockets::StormSocketConnectionId::InvalidConnectionId)
-      {
-        return;
-      }
-
-      m_NodeConnectionMap.emplace(std::make_pair(id, connection_id));
-      m_Senders.emplace(std::make_pair(connection_id, DDSServerToServerSender(m_NodeState, connection_id, id)));
-    }
+    return;
   }
+
+  m_NodeConnectionMap.emplace(std::make_pair(id, connection_id));
+  m_Senders.emplace(std::make_pair(connection_id, DDSServerToServerSender(m_NodeState, connection_id, id)));
 }
 
 void DDSNodeNetworkService::ProcessEvents()

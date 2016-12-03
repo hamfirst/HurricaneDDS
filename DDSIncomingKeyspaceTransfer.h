@@ -3,8 +3,11 @@
 #include <vector>
 #include <memory>
 
+#include <StormData/StormDataChangePacket.h>
+
 #include "DDSDataObjectAddress.h"
 #include "DDSRoutingTable.h"
+
 
 class DDSIncomingKeyspaceTransfer
 {
@@ -32,5 +35,4 @@ private:
 
   DDSKeyRange m_FullKeyRange;
   std::unique_ptr<std::vector<DDSKeyRange>[]> m_UnsyncedKeys;
-
 };

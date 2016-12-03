@@ -11,15 +11,41 @@
 #include <StormRefl/StormReflJsonStd.h>
 
 DDSOutgoingKeyspaceTransfer::DDSOutgoingKeyspaceTransfer(int num_object_types, int table_gen, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & output_keyranges) :
-  m_NumObjectTypes(num_object_types), m_TableGen(table_gen)
+  m_NumObjectTypes(num_object_types), m_TableGen(table_gen), m_TransferBegun(false)
 {
   for (auto & val : output_keyranges)
   {
+    m_PendingKeyRanges.emplace_back(val.second);
+
     for (int index = 0; index < num_object_types; index++)
     {
       m_PendingTransfers.emplace_back(std::make_tuple(val.first, index, val.second));
     }
   }
+}
+
+bool DDSOutgoingKeyspaceTransfer::IsReady(DDSNodeState & node_state)
+{
+  if (m_TransferBegun)
+  {
+    return true;
+  }
+
+  for (auto & key_range : m_PendingKeyRanges)
+  {
+    if (node_state.GetIncomingKeyspace().IsCompleteForKeyRange(key_range) == false)
+    {
+      return false;
+    }
+  }
+
+  m_TransferBegun = true;
+
+  for (auto & key_range : m_PendingKeyRanges)
+  {
+    node_state.PrepareObjectsForMove(key_range);
+  }
+  return false;
 }
 
 bool DDSOutgoingKeyspaceTransfer::Send(DDSNodeState & node_state)
@@ -33,11 +59,6 @@ bool DDSOutgoingKeyspaceTransfer::Send(DDSNodeState & node_state)
     auto key_range = std::get<2>(transfer);
 
     if (node_state.GetNodeNetwork().RequestNodeConnection(node_id) == false)
-    {
-      continue;
-    }
-
-    if (node_state.GetIncomingKeyspace().IsCompleteForKeyRange(key_range) == false)
     {
       continue;
     }

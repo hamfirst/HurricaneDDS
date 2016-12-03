@@ -5,6 +5,7 @@
 #include "DDSIncomingKeyspaceTransfer.h"
 #include "DDSDataObjectAddress.h"
 
+
 class DDSIncomingKeyspaceTransferManager
 {
 public:
@@ -18,6 +19,7 @@ public:
 
   bool IsCompleteForKey(DDSDataObjectAddress addr) const;
   bool IsCompleteForKeyRange(DDSKeyRange key_range) const;
+  bool IsComplete() const;
 
 private:
 

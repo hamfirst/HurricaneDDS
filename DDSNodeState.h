@@ -7,6 +7,8 @@
 #include <queue>
 #include <tuple>
 
+#include <optional/optional.hpp>
+
 #include "DDSNodeId.h"
 #include "DDSConnectionId.h"
 #include "DDSNodeInterface.h"
@@ -26,6 +28,7 @@
 #include "DDSDatabaseConnectionPool.h"
 #include "DDSIncomingKeyspaceTransferManager.h"
 #include "DDSOutgoingKeyspaceTransferManager.h"
+#include "DDSNodeSharedObjectResolver.h"
 #include "DDSWebsiteFilesystem.h"
 #include "DDSWebsiteFilesystemBuilder.h"
 
@@ -33,6 +36,9 @@
 
 struct DDSResponder;
 struct DDSResponderCallData;
+
+template <typename T>
+using Optional = std::experimental::optional<T>;
 
 class DDSNodeState
 {
@@ -57,9 +63,12 @@ public:
     InitConnectionFactories(std::forward<ConnectionFactoryTypes>(connection_factory_types)...);
   }
 
-  ~DDSNodeState() = default;
+  ~DDSNodeState();
 
   void ProcessEvents();
+
+  void Shutdown();
+  bool IsFullyShutdown();
 
   int GetDataObjectTypeIdForNameHash(uint32_t name_hash) const;
   int GetDatabaseObjectTypeIdForNameHash(uint32_t name_hash) const;
@@ -128,7 +137,7 @@ public:
 
   void SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message, bool force_process = false);
 
-  std::pair<std::string, int> GetNodeHost(DDSKey key);
+  DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key);
 private:
 
   friend class DDSCoordinatorClientProtocol;
@@ -178,7 +187,7 @@ private:
   void SendSubscriptionCreate(DDSCreateDataSubscription && req);
   void SendSubscriptionDestroy(const DDSDestroySubscription & destroy);
   void ExportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list);
-  void ImportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list);
+  void ImportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list, int routing_table_gen);
 
   void GotInitialCoordinatorSync(DDSNodeId node_id, const DDSRoutingTable & routing_table, bool initial_node, uint64_t server_secret, uint64_t client_secret);
   void GotNewRoutingTable(const DDSRoutingTable & routing_table);
@@ -190,7 +199,6 @@ private:
   void QueryObjectData(const char * collection, const char * query, DDSResponderCallData && responder_call);
 
   void InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData && responder_call);
-
   void UpdateObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData * responder_call);
 
   void BeginQueueingMessages();
@@ -216,6 +224,9 @@ private:
 
   uint32_t GetLocalInterface() const;
   int GetLocalPort() const;
+  void GetConnectionFactoryPorts(std::vector<DDSNodePort> & endpoint_ports, std::vector<DDSNodePort> & website_ports) const;
+
+  void PrepareObjectsForMove(DDSKeyRange requested_range);
 
   bool SendToLocalConnection(DDSConnectionId connection_id, const std::string & data);
   void DisconnectLocalConnection(DDSConnectionId connection_id);
@@ -227,7 +238,11 @@ private:
   void HandleIncomingTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string & message);
   void DestroyDeferredCallback(DDSDeferredCallback * callback);
 
+
 private:
+
+  bool m_IsDefunct = false;
+  bool m_IsShuttingDown = false;
 
   DDSNetworkBackend m_Backend;
   DDSNodeNetworkService m_NodeNetwork;
@@ -235,15 +250,16 @@ private:
 
   DDSIncomingKeyspaceTransferManager m_IncomingKeyspace;
   DDSOutgoingKeyspaceTransferManager m_OutgoingKeyspace;
+  DDSNodeSharedObjectResolver m_SharedResolver;
 
   DDSTimerSystem m_TimerSystem;
   DDSHttpClient m_HttpClient;
   DDSResolver m_Resolver;
   std::set<std::unique_ptr<DDSDeferredCallback>> m_DeferredCallbackList;
 
-  DDSNodeId m_LocalNodeId = 0;
-  DDSRoutingTable m_RoutingTable;
-  DDSKeyRange m_LocalKeyRange;
+  Optional<DDSNodeId> m_LocalNodeId;
+  Optional<DDSRoutingTable> m_RoutingTable;
+  Optional<DDSKeyRange> m_LocalKeyRange;
   std::vector<std::pair<DDSNodeId, DDSKeyRange>> m_RoutingKeyRanges;
 
   std::map<DDSDataObjectAddress, std::vector<std::pair<DDSServerToServerMessageType, std::string>>> m_PendingTargetedMessages;

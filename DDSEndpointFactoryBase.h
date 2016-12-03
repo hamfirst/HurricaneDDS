@@ -21,6 +21,7 @@ public:
   bool SendData(StormSockets::StormSocketConnectionId connection_id, const std::string & data);
 
   void ForceDisconnect(StormSockets::StormSocketConnectionId connection_id) override;
+  DDSNodePort GetListenPort() override;
 
 protected:
   virtual void HandleConnect(StormSockets::StormSocketConnectionId connection_id) = 0;
@@ -31,5 +32,6 @@ protected:
 protected:
 
   std::unique_ptr<StormSockets::StormSocketServerFrontendWebsocket> m_Frontend;
+  DDSNodePort m_Port;
   DDSNodeState & m_NodeState;
 };

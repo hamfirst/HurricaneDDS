@@ -231,7 +231,7 @@ void DDSSharedObjectInterface::DestroySubscriptionInternal(int return_object_typ
     DDSCoordinatorProtocolMessageType::kDestroySubscription, StormReflEncodeJson(sub_data));
 }
 
-std::pair<std::string, int> DDSSharedObjectInterface::GetNodeHost(DDSKey key)
+DDSRoutingTableNodeInfo DDSSharedObjectInterface::GetNodeInfo(DDSKey key)
 {
-  return m_CoordinatorState.GetNodeHost(key);
+  return m_CoordinatorState.GetNodeInfo(key);
 }

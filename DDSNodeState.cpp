@@ -1,5 +1,6 @@
 
 #include "DDSLog.h"
+#include "DDSShutdown.h"
 #include "DDSNodeState.h"
 #include "DDSRoutingTable.h"
 #include "DDSServerMessage.h"
@@ -32,8 +33,14 @@ DDSNodeState::DDSNodeState(
 {
   inet_pton(AF_INET, node_server_settings.ListenSettings.LocalInterface, &m_LocalInterface);
   m_LocalPort = node_server_settings.ListenSettings.Port;
-
+  
   m_CoordinatorConnection.RequestConnect();
+  DDSShutdownRegisterNode(this);
+}
+
+DDSNodeState::~DDSNodeState()
+{
+  DDSShutdownUnregisterNode(this);
 }
 
 void DDSNodeState::ProcessEvents()
@@ -60,15 +67,37 @@ void DDSNodeState::ProcessEvents()
     website_factor->ProcessEvents();
   }
 
+  if (m_IncomingKeyspace.IsComplete())
+  {
+    m_SharedResolver.Clear();
+  }
+
   EndQueueingMessages();
+}
+
+void DDSNodeState::Shutdown()
+{
+  if (m_IsShuttingDown == false)
+  {
+    m_IsShuttingDown = true;
+    if (m_CoordinatorConnection.ShutDown())
+    {
+      m_IsDefunct = true;
+    }
+  }
+}
+
+bool DDSNodeState::IsFullyShutdown()
+{
+  return m_IsDefunct == true && m_IncomingKeyspace.IsComplete() && m_OutgoingKeyspace.IsComplete();
 }
 
 void DDSNodeState::GotInitialCoordinatorSync(DDSNodeId node_id, const DDSRoutingTable & routing_table, bool initial_node, uint64_t server_secret, uint64_t client_secret)
 {
   m_LocalNodeId = node_id;
   m_RoutingTable = routing_table;
-  GetKeyRanges(m_RoutingTable, m_RoutingKeyRanges);
-  m_LocalKeyRange = GetKeyRange(node_id, m_RoutingTable);
+  GetKeyRanges(routing_table, m_RoutingKeyRanges);
+  m_LocalKeyRange = GetKeyRange(node_id, *m_RoutingTable);
 
   m_ServerSecret = server_secret;
   m_ClientSecret = client_secret;
@@ -79,19 +108,42 @@ void DDSNodeState::GotInitialCoordinatorSync(DDSNodeId node_id, const DDSRouting
   }
   else
   {
-    m_IncomingKeyspace.InitializeUnsyncedKeyspace(routing_table.m_TableGeneration, m_LocalKeyRange);
+    m_IncomingKeyspace.InitializeUnsyncedKeyspace(routing_table.m_TableGeneration, *m_LocalKeyRange);
   }
 }
 
 void DDSNodeState::GotNewRoutingTable(const DDSRoutingTable & routing_table)
 {
-  DDSKeyRange new_key_range = GetKeyRange(m_LocalNodeId, routing_table);
-  m_IncomingKeyspace.ProcessNewRoutingTable(routing_table, m_RoutingTable, new_key_range, m_LocalNodeId);
-  m_OutgoingKeyspace.ProcessNewRoutingTable(routing_table, m_LocalKeyRange, m_LocalNodeId);
+  for (auto & defunct_node : routing_table.m_Defunct)
+  {
+    if (defunct_node.m_Id == *m_LocalNodeId)
+    {
+      if (m_IsDefunct == false)
+      {
+        m_OutgoingKeyspace.ProcessDefunctRoutingTable(routing_table, *m_LocalKeyRange);
+      }
+
+      m_IsDefunct = true;
+      m_LocalKeyRange = {};
+
+      m_RoutingTable = routing_table;
+      GetKeyRanges(*m_RoutingTable, m_RoutingKeyRanges);
+      return;
+    }
+  }
+
+  DDSKeyRange new_key_range = GetKeyRange(*m_LocalNodeId, routing_table);
+  m_IncomingKeyspace.ProcessNewRoutingTable(routing_table, *m_RoutingTable, new_key_range, *m_LocalNodeId);
+  m_OutgoingKeyspace.ProcessNewRoutingTable(routing_table, *m_LocalKeyRange, *m_LocalNodeId);
 
   m_RoutingTable = routing_table;
-  GetKeyRanges(m_RoutingTable, m_RoutingKeyRanges);
+  GetKeyRanges(*m_RoutingTable, m_RoutingKeyRanges);
   m_LocalKeyRange = new_key_range;
+
+  if (m_IncomingKeyspace.IsComplete() == false)
+  {
+    m_SharedResolver.AddNewRoutingTableEntry(m_RoutingTable->m_TableGeneration, *m_LocalKeyRange);
+  }
 }
 
 void DDSNodeState::GotMessageFromCoordinator(DDSServerToServerMessageType type, DDSCoordinatorProtocolMessageType coordinator_type, const char * data)
@@ -138,7 +190,13 @@ void DDSNodeState::GotMessageFromCoordinator(DDSServerToServerMessageType type, 
       return;
     }
 
-    m_SharedObjects[delta.m_SharedObjectType - m_DataObjectList.size()]->ProcessDelta(delta);
+    int shared_object_type = delta.m_SharedObjectType - m_DataObjectList.size();
+    for (auto & change : delta.m_Deltas)
+    {
+      m_SharedObjects[shared_object_type]->ProcessDelta(delta);
+    }
+
+    m_SharedResolver.AddSharedChange(m_RoutingTable->m_TableGeneration, delta);
   }
 }
 
@@ -153,11 +211,11 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
       return;
     }
 
-    DDSLog::LogInfo("Got object sync id %d keys %d to %d node %d", obj_list.m_DataObjectType, obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax, node_id);
+    DDSLog::LogInfo("Got object id %d keys %llu to %llu node %d", obj_list.m_DataObjectType, obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax, node_id);
     DDSLog::LogInfo("Object list has %d elements", obj_list.m_Objects.size());
 
     auto & data_store = GetDataObjectStore(obj_list.m_DataObjectType);
-    data_store.ProcessExportedObjects(obj_list.m_Objects);
+    data_store.ProcessExportedObjects(obj_list.m_Objects, obj_list.m_RoutingTableGen);
 
     m_IncomingKeyspace.SetKeyRangeComplete(obj_list.m_RoutingTableGen, obj_list.m_DataObjectType, DDSKeyRange{ obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax });
   }
@@ -257,7 +315,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
     m_CoordinatorConnection.SendMessageToCoordinator(DDSGetServerMessage(type, message.c_str()));
     return;
   }
-  else if (KeyInKeyRange(addr.m_ObjectKey, m_LocalKeyRange))
+  else if (m_IsDefunct == false && KeyInKeyRange(addr.m_ObjectKey, *m_LocalKeyRange))
   {
     if (m_IncomingKeyspace.IsCompleteForKey(addr))
     {
@@ -280,24 +338,9 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
   result.first->second.emplace_back(std::make_pair(type, message));
 }
 
-std::pair<std::string, int> DDSNodeState::GetNodeHost(DDSKey key)
+DDSRoutingTableNodeInfo DDSNodeState::GetNodeInfo(DDSKey key)
 {
-  DDSNodeId node_id = GetNodeIdForKey(key);
-
-  for (auto & node : m_RoutingTable.m_Table)
-  {
-    if (node.m_Id == node_id)
-    {
-      uint8_t * ip_addr = (uint8_t *)&node.m_Addr;
-
-      char buffer[25];
-      snprintf(buffer, sizeof(buffer), "%d.%d.%d.%d", ip_addr[3], ip_addr[2], ip_addr[1], ip_addr[0]);
-
-      return std::make_pair(std::string(buffer), node.m_Port);
-    }
-  }
-
-  throw std::runtime_error("Invalid routing table");
+  return GetNodeDataForKey(key, *m_RoutingTable, m_RoutingKeyRanges);
 }
 
 void DDSNodeState::SendSubscriptionCreate(DDSCreateDataSubscription && req)
@@ -340,11 +383,11 @@ void DDSNodeState::ExportSharedSubscriptions(DDSDataObjectAddress addr, std::vec
   }
 }
 
-void DDSNodeState::ImportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list)
+void DDSNodeState::ImportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list, int routing_table_gen)
 {
   for(auto & list : exported_list)
   {
-    m_SharedObjects[list.first - m_SharedObjects.size()]->ImportSubscriptions(addr, std::move(list.second));
+    m_SharedObjects[list.first - m_SharedObjects.size()]->ImportSubscriptions(addr, std::move(list.second), m_SharedResolver, routing_table_gen);
   }
 }
 
@@ -432,7 +475,7 @@ DDSDataObjectStoreBase & DDSNodeState::GetDataObjectStore(int object_type_id)
 
 bool DDSNodeState::IsReadyToCreateObjects()
 {
-  return m_IncomingKeyspace.IsCompleteForKeyRange(m_LocalKeyRange);
+  return m_IsDefunct == false && m_IncomingKeyspace.IsCompleteForKeyRange(*m_LocalKeyRange);
 }
 
 bool DDSNodeState::CreateNewDataObject(int object_type_id, DDSKey & output_key)
@@ -442,14 +485,14 @@ bool DDSNodeState::CreateNewDataObject(int object_type_id, DDSKey & output_key)
     return false;
   }
 
-  output_key = m_DataObjectList[object_type_id]->GetUnusedKeyInRange(m_LocalKeyRange);
+  output_key = m_DataObjectList[object_type_id]->GetUnusedKeyInRange(*m_LocalKeyRange);
   m_DataObjectList[object_type_id]->SpawnNewNonDatabaseBackedType(output_key);
   return true;
 }
 
 bool DDSNodeState::DestroyDataObject(int object_type_id, DDSKey key)
 {
-  if (IsReadyToCreateObjects() == false)
+  if (m_IsDefunct == false && IsReadyToCreateObjects() == false)
   {
     return false;
   }
@@ -626,17 +669,17 @@ DDSOutgoingKeyspaceTransferManager & DDSNodeState::GetOutgoingKeyspace()
 
 DDSNodeId DDSNodeState::GetLocalNodeId() const
 {
-  return m_LocalNodeId;
+  return *m_LocalNodeId;
 }
 
 const DDSRoutingTable & DDSNodeState::GetRoutingTable() const
 {
-  return m_RoutingTable;
+  return *m_RoutingTable;
 }
 
 DDSKeyRange DDSNodeState::GetLocalKeyRange() const
 {
-  return m_LocalKeyRange;
+  return *m_LocalKeyRange;
 }
 
 uint64_t DDSNodeState::GetClientSecret() const
@@ -657,6 +700,27 @@ uint32_t DDSNodeState::GetLocalInterface() const
 int DDSNodeState::GetLocalPort() const
 {
   return m_LocalPort;
+}
+
+void DDSNodeState::GetConnectionFactoryPorts(std::vector<DDSNodePort> & endpoint_ports, std::vector<DDSNodePort> & website_ports) const
+{
+  for (auto & ep : m_EndpointFactoryList)
+  {
+    endpoint_ports.push_back(ep->GetListenPort());
+  }
+
+  for (auto & wp : m_WebsiteFactoryList)
+  {
+    website_ports.push_back(wp->GetListenPort());
+  }
+}
+
+void DDSNodeState::PrepareObjectsForMove(DDSKeyRange requested_range)
+{
+  for (auto & obj_list : m_DataObjectList)
+  {
+    obj_list->PrepareObjectsForMove(requested_range);
+  }
 }
 
 bool DDSNodeState::SendToLocalConnection(DDSConnectionId connection_id, const std::string & data)
@@ -687,7 +751,7 @@ void DDSNodeState::RecheckOutgoingTargetedMessages()
 
     for (auto & msg : itr_copy->second)
     {
-      if (KeyInKeyRange(itr_copy->first.m_ObjectKey, m_LocalKeyRange))
+      if (KeyInKeyRange(itr_copy->first.m_ObjectKey, *m_LocalKeyRange))
       {
         if (m_IncomingKeyspace.IsCompleteForKey(itr_copy->first))
         {

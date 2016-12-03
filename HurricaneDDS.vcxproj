@@ -255,6 +255,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSNodeSharedObjectResolver.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSNodeState.h">
       <SubType>
       </SubType>
@@ -332,6 +336,10 @@
     <ClInclude Include="DDSSharedObjectBase.h" />
     <ClInclude Include="DDSSharedObjectInterface.h" />
     <ClInclude Include="DDSSharedObjectList.h" />
+    <ClInclude Include="DDSShutdown.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSTimerSystem.h">
       <SubType>
       </SubType>
@@ -443,6 +451,10 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="DDSNodeSharedObjectResolver.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSNodeState.cpp">
       <SubType>
       </SubType>
@@ -484,6 +496,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSSharedObjectInterface.cpp" />
+    <ClCompile Include="DDSShutdown.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSTimerSystem.cpp">
       <SubType>
       </SubType>

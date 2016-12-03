@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include "DDSKey.h"
+#include "DDSRoutingTable.h"
 #include "DDSConnectionId.h"
 #include "DDSConnectionFactoryBase.h"
 #include "DDSDeferredCallback.h"
@@ -89,7 +90,7 @@ public:
   }
 
   bool IsLocalKey(DDSKey key);
-  std::pair<std::string, int> GetNodeHost(DDSKey key);
+  DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key);
 
   void ForceDisconnect();
 

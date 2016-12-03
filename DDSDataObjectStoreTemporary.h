@@ -5,10 +5,17 @@
 template <class DataType>
 class DDSDataObjectStore<DataType, void> : public DDSDataObjectStoreBase
 {
+  struct CallbackData
+  {
+    DDSKey m_Key;
+    DDSDataObjectStore<DataType, void> * m_DataStore;
+  };
+
   struct ObjectData
   {
     bool m_Active;
     std::unique_ptr<DataType> m_ActiveObject;
+    std::unique_ptr<CallbackData> m_CallbackData;
     std::vector<DDSExportedMessage> m_PendingMessages;
     std::vector<DDSExportedSubscription> m_Subscriptions;
     std::vector<DDSExportedRequestedSubscription> m_RequestedSubscriptions;
@@ -40,6 +47,19 @@ public:
 
     obj_data.m_ActiveObject = std::make_unique<DataType>(node_interface);
     InitializeParentInfo(*obj_data.m_ActiveObject.get());
+
+    obj_data.m_CallbackData = std::make_unique<CallbackData>();
+    obj_data.m_CallbackData->m_Key = key;
+    obj_data.m_CallbackData->m_DataStore = this;
+
+    auto data_obj_callback = [](void * user_ptr, const ReflectionChangeNotification & change)
+    {
+      CallbackData * cb = (CallbackData *)user_ptr;
+      cb->m_DataStore->HandleDataObjectChange(cb->m_Key, change);
+    };
+
+    SetNotifyCallback(*obj_data.m_ActiveObject.get(), data_obj_callback, obj_data.m_CallbackData.get());
+
 
     if (DDS_CALL_FUNC(BeginLoad, *obj_data.m_ActiveObject.get()) == false)
     {
@@ -285,6 +305,16 @@ public:
     }
   }
 
+  void HandleDataObjectChange(DDSKey key, const ReflectionChangeNotification & change)
+  {
+    if (m_Modifying == false)
+    {
+      DDSLog::LogError("Invalid modification");
+    }
+
+    m_Changes.emplace_back(std::make_pair(key, change));
+  }
+
   virtual void BeginObjectModification(DDSKey key)
   {
     if (m_Modifying)
@@ -295,13 +325,10 @@ public:
     m_Modifying = true;
 
     m_NodeState.BeginQueueingMessages();
-    ReflectionPushNotifyCallback([this, key](const ReflectionChangeNotification & change) { m_Changes.emplace_back(std::make_pair(key, change)); });
   }
 
   virtual void EndObjectModification()
   {
-    ReflectionPopNotifyCallback();
-
     std::vector<std::pair<DDSKey, ReflectionChangeNotification>> changes = std::move(m_Changes);
     std::vector<DDSKey> dead_keys = std::move(m_DeadObjects);
     std::vector<DDSKey> finalized_objects = std::move(m_FinalizedObjects);
@@ -318,11 +345,6 @@ public:
       }
 
       auto & obj_data = itr->second;
-
-      if (change.m_BaseObject != obj_data.m_ActiveObject.get())
-      {
-        continue;
-      }
 
       for (auto & sub : obj_data.m_Subscriptions)
       {
@@ -405,6 +427,11 @@ public:
     }
 
     auto start_itr = m_Objects.lower_bound(requested_range.m_Min);
+    if (start_itr == m_Objects.end())
+    {
+      start_itr = m_Objects.begin();
+    }
+
     auto itr = start_itr;
 
     while (true)
@@ -447,12 +474,12 @@ public:
     }
 
     auto start_itr = m_Objects.lower_bound(requested_range.m_Min);
-    auto itr = start_itr;
-
-    if (itr == m_Objects.end())
+    if (start_itr == m_Objects.end())
     {
-      itr = m_Objects.begin();
+      start_itr = m_Objects.begin();
     }
+
+    auto itr = start_itr;
 
     std::vector<decltype(itr)> saved_itrs;
 
@@ -507,7 +534,7 @@ public:
     return complete;
   }
 
-  void ProcessExportedObjects(std::vector<DDSExportedObject> & object_list)
+  void ProcessExportedObjects(std::vector<DDSExportedObject> & object_list, int routing_table_gen)
   {
     for (auto & object : object_list)
     {
@@ -520,11 +547,13 @@ public:
         return;
       }
 
+      DDSLog::LogVerbose("Processing incoming temporary objtect:\n%s", StormReflEncodePrettyJson(*obj_data.m_ActiveObject.get()).data());
+
       obj_data.m_PendingMessages = std::move(object.m_PendingMessages);
       obj_data.m_Subscriptions = std::move(object.m_Subscriptions);
       obj_data.m_RequestedSubscriptions = std::move(object.m_RequestedSubscriptions);
 
-      m_NodeState.ImportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, object.m_Key }, object.m_SharedSubscriptions);
+      m_NodeState.ImportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, object.m_Key }, object.m_SharedSubscriptions, routing_table_gen);
 
       DDS_CALL_FUNC(MoveObject, *obj_data.m_ActiveObject.get());
 

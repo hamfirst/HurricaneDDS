@@ -1,8 +1,12 @@
 
 #include "DDSIncomingKeyspaceTransfer.h"
+#include "DDSLog.h"
 
 DDSIncomingKeyspaceTransfer::DDSIncomingKeyspaceTransfer(int num_object_types, int table_gen, DDSKeyRange key_range) :
-  m_Complete(false), m_NumObjectTypes(num_object_types), m_TableGen(table_gen), m_UnsyncedKeys(std::make_unique<std::vector<DDSKeyRange>[]>(num_object_types))
+  m_Complete(false), 
+  m_NumObjectTypes(num_object_types), 
+  m_TableGen(table_gen), 
+  m_UnsyncedKeys(std::make_unique<std::vector<DDSKeyRange>[]>(num_object_types))
 {
   for (int index = 0; index < m_NumObjectTypes; index++)
   {
@@ -11,7 +15,10 @@ DDSIncomingKeyspaceTransfer::DDSIncomingKeyspaceTransfer(int num_object_types, i
 }
 
 DDSIncomingKeyspaceTransfer::DDSIncomingKeyspaceTransfer(int num_object_types, int table_gen, const std::vector<DDSKeyRange> & key_ranges) :
-  m_Complete(false), m_NumObjectTypes(num_object_types), m_TableGen(table_gen), m_UnsyncedKeys(std::make_unique<std::vector<DDSKeyRange>[]>(num_object_types))
+  m_Complete(false), 
+  m_NumObjectTypes(num_object_types), 
+  m_TableGen(table_gen), 
+  m_UnsyncedKeys(std::make_unique<std::vector<DDSKeyRange>[]>(num_object_types))
 {
   for (int index = 0; index < m_NumObjectTypes; index++)
   {
@@ -98,4 +105,3 @@ void DDSIncomingKeyspaceTransfer::SetKeyRangeComplete(int object_type_id, DDSKey
     m_Complete = true;
   }
 }
-
