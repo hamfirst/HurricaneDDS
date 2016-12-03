@@ -33,7 +33,7 @@ bool InvertKeyRange(DDSKeyRange range, DDSKeyRange & out)
 
 bool KeyInKeyRange(DDSKey key, DDSKeyRange range)
 {
-  return range.m_Max >= range.m_Min ? (key <= range.m_Max && key >= range.m_Min) : (key <= range.m_Min || key >= range.m_Max);
+  return range.m_Max >= range.m_Min ? (key >= range.m_Min && key <= range.m_Max) : (key >= range.m_Min || key <= range.m_Max);
 }
 
 bool KeyRangeEntirelyInKeyRange(DDSKeyRange outer, DDSKeyRange inner)

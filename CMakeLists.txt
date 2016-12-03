@@ -28,6 +28,7 @@ add_library(HurricaneDDS STATIC
             DDSNetworkBackend.cpp
             DDSNodeInterface.cpp
             DDSNodeNetworkService.cpp
+            DDSNodeSharedObjectResolver.cpp
             DDSNodeState.cpp
             DDSOutgoingKeyspaceTransfer.cpp
             DDSOutgoingKeyspaceTransferManager.cpp
@@ -39,6 +40,7 @@ add_library(HurricaneDDS STATIC
             DDSServerToServerReceiver.cpp
             DDSServerToServerSender.cpp
             DDSSharedObjectInterface.cpp
+            DDSShutdown.cpp
             DDSTimerSystem.cpp
             DDSVersion.cpp
             DDSWebsiteFactoryBase.cpp

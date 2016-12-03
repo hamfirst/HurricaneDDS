@@ -72,6 +72,7 @@ void DDSNodeState::ProcessEvents()
     m_SharedResolver.Clear();
   }
 
+  RecheckOutgoingTargetedMessages();
   EndQueueingMessages();
 }
 
@@ -89,6 +90,21 @@ void DDSNodeState::Shutdown()
 
 bool DDSNodeState::IsFullyShutdown()
 {
+  if (m_HttpClient.AreAllCallbacksComplete() == false)
+  {
+    return false;
+  }
+
+  if (m_Resolver.AreAllCallbacksComplete() == false)
+  {
+    return false;
+  }
+
+  if (m_TimerSystem.AreAllCallbacksComplete() == false)
+  {
+    return false;
+  }
+
   return m_IsDefunct == true && m_IncomingKeyspace.IsComplete() && m_OutgoingKeyspace.IsComplete();
 }
 
@@ -110,6 +126,8 @@ void DDSNodeState::GotInitialCoordinatorSync(DDSNodeId node_id, const DDSRouting
   {
     m_IncomingKeyspace.InitializeUnsyncedKeyspace(routing_table.m_TableGeneration, *m_LocalKeyRange);
   }
+
+  m_IsReady = true;
 }
 
 void DDSNodeState::GotNewRoutingTable(const DDSRoutingTable & routing_table)
@@ -120,6 +138,7 @@ void DDSNodeState::GotNewRoutingTable(const DDSRoutingTable & routing_table)
     {
       if (m_IsDefunct == false)
       {
+        DDSLog::LogInfo("Node is now defunct");
         m_OutgoingKeyspace.ProcessDefunctRoutingTable(routing_table, *m_LocalKeyRange);
       }
 
@@ -475,7 +494,7 @@ DDSDataObjectStoreBase & DDSNodeState::GetDataObjectStore(int object_type_id)
 
 bool DDSNodeState::IsReadyToCreateObjects()
 {
-  return m_IsDefunct == false && m_IncomingKeyspace.IsCompleteForKeyRange(*m_LocalKeyRange);
+  return m_IsReady && m_IsDefunct == false && m_IncomingKeyspace.IsCompleteForKeyRange(*m_LocalKeyRange);
 }
 
 bool DDSNodeState::CreateNewDataObject(int object_type_id, DDSKey & output_key)
@@ -486,13 +505,25 @@ bool DDSNodeState::CreateNewDataObject(int object_type_id, DDSKey & output_key)
   }
 
   output_key = m_DataObjectList[object_type_id]->GetUnusedKeyInRange(*m_LocalKeyRange);
+  output_key = 9276103389541756185;
+
   m_DataObjectList[object_type_id]->SpawnNewNonDatabaseBackedType(output_key);
   return true;
 }
 
 bool DDSNodeState::DestroyDataObject(int object_type_id, DDSKey key)
 {
-  if (m_IsDefunct == false && IsReadyToCreateObjects() == false)
+  if (m_IsDefunct)
+  {
+    return false;
+  }
+
+  if (KeyInKeyRange(key, *m_LocalKeyRange) == false)
+  {
+    return false;
+  }
+
+  if (IsReadyToCreateObjects() == false)
   {
     return false;
   }
@@ -749,32 +780,27 @@ void DDSNodeState::RecheckOutgoingTargetedMessages()
     auto itr_copy = itr;
     itr++;
 
-    for (auto & msg : itr_copy->second)
+    if (KeyInKeyRange(itr_copy->first.m_ObjectKey, *m_LocalKeyRange))
     {
-      if (KeyInKeyRange(itr_copy->first.m_ObjectKey, *m_LocalKeyRange))
+      if (m_IncomingKeyspace.IsCompleteForKey(itr_copy->first))
       {
-        if (m_IncomingKeyspace.IsCompleteForKey(itr_copy->first))
+        for (auto & message : itr_copy->second)
         {
-          for (auto & message : itr_copy->second)
-          {
-            HandleIncomingTargetedMessage(itr_copy->first, message.first, message.second);
-          }
-
-          m_PendingTargetedMessages.erase(itr_copy);
+          HandleIncomingTargetedMessage(itr_copy->first, message.first, message.second);
         }
+        m_PendingTargetedMessages.erase(itr_copy);
       }
-      else
+    }
+    else
+    {
+      DDSNodeId node_id = GetNodeIdForKey(itr_copy->first.m_ObjectKey);
+      if (m_NodeNetwork.RequestNodeConnection(node_id))
       {
-        DDSNodeId node_id = GetNodeIdForKey(itr_copy->first.m_ObjectKey);
-        if (m_NodeNetwork.RequestNodeConnection(node_id))
+        for (auto & message : itr_copy->second)
         {
-          for (auto & message : itr_copy->second)
-          {
-            m_NodeNetwork.SendMessageToServer(node_id, DDSGetServerMessage(message.first, message.second.c_str()));
-          }
-
-          m_PendingTargetedMessages.erase(itr_copy);
+          m_NodeNetwork.SendMessageToServer(node_id, DDSGetServerMessage(message.first, message.second.c_str()));
         }
+        m_PendingTargetedMessages.erase(itr_copy);
       }
     }
   }

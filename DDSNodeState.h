@@ -241,6 +241,7 @@ private:
 
 private:
 
+  bool m_IsReady = false;
   bool m_IsDefunct = false;
   bool m_IsShuttingDown = false;
 
