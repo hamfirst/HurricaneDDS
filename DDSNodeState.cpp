@@ -107,6 +107,11 @@ bool DDSNodeState::IsFullyShutdown()
     return false;
   }
 
+  if (m_TokenValidator.AreAllCallbacksComplete() == false)
+  {
+    return false;
+  }
+
   return m_IsDefunct == true && m_IncomingKeyspace.IsComplete() && m_OutgoingKeyspace.IsComplete();
 }
 
@@ -537,7 +542,6 @@ bool DDSNodeState::CreateNewDataObject(int object_type_id, DDSKey & output_key)
   }
 
   output_key = m_DataObjectList[object_type_id]->GetUnusedKeyInRange(*m_LocalKeyRange);
-  output_key = 9276103389541756185;
 
   m_DataObjectList[object_type_id]->SpawnNewNonDatabaseBackedType(output_key);
   return true;
