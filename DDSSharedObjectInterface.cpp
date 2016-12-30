@@ -2,6 +2,7 @@
 #include "DDSSharedObjectInterface.h"
 #include "DDSCoordinatorState.h"
 #include "DDSRandom.h"
+#include "DDSLog.h"
 
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
 
@@ -33,6 +34,11 @@ int DDSSharedObjectInterface::GetDataObjectType(uint32_t object_type_name_hash)
   return m_CoordinatorState.GetDatabaseObjectTypeIdForNameHash(object_type_name_hash);
 }
 
+int DDSSharedObjectInterface::GetSharedObjectType(uint32_t object_type_name_hash)
+{
+  return m_CoordinatorState.GetSharedObjectTypeIdForNameHash(object_type_name_hash);
+}
+
 void DDSSharedObjectInterface::SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message)
 {
   DDSCoordinatorTargetedMessage packet;
@@ -59,6 +65,34 @@ void DDSSharedObjectInterface::SendMessageToObjectWithResponderReturnArg(int tar
 
   m_CoordinatorState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key }, DDSCoordinatorProtocolMessageType::kTargetedMessageResponder, StormReflEncodeJson(packet));
 }
+
+void DDSSharedObjectInterface::SendMessageToSharedObject(int target_object_type, int target_method_id, std::string && message)
+{
+  DDSCoordinatorTargetedMessage packet;
+  packet.m_Key = 0;
+  packet.m_ObjectType = target_object_type;
+  packet.m_MethodId = target_method_id;
+  packet.m_MethodArgs = message;
+
+  m_CoordinatorState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, 0 }, DDSCoordinatorProtocolMessageType::kTargetedMessage, StormReflEncodeJson(packet));
+}
+
+void DDSSharedObjectInterface::SendMessageToSharedObjectWithResponderReturnArg(int target_object_type, int target_method_id,
+  int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg)
+{
+  DDSCoordinatorTargetedMessageWithResponder packet;
+  packet.m_Key = 0;
+  packet.m_ObjectType = target_object_type;
+  packet.m_MethodId = target_method_id;
+  packet.m_MethodArgs = message;
+  packet.m_ResponderKey = responder_key;
+  packet.m_ResponderObjectType = responder_object_type;
+  packet.m_ResponderMethodId = responder_method_id;
+  packet.m_ReturnArg = return_arg;
+
+  m_CoordinatorState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, 0 }, DDSCoordinatorProtocolMessageType::kTargetedMessageResponder, StormReflEncodeJson(packet));
+}
+
 
 void DDSSharedObjectInterface::SendResponderCall(const DDSResponderCallBase & call_data)
 {
@@ -235,3 +269,9 @@ DDSRoutingTableNodeInfo DDSSharedObjectInterface::GetNodeInfo(DDSKey key)
 {
   return m_CoordinatorState.GetNodeInfo(key);
 }
+
+void DDSSharedObjectCopyInterface::NotImplemented()
+{
+  DDSLog::LogError("Calling shared object function from outside coordinator");
+}
+

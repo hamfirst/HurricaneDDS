@@ -50,6 +50,11 @@ int DDSNodeInterface::GetDataObjectType(uint32_t object_type_name_hash)
   return m_NodeState.GetDatabaseObjectTypeIdForNameHash(object_type_name_hash);
 }
 
+int DDSNodeInterface::GetSharedObjectType(uint32_t object_type_name_hash)
+{
+  return m_NodeState.GetSharedObjectTypeIdForNameHash(object_type_name_hash);
+}
+
 void DDSNodeInterface::SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message)
 {
   DDSTargetedMessage packet;
@@ -75,6 +80,33 @@ void DDSNodeInterface::SendMessageToObjectWithResponderReturnArg(int target_obje
   packet.m_ReturnArg = return_arg;
 
   m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, target_key }, DDSServerToServerMessageType::kTargetedMessageResponder, StormReflEncodeJson(packet));
+}
+
+void DDSNodeInterface::SendMessageToSharedObject(int target_object_type, int target_method_id, std::string && message)
+{
+  DDSTargetedMessage packet;
+  packet.m_Key = 0;
+  packet.m_ObjectType = target_object_type;
+  packet.m_MethodId = target_method_id;
+  packet.m_MethodArgs = message;
+
+  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, 0 }, DDSServerToServerMessageType::kTargetedMessage, StormReflEncodeJson(packet));
+}
+
+void DDSNodeInterface::SendMessageToSharedObjectWithResponderReturnArg(int target_object_type, int target_method_id,
+  int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg)
+{
+  DDSTargetedMessageWithResponder packet;
+  packet.m_Key = 0;
+  packet.m_ObjectType = target_object_type;
+  packet.m_MethodId = target_method_id;
+  packet.m_MethodArgs = message;
+  packet.m_ResponderKey = responder_key;
+  packet.m_ResponderObjectType = responder_object_type;
+  packet.m_ResponderMethodId = responder_method_id;
+  packet.m_ReturnArg = return_arg;
+
+  m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ target_object_type, 0 }, DDSServerToServerMessageType::kTargetedMessageResponder, StormReflEncodeJson(packet));
 }
 
 void DDSNodeInterface::SendResponderCall(const DDSResponderCallBase & call_data)

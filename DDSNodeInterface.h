@@ -56,9 +56,13 @@ private:
 
   int GetObjectType(uint32_t object_type_name_hash) override;
   int GetDataObjectType(uint32_t object_type_name_hash) override;
+  int GetSharedObjectType(uint32_t object_type_name_hash) override;
   
   void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message) override;
   void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
+    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg) override;
+  void SendMessageToSharedObject(int target_object_type, int target_method_id, std::string && message) override;
+  void SendMessageToSharedObjectWithResponderReturnArg(int target_object_type, int target_method_id,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg) override;
   void SendResponderCall(const DDSResponderCallBase & call_data) override;
 

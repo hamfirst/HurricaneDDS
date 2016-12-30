@@ -12,6 +12,8 @@
 
 #include <StormRefl/StormReflJsonStd.h>
 
+#include <StormData/StormDataChangeType.refl.meta.h>
+
 #include <StormSockets/StormSocketClientFrontendWebsocket.h>
 #include <StormSockets/StormSocketServerFrontendWebsocket.h>
 
@@ -206,23 +208,6 @@ void DDSNodeState::GotMessageFromCoordinator(DDSServerToServerMessageType type, 
     }
 
     SendTargetedMessage(DDSDataObjectAddress{ responder_data.m_ObjectType, responder_data.m_Key }, type, std::string(data));
-  }
-  else if (coordinator_type == DDSCoordinatorProtocolMessageType::kSharedObjectDelta)
-  {
-    DDSCoordinatorSharedObjectDelta delta;
-    if (StormReflParseJson(delta, data) == false)
-    {
-      DDSLog::LogError("Invalid targeted message");
-      return;
-    }
-
-    int shared_object_type = delta.m_SharedObjectType - m_DataObjectList.size();
-    for (auto & change : delta.m_Deltas)
-    {
-      m_SharedObjects[shared_object_type]->ProcessDelta(delta);
-    }
-
-    m_SharedResolver.AddSharedChange(m_RoutingTable->m_TableGeneration, delta);
   }
 }
 
@@ -904,6 +889,24 @@ void DDSNodeState::HandleInsertResult(int ec, DDSResponderCallData & responder_c
 
   SendTargetedMessage(DDSDataObjectAddress{ responder_call.m_ObjectType, responder_call.m_Key },
     DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+}
+
+void DDSNodeState::HandleSharedObjectDelta(const char * data)
+{
+  DDSCoordinatorSharedObjectDelta delta;
+  if (StormReflParseJson(delta, data) == false)
+  {
+    DDSLog::LogError("Invalid targeted message");
+    return;
+  }
+
+  int shared_object_type = delta.m_SharedObjectType - m_DataObjectList.size();
+  for (auto & change : delta.m_Deltas)
+  {
+    m_SharedObjects[shared_object_type]->ProcessDelta(delta);
+  }
+
+  m_SharedResolver.AddSharedChange(m_RoutingTable->m_TableGeneration, delta);
 }
 
 void DDSNodeState::HandleIncomingTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string & message)

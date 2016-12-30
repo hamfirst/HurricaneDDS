@@ -7,6 +7,7 @@
 #include "DDSDataObjectStoreHelpers.h"
 #include "DDSSharedObjectBase.h"
 #include "DDSSharedObjectInterface.h"
+#include "DDSServerMessage.h"
 
 #include "DDSServerToServerMessages.refl.meta.h"
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
@@ -20,8 +21,9 @@ class DDSSharedObject : public DDSSharedObjectBase
 {
 public:
   DDSSharedObject(DDSCoordinatorState & coordinator_state, int shared_object_type) :
+    m_Interface(coordinator_state, this),
     m_Coordinator(coordinator_state), 
-    m_DataObject(std::make_unique<DataType>(DDSSharedObjectInterface(coordinator_state, this))), 
+    m_DataObject(std::make_unique<DataType>(m_Interface)),
     m_SharedObjectType(shared_object_type)
   {
     InitializeParentInfo(*m_DataObject.get());
@@ -151,7 +153,7 @@ public:
         }
 
         m_Coordinator.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
-          DDSCoordinatorProtocolMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+          DDSCoordinatorProtocolMessageType::kResponderCall, DDSGetServerMessage(responder_call));
       }
       break;
       case DDSCoordinatorProtocolMessageType::kDestroySubscription:
@@ -195,6 +197,7 @@ public:
 
 private:
 
+  DDSSharedObjectInterface m_Interface;
   DDSCoordinatorState & m_Coordinator;
 
   std::unique_ptr<DataType> m_DataObject;
@@ -212,7 +215,8 @@ class DDSSharedObjectCopy : public DDSSharedObjectCopyBase
 {
 public:
   DDSSharedObjectCopy(DDSNodeState & node_state, int shared_object_type_id) :
-    m_NodeState(node_state), 
+    m_NodeState(node_state),
+    m_DataObject(std::make_unique<DataType>(m_Interface)),
     m_SharedObjectType(shared_object_type_id)
   {
 
@@ -341,6 +345,7 @@ public:
 
 private:
 
+  DDSSharedObjectCopyInterface m_Interface;
   DDSNodeState & m_NodeState;
 
   std::unique_ptr<DataType> m_DataObject;

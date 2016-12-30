@@ -219,6 +219,11 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
       m_NodeState.GotNewRoutingTable(table);
       return true;
     }
+    else if (type == DDSCoordinatorProtocolMessageType::kSharedObjectDelta)
+    {
+      m_NodeState.HandleSharedObjectDelta(msg);
+      return true;
+    }
     else
     {
       msg = start_msg;

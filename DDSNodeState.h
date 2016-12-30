@@ -242,6 +242,7 @@ private:
 
   void HandleQueryByKey(int object_type_id, DDSKey key, const char * result_data, int ec);
   void HandleInsertResult(int ec, DDSResponderCallData & responder_call);
+  void HandleSharedObjectDelta(const char * data);
   void HandleIncomingTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string & message);
   void DestroyDeferredCallback(DDSDeferredCallback * callback);
 

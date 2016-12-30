@@ -86,6 +86,67 @@ public:
       SerializeCallData(std::forward<CallArgs>(args)...), StormReflEncodeJson(return_arg));
   }
 
+  template <typename TargetObject, typename ... Args, typename ... CallArgs>
+  void CallShared(void (TargetObject::* target_func)(Args...), CallArgs && ... args)
+  {
+    static_assert(std::is_convertible<std::tuple<CallArgs...>, std::tuple<Args...>>::value, "Invalid call args for function");
+
+    int target_object_type = GetSharedObjectType(StormReflTypeInfo<TargetObject>::GetNameHash());
+    SendMessageToSharedObject(target_object_type, StormReflGetMemberFunctionIndex(target_func), SerializeCallData(std::forward<CallArgs>(args)...));
+  }
+
+  template <typename TargetObject, typename ... Args, typename ... CallArgs>
+  void CallSharedWithResponder(void (TargetObject::* target_func)(DDSResponder &, Args...), DDSResponder & responder, CallArgs && ... args)
+  {
+    static_assert(std::is_convertible<std::tuple<CallArgs...>, std::tuple<Args...>>::value, "Invalid call args for function");
+
+    SendMessageToSharedObjectWithResponderReturnArg(GetSharedObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), StormReflGetMemberFunctionIndex(target_func),
+      responder.m_Data.m_ObjectType, responder.m_Data.m_Key, responder.m_Data.m_ReturnMethodId, SerializeCallData(std::forward<CallArgs>(args)...), std::string());
+  }
+
+  template <typename TargetObject, typename ReturnObject, typename ... Args, typename ... CallArgs, typename ... ReturnArgs>
+  void CallSharedWithResponder(void (TargetObject::* target_func)(DDSResponder &, Args...), void (ReturnObject::* return_func)(ReturnArgs...), DDSKey return_key, CallArgs && ... args)
+  {
+    static_assert(std::is_convertible<std::tuple<CallArgs...>, std::tuple<Args...>>::value, "Invalid call args for function");
+
+    SendMessageToSharedObjectWithResponderReturnArg(GetSharedObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), StormReflGetMemberFunctionIndex(target_func),
+      GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), return_key, StormReflGetMemberFunctionIndex(return_func),
+      SerializeCallData(std::forward<CallArgs>(args)...), std::string());
+  }
+
+  template <typename TargetObject, typename ReturnObject, typename ... Args, typename ... CallArgs, typename ... ReturnArgs>
+  void CallSharedWithResponder(void (TargetObject::* target_func)(DDSResponder &, Args...), void (ReturnObject::* return_func)(ReturnArgs...), ReturnObject * p_this, CallArgs && ... args)
+  {
+    static_assert(std::is_convertible<std::tuple<CallArgs...>, std::tuple<Args...>>::value, "Invalid call args for function");
+
+    SendMessageToSharedObjectWithResponderReturnArg(GetSharedObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), StormReflGetMemberFunctionIndex(target_func),
+      GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(), StormReflGetMemberFunctionIndex(return_func),
+      SerializeCallData(std::forward<CallArgs>(args)...), std::string());
+  }
+
+  template <typename TargetObject, typename ReturnObject, typename ReturnArg, typename ... Args, typename ... CallArgs, typename ... ReturnArgs>
+  void CallSharedWithResponderReturnArg(void (TargetObject::* target_func)(DDSResponder &, Args...),
+    void (ReturnObject::* return_func)(ReturnArg, ReturnArgs...), DDSKey return_key, const ReturnArg & return_arg, CallArgs && ... args)
+  {
+    static_assert(std::is_convertible<std::tuple<CallArgs...>, std::tuple<Args...>>::value, "Invalid call args for function");
+
+    SendMessageToSharedObjectWithResponderReturnArg(GetSharedObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), StormReflGetMemberFunctionIndex(target_func),
+      GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), return_key, StormReflGetMemberFunctionIndex(return_func),
+      SerializeCallData(std::forward<CallArgs>(args)...), StormReflEncodeJson(return_arg));
+  }
+
+  template <typename TargetObject, typename ReturnObject, typename ReturnArg, typename ... Args, typename ... CallArgs, typename ... ReturnArgs>
+  void CallSharedWithResponderReturnArg(void (TargetObject::* target_func)(DDSResponder &, Args...),
+    void (ReturnObject::* return_func)(ReturnArg, ReturnArgs...), ReturnObject * p_this, const ReturnArg & return_arg, CallArgs && ... args)
+  {
+    static_assert(std::is_convertible<std::tuple<CallArgs...>, std::tuple<Args...>>::value, "Invalid call args for function");
+
+    SendMessageToSharedObjectWithResponderReturnArg(GetSharedObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), StormReflGetMemberFunctionIndex(target_func),
+      GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(), StormReflGetMemberFunctionIndex(return_func),
+      SerializeCallData(std::forward<CallArgs>(args)...), StormReflEncodeJson(return_arg));
+  }
+
+
   template <typename DatabaseType, typename ReturnObject>
   void InsertIntoDatabase(const DatabaseType & data, DDSKey key, void (ReturnObject::*return_func)(int ec), ReturnObject * p_this)
   {
@@ -246,10 +307,15 @@ private:
 
   virtual int GetObjectType(uint32_t object_type_name_hash) = 0;
   virtual int GetDataObjectType(uint32_t object_type_name_hash) = 0;
+  virtual int GetSharedObjectType(uint32_t object_type_name_hash) = 0;
 
   virtual void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message) = 0;
   virtual void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg) = 0;
+  virtual void SendMessageToSharedObject(int target_object_type, int target_method_id, std::string && message) = 0;
+  virtual void SendMessageToSharedObjectWithResponderReturnArg(int target_object_type, int target_method_id,
+    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg) = 0;
+
   virtual void SendResponderCall(const DDSResponderCallBase & call_data) = 0;
 
   virtual void InsertIntoDatabaseWithResponderReturnArg(const char * collection, int data_object_type, std::string && data, DDSKey data_key,
