@@ -353,7 +353,30 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
 
   if (addr.m_ObjectType >= (int)m_DataObjectList.size())
   {
-    m_CoordinatorConnection.SendMessageToCoordinator(DDSGetServerMessage(type, message.c_str()));
+    if (type == DDSServerToServerMessageType::kCreateSubscription)
+    {
+      DDSCreateSubscription msg;
+      if (StormReflParseJson(msg, message.data()) == false)
+      {
+        DDSLog::LogError("Couldn't parse sub create msg?");
+      }
+
+      SendSubscriptionCreate(std::move(msg));
+    }
+    else if (type == DDSServerToServerMessageType::kDestroySubscription)
+    {
+      DDSDestroySubscription msg;
+      if (StormReflParseJson(msg, message.data()) == false)
+      {
+        DDSLog::LogError("Couldn't parse sub create msg?");
+      }
+
+      SendSubscriptionDestroy(std::move(msg));
+    }
+    else
+    {
+      m_CoordinatorConnection.SendMessageToCoordinator(DDSGetServerMessage(type, message.c_str()));
+    }
     return;
   }
   else if (m_IsDefunct == false && KeyInKeyRange(addr.m_ObjectKey, *m_LocalKeyRange))
@@ -384,7 +407,7 @@ DDSRoutingTableNodeInfo DDSNodeState::GetNodeInfo(DDSKey key)
   return GetNodeDataForKey(key, *m_RoutingTable, m_RoutingKeyRanges);
 }
 
-void DDSNodeState::SendSubscriptionCreate(DDSCreateDataSubscription && req)
+void DDSNodeState::SendSubscriptionCreate(DDSCreateSubscription && req)
 {
   if (req.m_ObjectType >= (int)m_DataObjectList.size())
   {
@@ -402,7 +425,7 @@ void DDSNodeState::SendSubscriptionCreate(DDSCreateDataSubscription && req)
     return;
   }
 
-  SendTargetedMessage(DDSDataObjectAddress{ req.m_ObjectType, req.m_Key }, DDSServerToServerMessageType::kCreateSubscription, StormReflEncodeJson(req));
+  m_CoordinatorConnection.SendMessageToCoordinator(DDSGetServerMessage(req));
 }
 
 void DDSNodeState::SendSubscriptionDestroy(const DDSDestroySubscription & destroy)
@@ -413,7 +436,7 @@ void DDSNodeState::SendSubscriptionDestroy(const DDSDestroySubscription & destro
     return;
   }
 
-  SendTargetedMessage(DDSDataObjectAddress{ destroy.m_ObjectType, destroy.m_Key }, DDSServerToServerMessageType::kDestroySubscription, StormReflEncodeJson(destroy));
+  m_CoordinatorConnection.SendMessageToCoordinator(DDSGetServerMessage(destroy));
 }
 
 void DDSNodeState::ExportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list)

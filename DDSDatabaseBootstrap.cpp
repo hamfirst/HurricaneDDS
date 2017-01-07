@@ -38,13 +38,16 @@ void DDSDatabaseBoostrapFullInternal(const std::vector<DDSDatabaseBoostrapCollec
     for (auto & index : collection_info.m_Indices)
     {
       bson_t key;
-      std::string index_str = "{" + index + ":1}";
+      std::string index_str = "{\"" + index + "\":1}";
       bson_init_from_json(&key, index_str.c_str(), index_str.length(), &err);
       auto key_auto_destroy = gsl::finally([&]() { bson_destroy(&key); });
+
+      std::string index_name = collection_info.m_CollectionName + "_" + index;
 
       mongoc_index_opt_t options;
       mongoc_index_opt_init(&options);
       options.unique = true;
+      options.name = index_name.data();
 
       mongoc_collection_create_index(collection, &key, &options, &err);
     }

@@ -191,7 +191,7 @@ private:
 
   }
 
-  void SendSubscriptionCreate(DDSCreateDataSubscription && req);
+  void SendSubscriptionCreate(DDSCreateSubscription && req);
   void SendSubscriptionDestroy(const DDSDestroySubscription & destroy);
   void ExportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list);
   void ImportSharedSubscriptions(DDSDataObjectAddress addr, std::vector<std::pair<int, std::vector<DDSExportedSubscription>>> & exported_list, int routing_table_gen);

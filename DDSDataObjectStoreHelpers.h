@@ -185,6 +185,12 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTa
   };
 
   StormReflVisitFuncByIndex(dt, func_visitor, message.m_MethodId);
+
+  if (parsed == false)
+  {
+    return false;
+  }
+
   return parsed;
 }
 
@@ -242,6 +248,12 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTa
   };
 
   StormReflVisitFuncByIndex(dt, func_visitor, message.m_MethodId);
+
+  if (parsed == false)
+  {
+    return false;
+  }
+
   return parsed;
 }
 
@@ -299,6 +311,12 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSRe
   };
 
   StormReflVisitFuncByIndex(dt, func_visitor, message.m_MethodId);
+
+  if (parsed == false)
+  {
+    return false;
+  }
+
   return parsed;
 }
 
