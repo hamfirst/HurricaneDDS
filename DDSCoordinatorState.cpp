@@ -169,12 +169,9 @@ void DDSCoordinatorState::GotMessageFromServer(DDSNodeId server_id, DDSCoordinat
 
     SendTargetedMessage(DDSDataObjectAddress{ responder_data.m_ObjectType, responder_data.m_Key }, type, std::string(data));
   }
-  else if (type == DDSCoordinatorProtocolMessageType::kCreateSubscription ||
-           type == DDSCoordinatorProtocolMessageType::kCreateDataSubscription || 
-           type == DDSCoordinatorProtocolMessageType::kCreateExistSubscription ||
-           type == DDSCoordinatorProtocolMessageType::kCreateDataExistSubscription)
+  else if (type == DDSCoordinatorProtocolMessageType::kCreateSubscription)
   {
-    DDSCoordinatorCreateDataSubscription sub_data;
+    DDSCoordinatorCreateSubscription sub_data;
     if (StormReflParseJson(sub_data, data) == false)
     {
       DDSLog::LogError("Invalid targeted message");
@@ -203,7 +200,7 @@ void DDSCoordinatorState::GotMessageFromServer(DDSNodeId server_id, DDSCoordinat
       return;
     }
 
-    SendTargetedMessage(DDSDataObjectAddress{ sub_data.m_ResponderObjectType, sub_data.m_ResponderKey }, type, std::string(data));
+    SendTargetedMessage(DDSDataObjectAddress{ sub_data.m_ObjectType, sub_data.m_Key }, type, std::string(data));
   }
   else if (type == DDSCoordinatorProtocolMessageType::kShutDown)
   {

@@ -10,7 +10,7 @@
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>
 {
-  static constexpr int elems_n = 17;
+  static constexpr int elems_n = 14;
   static constexpr auto GetName() { return "DDSCoordinatorProtocolMessageType"; }
   static constexpr auto GetNameHash() { return 0xD880A841; }
   template <int N> struct elems { };
@@ -115,37 +115,13 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<11>
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<12>
 {
-  static constexpr auto GetName() { return "kCreateDataSubscription"; }
-  static constexpr auto GetNameHash() { return 0x1B0ACF16; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kCreateDataSubscription; }
-};
-
-template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<13>
-{
-  static constexpr auto GetName() { return "kCreateExistSubscription"; }
-  static constexpr auto GetNameHash() { return 0xF5D37338; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kCreateExistSubscription; }
-};
-
-template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<14>
-{
-  static constexpr auto GetName() { return "kCreateDataExistSubscription"; }
-  static constexpr auto GetNameHash() { return 0x620781BB; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kCreateDataExistSubscription; }
-};
-
-template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<15>
-{
   static constexpr auto GetName() { return "kDestroySubscription"; }
   static constexpr auto GetNameHash() { return 0xF053A8EC; }
   static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kDestroySubscription; }
 };
 
 template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<16>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<13>
 {
   static constexpr auto GetName() { return "kSubscriptionDeleted"; }
   static constexpr auto GetNameHash() { return 0xA823DCCA; }
@@ -741,22 +717,6 @@ struct StormReflTypeInfo<DDSCoordinatorCreateSubscription>
 };
 
 template <>
-struct StormReflTypeInfo<DDSCoordinatorCreateDataSubscription>
-{
-  using MyBase = DDSCreateDataSubscriptionBase;
-  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
-  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
-  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
-  {
-    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
-  };
-  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
-  static constexpr auto GetName() { return "DDSCoordinatorCreateDataSubscription"; }
-  static constexpr auto GetNameHash() { return 0x641666E1; }
-  static DDSCoordinatorCreateDataSubscription & GetDefault() { static DDSCoordinatorCreateDataSubscription def; return def; }
-};
-
-template <>
 struct StormReflTypeInfo<DDSCoordinatorDestroySubscription>
 {
   using MyBase = DDSDestroySubscriptionBase;
@@ -770,38 +730,6 @@ struct StormReflTypeInfo<DDSCoordinatorDestroySubscription>
   static constexpr auto GetName() { return "DDSCoordinatorDestroySubscription"; }
   static constexpr auto GetNameHash() { return 0xFADAE045; }
   static DDSCoordinatorDestroySubscription & GetDefault() { static DDSCoordinatorDestroySubscription def; return def; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCoordinatorCreateExistSubscription>
-{
-  using MyBase = DDSCreateExistSubscriptionBase;
-  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
-  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
-  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
-  {
-    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
-  };
-  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
-  static constexpr auto GetName() { return "DDSCoordinatorCreateExistSubscription"; }
-  static constexpr auto GetNameHash() { return 0x5AA674DD; }
-  static DDSCoordinatorCreateExistSubscription & GetDefault() { static DDSCoordinatorCreateExistSubscription def; return def; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCoordinatorCreateDataExistSubscription>
-{
-  using MyBase = DDSCreateDataExistSubscriptionBase;
-  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
-  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
-  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
-  {
-    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
-  };
-  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
-  static constexpr auto GetName() { return "DDSCoordinatorCreateDataExistSubscription"; }
-  static constexpr auto GetNameHash() { return 0x6BF3DF9C; }
-  static DDSCoordinatorCreateDataExistSubscription & GetDefault() { static DDSCoordinatorCreateDataExistSubscription def; return def; }
 };
 
 template <>
@@ -824,7 +752,7 @@ namespace StormReflFileInfo
 {
   struct DDSCoordinatorProtocolMessages
   {
-    static const int types_n = 16;
+    static const int types_n = 13;
     template <int i> struct type_info { using type = void; };
   };
 
@@ -897,29 +825,11 @@ namespace StormReflFileInfo
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<11>
   {
-    using type = ::DDSCoordinatorCreateDataSubscription;
-  };
-
-  template <>
-  struct DDSCoordinatorProtocolMessages::type_info<12>
-  {
     using type = ::DDSCoordinatorDestroySubscription;
   };
 
   template <>
-  struct DDSCoordinatorProtocolMessages::type_info<13>
-  {
-    using type = ::DDSCoordinatorCreateExistSubscription;
-  };
-
-  template <>
-  struct DDSCoordinatorProtocolMessages::type_info<14>
-  {
-    using type = ::DDSCoordinatorCreateDataExistSubscription;
-  };
-
-  template <>
-  struct DDSCoordinatorProtocolMessages::type_info<15>
+  struct DDSCoordinatorProtocolMessages::type_info<12>
   {
     using type = ::DDSCoordinatorSubscriptionDeleted;
   };

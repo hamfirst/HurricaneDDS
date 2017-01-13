@@ -10,16 +10,19 @@
 #include <StormData/StormDataChangePacket.h>
 #include <StormData/StormDataChangeNotifier.h>
 
-
+inline bool DDSRequiresAnyObject(DDSServerToServerMessageType type)
+{
+  return type != DDSServerToServerMessageType::kCreateSubscription &&
+         type != DDSServerToServerMessageType::kDestroySubscription;
+}
 
 inline bool DDSRequiresFullObject(DDSServerToServerMessageType type)
 {
-  return type != DDSServerToServerMessageType::kCreateDataSubscription && 
-         type != DDSServerToServerMessageType::kCreateExistSubscription &&
-         type != DDSServerToServerMessageType::kCreateDataExistSubscription;
+  return type != DDSServerToServerMessageType::kCreateSubscription &&
+         type != DDSServerToServerMessageType::kDestroySubscription;
 }
 
-inline bool DDSRequiresFullObject(const std::vector<DDSExportedMessage> & pending_messages)
+inline bool DDSRequiresFullObject(const std::vector<DDSExportedMessage> & pending_messages, const std::vector<DDSExportedSubscription> & subs)
 {
   bool requires_full_object = false;
   for (auto & msg : pending_messages)
@@ -31,15 +34,28 @@ inline bool DDSRequiresFullObject(const std::vector<DDSExportedMessage> & pendin
     }
   }
 
+  if (requires_full_object == false)
+  {
+    for (auto & sub : subs)
+    {
+      if (sub.m_IsDataSubscription == false && sub.m_ForceLoad)
+      {
+        requires_full_object = true;
+        break;
+      }
+    }
+  }
+
   return requires_full_object;
 }
 
 inline bool DDSRequiresActiveObject(DDSServerToServerMessageType type)
 {
-  return DDSRequiresFullObject(type) && type != DDSServerToServerMessageType::kResponderCall;
+  return DDSRequiresFullObject(type) &&
+    type != DDSServerToServerMessageType::kResponderCall; // This allows the object to call or subscribe to other objects when loading
 }
 
-inline bool DDSRequiresActiveObject(const std::vector<DDSExportedMessage> & pending_messages)
+inline bool DDSRequiresActiveObject(const std::vector<DDSExportedMessage> & pending_messages, const std::vector<DDSExportedSubscription> & subs)
 {
   bool requires_active_object = false;
   for (auto & msg : pending_messages)
@@ -48,6 +64,18 @@ inline bool DDSRequiresActiveObject(const std::vector<DDSExportedMessage> & pend
     {
       requires_active_object = true;
       break;
+    }
+  }
+
+  if (requires_active_object == false)
+  {
+    for (auto & sub : subs)
+    {
+      if (sub.m_IsDataSubscription == false && sub.m_ForceLoad)
+      {
+        requires_active_object = true;
+        break;
+      }
     }
   }
 
@@ -172,7 +200,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTa
     }
   };
 
-  DDSResponder responder = { iface, { 0, -1, -1 } };
+  DDSResponder responder = { iface, { 0, -1, -1, -1 } };
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -235,7 +263,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTa
     }
   };
 
-  DDSResponder responder = { iface, { message.m_ResponderKey, message.m_ResponderObjectType, message.m_ResponderMethodId, message.m_ReturnArg } };
+  DDSResponder responder = { iface, { message.m_ResponderKey, message.m_ResponderObjectType, message.m_ResponderMethodId, message.m_ErrorMethodId, message.m_ReturnArg } };
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -298,7 +326,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSRe
     }
   };
 
-  DDSResponder responder = { iface, { 0, -1, -1 } };
+  DDSResponder responder = { iface, { 0, -1, -1, -1 } };
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -343,6 +371,11 @@ bool DDSCreateSubscriptionResponse(DataType & data_type, const ReflectionChangeN
   responder_data.m_MethodId = sub.m_ResponderMethodId;
   responder_data.m_ResponderArgs = sub.m_ResponderArgs;
 
+  if (sub.m_State != kSubSentValid)
+  {
+    DDSLog::LogError("Didn't sent initial subscription response");
+  }
+
   if (sub.m_DeltaOnly)
   {
     ReflectionChangeNotification notification_copy = change_notification;
@@ -375,7 +408,7 @@ bool DDSCreateSubscriptionResponse(DataType & data_type, const ReflectionChangeN
 }
 
 template <class DataType>
-bool DDSCreateInitialSubscriptionResponse(DataType & data_type, const DDSExportedSubscription & sub, DDSResponderCallData & responder_data)
+bool DDSCreateInitialSubscriptionResponse(DataType & data_type, DDSExportedSubscription & sub, DDSResponderCallData & responder_data)
 {
   responder_data.m_Key = sub.m_ResponderKey;
   responder_data.m_ObjectType = sub.m_ResponderObjectType;
@@ -393,8 +426,20 @@ bool DDSCreateInitialSubscriptionResponse(DataType & data_type, const DDSExporte
 
   if (StormDataVisitPath(data_type, visitor, sub.m_DataPath.c_str()) == false)
   {
-    return false;
+    sub.m_State = kSubSentInvalid;
+    if (sub.m_ErrorMethodId != -1)
+    {
+      responder_data.m_MethodArgs = "[]";
+      responder_data.m_MethodId = sub.m_ErrorMethodId;
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   }
+
+  sub.m_State = kSubSentValid;
 
   responder_data.m_MethodArgs = "[";
   if (sub.m_DeltaOnly)
@@ -411,19 +456,26 @@ bool DDSCreateInitialSubscriptionResponse(DataType & data_type, const DDSExporte
   return true;
 }
 
-inline void DDSCreateDeletedSubscriptionResponse(const DDSExportedSubscription & sub, DDSSubscriptionDeleted & responder_data)
+inline bool DDSCreateErrorSubscriptionResponse(DDSExportedSubscription & sub, DDSResponderCallData & responder_data)
 {
-  responder_data.m_ResponderKey = sub.m_ResponderKey;
-  responder_data.m_ResponderObjectType = sub.m_ResponderObjectType;
-  responder_data.m_ResponderMethodId = sub.m_ResponderMethodId;
-  responder_data.m_SubscriptionId = sub.m_SubscriptionId;
+  sub.m_State = kSubSentInvalid;
+
+  if (sub.m_ErrorMethodId == -1)
+  {
+    return false;
+  }
+
+  responder_data.m_Key = sub.m_ResponderKey;
+  responder_data.m_ObjectType = sub.m_ResponderObjectType;
+  responder_data.m_MethodId = sub.m_ErrorMethodId;
+  responder_data.m_MethodArgs = "[]";
+  responder_data.m_ResponderArgs = sub.m_ResponderArgs;
+  return true;
 }
 
-inline void DDSCreateSubscriptionExistResponse(bool exists, const DDSExportedSubscription & sub, DDSResponderCallData & responder_data)
+inline void DDSCreateDeletedSubscriptionResponse(const DDSExportedSubscription & sub, DDSSubscriptionDeleted & responder_data)
 {
   responder_data.m_Key = sub.m_ResponderKey;
   responder_data.m_ObjectType = sub.m_ResponderObjectType;
-  responder_data.m_MethodId = sub.m_ResponderMethodId;
-  responder_data.m_ResponderArgs = sub.m_ResponderArgs;
-  responder_data.m_MethodArgs = exists ? "[true]" : "[false]";
+  responder_data.m_SubscriptionId = sub.m_SubscriptionId;
 }

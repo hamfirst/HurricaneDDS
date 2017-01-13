@@ -27,4 +27,19 @@ void DDSResponderCall(DDSResponder & responder, Args && ... args)
   DDSResponderCallFinalize(responder, call_data);
 }
 
+template <class ... Args>
+void DDSResponderCallError(DDSResponder & responder)
+{
+  DDSResponderCallBase call_data;
+
+  call_data.m_Key = responder.m_Data.m_Key;
+  call_data.m_ObjectType = responder.m_Data.m_ObjectType;
+  call_data.m_MethodId = responder.m_Data.m_ErrorMethodId;
+  call_data.m_ResponderArgs = responder.m_Data.m_ReturnArg;
+  call_data.m_MethodArgs = "[]";
+
+  DDSResponderCallFinalize(responder, call_data);
+}
+
+
 

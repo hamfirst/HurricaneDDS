@@ -11,15 +11,16 @@ DDSCoordinatorNetworkService::DDSCoordinatorNetworkService(
   DDSCoordinatorState & coordinator_state,
   const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings) :
   m_CoordinatorState(coordinator_state),
-  m_Backend(backend),
-  m_ServerFrontend(std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(server_settings, m_Backend.m_Backend.get()))
+  m_Backend(backend)
 {
-
+  auto settings = server_settings;
+  settings.EventSemaphore = &m_Semaphore;
+  m_ServerFrontend = std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(settings, m_Backend.m_Backend.get());
 }
 
 void DDSCoordinatorNetworkService::WaitForEvent()
 {
-  m_ServerFrontend->WaitForEvent(100);
+  m_Semaphore.WaitOne(100);
 }
 
 void DDSCoordinatorNetworkService::ProcessEvents()

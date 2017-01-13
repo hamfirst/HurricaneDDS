@@ -24,9 +24,6 @@ enum STORM_REFL_ENUM class DDSCoordinatorProtocolMessageType
   kTargetedMessage,
   kTargetedMessageResponder,
   kCreateSubscription,
-  kCreateDataSubscription,
-  kCreateExistSubscription,
-  kCreateDataExistSubscription,
   kDestroySubscription,
   kSubscriptionDeleted
 };
@@ -122,28 +119,10 @@ struct DDSCoordinatorCreateSubscription : public DDSCreateSubscriptionBase
   static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kCreateSubscription;
 };
 
-struct DDSCoordinatorCreateDataSubscription : public DDSCreateDataSubscriptionBase
-{
-  STORM_REFL;
-  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kCreateDataSubscription;
-};
-
 struct DDSCoordinatorDestroySubscription : public DDSDestroySubscriptionBase
 {
   STORM_REFL;
   static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kDestroySubscription;
-};
-
-struct DDSCoordinatorCreateExistSubscription : public DDSCreateExistSubscriptionBase
-{
-  STORM_REFL;
-  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kCreateExistSubscription;
-};
-
-struct DDSCoordinatorCreateDataExistSubscription : public DDSCreateDataExistSubscriptionBase
-{
-  STORM_REFL;
-  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kCreateDataExistSubscription;
 };
 
 struct DDSCoordinatorSubscriptionDeleted : public DDSSubscriptionDeletedBase

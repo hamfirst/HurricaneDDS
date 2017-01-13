@@ -263,12 +263,9 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
 
     SendTargetedMessage(DDSDataObjectAddress{ responder_data.m_ObjectType, responder_data.m_Key }, type, std::string(data));
   }
-  else if (type == DDSServerToServerMessageType::kCreateSubscription ||
-           type == DDSServerToServerMessageType::kCreateDataSubscription ||
-           type == DDSServerToServerMessageType::kCreateExistSubscription ||
-           type == DDSServerToServerMessageType::kCreateDataExistSubscription)
+  else if (type == DDSServerToServerMessageType::kCreateSubscription)
   {
-    DDSCreateDataSubscription sub_data;
+    DDSCreateSubscription sub_data;
     if (StormReflParseJson(sub_data, data) == false)
     {
       DDSLog::LogError("Invalid targeted message");
@@ -297,7 +294,7 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
       return;
     }
     
-    SendTargetedMessage(DDSDataObjectAddress{ sub_data.m_ResponderObjectType, sub_data.m_ResponderKey }, type, std::string(data));
+    SendTargetedMessage(DDSDataObjectAddress{ sub_data.m_ObjectType, sub_data.m_Key }, type, std::string(data));
   }
   else if (type == DDSServerToServerMessageType::kUnlockObject)
   {
@@ -417,9 +414,12 @@ void DDSNodeState::SendSubscriptionCreate(DDSCreateSubscription && req)
     sub_data.m_ResponderKey = req.m_ResponderKey;
     sub_data.m_ResponderObjectType = req.m_ResponderObjectType;
     sub_data.m_ResponderMethodId = req.m_ResponderMethodId;
+    sub_data.m_ErrorMethodId = req.m_ErrorMethodId;
     sub_data.m_ResponderArgs = std::move(req.m_ReturnArg);
-    sub_data.m_IsDataSubscription = false;
+    sub_data.m_IsDataSubscription = req.m_DataSubscription;
     sub_data.m_DeltaOnly = req.m_DeltaOnly;
+    sub_data.m_ForceLoad = req.m_ForceLoad;
+    sub_data.m_State = kSubUnsent;
 
     m_SharedObjects[req.m_ObjectType - m_DataObjectList.size()]->CreateSubscription(std::move(sub_data));
     return;
@@ -451,7 +451,7 @@ void DDSNodeState::ImportSharedSubscriptions(DDSDataObjectAddress addr, std::vec
 {
   for(auto & list : exported_list)
   {
-    m_SharedObjects[list.first - m_SharedObjects.size()]->ImportSubscriptions(addr, std::move(list.second), m_SharedResolver, routing_table_gen);
+    m_SharedObjects[list.first - m_DataObjectList.size()]->ImportSubscriptions(addr, std::move(list.second), m_SharedResolver, routing_table_gen);
   }
 }
 
@@ -572,7 +572,7 @@ bool DDSNodeState::DestroyDataObject(int object_type_id, DDSKey key)
     return false;
   }
 
-  return m_DataObjectList[object_type_id]->DestroyNonDatabaseBackedType(key);
+  return m_DataObjectList[object_type_id]->Destroy(key);
 }
 
 void DDSNodeState::CreateTimer(std::chrono::system_clock::duration duration, DDSDeferredCallback & callback, std::function<void()> && function)
@@ -686,7 +686,7 @@ void DDSNodeState::QueryObjectData(const char * collection, const char * query, 
     std::string sb;
     StormReflJsonEncodeString(data, sb);
 
-    responder_call.m_MethodArgs = std::string("[") + sb + "," + StormReflEncodeJson(ec) + "]";
+    responder_call.m_MethodArgs = std::string("[") + StormReflEncodeJson(ec) + "," + sb + "]";
     std::string responder_str = StormReflEncodeJson(responder_call);
     SendTargetedMessage(address, DDSServerToServerMessageType::kResponderCall, std::move(responder_str));
   };
@@ -739,6 +739,42 @@ void DDSNodeState::UpdateObjectData(int object_type_id, DDSKey key, const char *
     };
 
     m_Database->QueryDatabaseUpsert(key, collection, data, callback);
+  }
+}
+
+void DDSNodeState::DeleteObjectData(int object_type_id, DDSKey key, const char * collection, DDSResponderCallData * responder_call)
+{
+  m_DataObjectList[object_type_id]->LockObject(key);
+
+  if (responder_call)
+  {
+    DDSResponderCallData responder = std::move(*responder_call);
+
+    auto callback = [=](const char *, int ec) mutable {
+      if (ec != 0)
+      {
+        responder.m_MethodArgs = "[false]";
+      }
+      else
+      {
+        responder.m_MethodArgs = "[true]";
+      }
+
+      SendTargetedMessage(DDSDataObjectAddress{ object_type_id, key }, DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder));
+    };
+
+    m_Database->QueryDatabaseDelete(key, collection, callback);
+  }
+  else
+  {
+    auto callback = [](const char *, int ec) {
+      if (ec != 0)
+      {
+        DDSLog::LogError("Non failing delete has failed");
+      }
+    };
+
+    m_Database->QueryDatabaseDelete(key, collection, callback);
   }
 }
 

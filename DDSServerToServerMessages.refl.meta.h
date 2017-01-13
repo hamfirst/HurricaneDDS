@@ -10,7 +10,7 @@
 template <>
 struct StormReflEnumInfo<DDSServerToServerMessageType>
 {
-  static constexpr int elems_n = 16;
+  static constexpr int elems_n = 13;
   static constexpr auto GetName() { return "DDSServerToServerMessageType"; }
   static constexpr auto GetNameHash() { return 0xBBFBB085; }
   template <int N> struct elems { };
@@ -91,37 +91,13 @@ struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<8>
 template <>
 struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<9>
 {
-  static constexpr auto GetName() { return "kCreateDataSubscription"; }
-  static constexpr auto GetNameHash() { return 0x1B0ACF16; }
-  static constexpr auto GetValue() { return DDSServerToServerMessageType::kCreateDataSubscription; }
-};
-
-template <>
-struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<10>
-{
-  static constexpr auto GetName() { return "kCreateExistSubscription"; }
-  static constexpr auto GetNameHash() { return 0xF5D37338; }
-  static constexpr auto GetValue() { return DDSServerToServerMessageType::kCreateExistSubscription; }
-};
-
-template <>
-struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<11>
-{
-  static constexpr auto GetName() { return "kCreateDataExistSubscription"; }
-  static constexpr auto GetNameHash() { return 0x620781BB; }
-  static constexpr auto GetValue() { return DDSServerToServerMessageType::kCreateDataExistSubscription; }
-};
-
-template <>
-struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<12>
-{
   static constexpr auto GetName() { return "kDestroySubscription"; }
   static constexpr auto GetNameHash() { return 0xF053A8EC; }
   static constexpr auto GetValue() { return DDSServerToServerMessageType::kDestroySubscription; }
 };
 
 template <>
-struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<13>
+struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<10>
 {
   static constexpr auto GetName() { return "kSubscriptionDeleted"; }
   static constexpr auto GetNameHash() { return 0xA823DCCA; }
@@ -129,7 +105,7 @@ struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<13>
 };
 
 template <>
-struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<14>
+struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<11>
 {
   static constexpr auto GetName() { return "kValidateTokenRequest"; }
   static constexpr auto GetNameHash() { return 0x415645E9; }
@@ -137,7 +113,7 @@ struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<14>
 };
 
 template <>
-struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<15>
+struct StormReflEnumInfo<DDSServerToServerMessageType>::elems<12>
 {
   static constexpr auto GetName() { return "kValidateTokenResponse"; }
   static constexpr auto GetNameHash() { return 0x353318E1; }
@@ -920,22 +896,6 @@ struct StormReflTypeInfo<DDSCreateSubscription>
 };
 
 template <>
-struct StormReflTypeInfo<DDSCreateDataSubscription>
-{
-  using MyBase = DDSCreateDataSubscriptionBase;
-  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
-  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
-  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
-  {
-    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
-  };
-  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
-  static constexpr auto GetName() { return "DDSCreateDataSubscription"; }
-  static constexpr auto GetNameHash() { return 0x050377EC; }
-  static DDSCreateDataSubscription & GetDefault() { static DDSCreateDataSubscription def; return def; }
-};
-
-template <>
 struct StormReflTypeInfo<DDSDestroySubscription>
 {
   using MyBase = DDSDestroySubscriptionBase;
@@ -949,38 +909,6 @@ struct StormReflTypeInfo<DDSDestroySubscription>
   static constexpr auto GetName() { return "DDSDestroySubscription"; }
   static constexpr auto GetNameHash() { return 0x5D5FD9C0; }
   static DDSDestroySubscription & GetDefault() { static DDSDestroySubscription def; return def; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateExistSubscription>
-{
-  using MyBase = DDSCreateExistSubscriptionBase;
-  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
-  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
-  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
-  {
-    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
-  };
-  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
-  static constexpr auto GetName() { return "DDSCreateExistSubscription"; }
-  static constexpr auto GetNameHash() { return 0x3077413E; }
-  static DDSCreateExistSubscription & GetDefault() { static DDSCreateExistSubscription def; return def; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateDataExistSubscription>
-{
-  using MyBase = DDSCreateDataExistSubscriptionBase;
-  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
-  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
-  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
-  {
-    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
-  };
-  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
-  static constexpr auto GetName() { return "DDSCreateDataExistSubscription"; }
-  static constexpr auto GetNameHash() { return 0x6EAB8D48; }
-  static DDSCreateDataExistSubscription & GetDefault() { static DDSCreateDataExistSubscription def; return def; }
 };
 
 template <>
@@ -1035,7 +963,7 @@ namespace StormReflFileInfo
 {
   struct DDSServerToServerMessages
   {
-    static const int types_n = 18;
+    static const int types_n = 15;
     template <int i> struct type_info { using type = void; };
   };
 
@@ -1108,41 +1036,23 @@ namespace StormReflFileInfo
   template <>
   struct DDSServerToServerMessages::type_info<11>
   {
-    using type = ::DDSCreateDataSubscription;
+    using type = ::DDSDestroySubscription;
   };
 
   template <>
   struct DDSServerToServerMessages::type_info<12>
   {
-    using type = ::DDSDestroySubscription;
+    using type = ::DDSSubscriptionDeleted;
   };
 
   template <>
   struct DDSServerToServerMessages::type_info<13>
   {
-    using type = ::DDSCreateExistSubscription;
-  };
-
-  template <>
-  struct DDSServerToServerMessages::type_info<14>
-  {
-    using type = ::DDSCreateDataExistSubscription;
-  };
-
-  template <>
-  struct DDSServerToServerMessages::type_info<15>
-  {
-    using type = ::DDSSubscriptionDeleted;
-  };
-
-  template <>
-  struct DDSServerToServerMessages::type_info<16>
-  {
     using type = ::DDSValidateTokenRequest;
   };
 
   template <>
-  struct DDSServerToServerMessages::type_info<17>
+  struct DDSServerToServerMessages::type_info<14>
   {
     using type = ::DDSValidateTokenResponse;
   };

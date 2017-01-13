@@ -207,6 +207,7 @@ private:
 
   void InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData && responder_call);
   void UpdateObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData * responder_call);
+  void DeleteObjectData(int object_type_id, DDSKey key, const char * collection, DDSResponderCallData * responder_call);
 
   void BeginQueueingMessages();
   void EndQueueingMessages();

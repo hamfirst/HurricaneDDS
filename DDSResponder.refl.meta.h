@@ -8,7 +8,7 @@
 template <>
 struct StormReflTypeInfo<DDSResponderData>
 {
-  static constexpr int fields_n = 4;
+  static constexpr int fields_n = 5;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -86,17 +86,39 @@ struct StormReflTypeInfo<DDSResponderData>::field_data<2, Self> : public StormRe
 template <>
 struct StormReflTypeInfo<DDSResponderData>::field_data_static<3>
 {
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_ErrorMethodId"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x574B3263; }
+  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr auto GetFieldIndex() { return 3; }
+  static constexpr auto GetMemberPtr() { return &DDSResponderData::m_ErrorMethodId; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSResponderData>::field_data<3, Self> : public StormReflTypeInfo<DDSResponderData>::field_data_static<3>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_ErrorMethodId; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ErrorMethodId; }
+  void SetDefault() { self.m_ErrorMethodId = StormReflTypeInfo<DDSResponderData>::GetDefault().m_ErrorMethodId; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSResponderData>::field_data_static<4>
+{
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_ReturnArg"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0xBA1409C0; }
   static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
-  static constexpr auto GetFieldIndex() { return 3; }
+  static constexpr auto GetFieldIndex() { return 4; }
   static constexpr auto GetMemberPtr() { return &DDSResponderData::m_ReturnArg; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSResponderData>::field_data<3, Self> : public StormReflTypeInfo<DDSResponderData>::field_data_static<3>
+struct StormReflTypeInfo<DDSResponderData>::field_data<4, Self> : public StormReflTypeInfo<DDSResponderData>::field_data_static<4>
 {
   Self & self;
   field_data(Self & self) : self(self) {}

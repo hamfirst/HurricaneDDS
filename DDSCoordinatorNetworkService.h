@@ -42,6 +42,9 @@ protected:
   void HandleDisconnect(StormSockets::StormSocketConnectionId connection_id);
 
 private:
+
+  StormSockets::StormSemaphore m_Semaphore;
+
   DDSCoordinatorState & m_CoordinatorState;
   DDSNetworkBackend & m_Backend;
 

@@ -39,6 +39,11 @@ public:
     return 0;
   }
 
+  int GetDataTypeId() const
+  {
+    return m_ObjectTypeId;
+  }
+
   ObjectData & CreateObject(DDSKey key)
   {
     DDSNodeInterface node_interface(m_NodeState, this, key);
@@ -97,9 +102,21 @@ public:
     }
 
     obj_data.m_PendingMessages.clear();
+
+    for (auto & sub : obj_data.m_Subscriptions)
+    {
+      if (sub.m_IsDataSubscription == false)
+      {
+        DDSResponderCallData responder_call;
+        DDSCreateInitialSubscriptionResponse(*obj_data.m_ActiveObject.get(), sub, responder_call);
+
+        m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub.m_ResponderObjectType, sub.m_ResponderKey },
+          DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+      }
+    }
   }
 
-  bool DestroyNonDatabaseBackedType(DDSKey key)
+  bool Destroy(DDSKey key)
   {
     DestroyObject(key);
     return true;
@@ -137,10 +154,43 @@ public:
 
       if (itr != m_Objects.end())
       {
+        BeginObjectModification(key);
         auto & obj_data = itr->second;
 
         DDS_CALL_FUNC(PreDestroy, *obj_data.m_ActiveObject.get());
+
+        for (auto & sub : obj_data.m_Subscriptions)
+        {
+          if (sub.m_State != kSubSentInvalid)
+          {
+            DDSResponderCallData error_msg;
+            if (DDSCreateErrorSubscriptionResponse(sub, error_msg))
+            {
+              m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ error_msg.m_ObjectType, error_msg.m_Key },
+                DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(error_msg));
+            }
+          }
+
+          DDSSubscriptionDeleted deleted_msg;
+          DDSCreateDeletedSubscriptionResponse(sub, deleted_msg);
+
+          m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ deleted_msg.m_ObjectType, deleted_msg.m_Key },
+            DDSServerToServerMessageType::kSubscriptionDeleted, StormReflEncodeJson(deleted_msg));
+        }
+
+        for (auto & sub : obj_data.m_RequestedSubscriptions)
+        {
+          DDSDestroySubscription sub_data;
+          sub_data.m_Key = sub.m_Key;
+          sub_data.m_ObjectType = sub.m_ObjectType;
+          sub_data.m_SubscriptionId = sub.m_SubscriptionId;
+
+          m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub.m_ObjectType, sub.m_Key },
+            DDSServerToServerMessageType::kDestroySubscription, StormReflEncodeJson(sub_data));
+        }
+
         m_Objects.erase(itr);
+        EndObjectModification();
       }
     }
     else
@@ -156,6 +206,24 @@ public:
     {
       if (DataType::AllowsImplicitCreate() == false)
       {
+        if (message_type == DDSServerToServerMessageType::kTargetedMessageResponder)
+        {
+          DDSTargetedMessageWithResponder targeted_msg;
+          StormReflParseJson(targeted_msg, msg);
+
+          if (targeted_msg.m_ErrorMethodId != -1)
+          {
+            DDSResponderCallData responder_call;
+            responder_call.m_Key = targeted_msg.m_ResponderKey;
+            responder_call.m_MethodArgs = "[]";
+            responder_call.m_MethodId = targeted_msg.m_ErrorMethodId;
+            responder_call.m_ObjectType = targeted_msg.m_ResponderObjectType;
+            responder_call.m_ResponderArgs = targeted_msg.m_ReturnArg;
+
+            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ targeted_msg.m_ResponderObjectType, targeted_msg.m_ResponderKey },
+              DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+          }
+        }
         return;
       }
 
@@ -234,13 +302,9 @@ public:
       EndObjectModification();
     }
     break;
-    case DDSServerToServerMessageType::kCreateDataSubscription:
-    {
-      DDSLog::LogError("Can't subscript to data object for non database type");
-    }
-    break;
     case DDSServerToServerMessageType::kCreateSubscription:
     {
+
       DDSCreateSubscription sub_msg;
       StormReflParseJson(sub_msg, message);
 
@@ -250,6 +314,12 @@ public:
         return;
       }
 
+      if (sub_msg.m_DataSubscription)
+      {
+        DDSLog::LogError("Can't subscript to data object for non database type");
+      }
+
+      m_NodeState.BeginQueueingMessages();
       auto & obj_data = itr->second;
 
       DDSExportedSubscription sub_data;
@@ -258,21 +328,41 @@ public:
       sub_data.m_ResponderKey = sub_msg.m_ResponderKey;
       sub_data.m_ResponderObjectType = sub_msg.m_ResponderObjectType;
       sub_data.m_ResponderMethodId = sub_msg.m_ResponderMethodId;
+      sub_data.m_ErrorMethodId = sub_msg.m_ErrorMethodId;
       sub_data.m_ResponderArgs = std::move(sub_msg.m_ReturnArg);
-      sub_data.m_IsDataSubscription = (message_type == DDSServerToServerMessageType::kCreateDataSubscription);
+      sub_data.m_IsDataSubscription = sub_msg.m_DataSubscription;
+      sub_data.m_ForceLoad = sub_msg.m_ForceLoad;
       sub_data.m_DeltaOnly = sub_msg.m_DeltaOnly;
+      sub_data.m_State = kSubUnsent;
       obj_data.m_Subscriptions.emplace_back(std::move(sub_data));
 
       auto & sub = obj_data.m_Subscriptions.back();
 
+      bool send_responder = true;
+
       DDSResponderCallData responder_call;
-      if (DDSCreateInitialSubscriptionResponse(*obj_data.m_ActiveObject.get(), sub, responder_call) == false)
+      if (obj_data.m_Active)
       {
-        DDSLog::LogError("Could not create initial subscription response");
+        if (DDSCreateInitialSubscriptionResponse(*obj_data.m_ActiveObject.get(), sub, responder_call) == false)
+        {
+          DDSLog::LogError("Could not create initial subscription response");
+        }
+      }
+      else if (sub_data.m_ForceLoad == false)
+      {
+        if (DDSCreateErrorSubscriptionResponse(sub, responder_call) == false)
+        {
+          send_responder = false;
+        }
       }
 
-      m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
-        DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+      if (send_responder)
+      {
+        m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
+          DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+      }
+
+      m_NodeState.EndQueueingMessages();
     }
     break;
     case DDSServerToServerMessageType::kDestroySubscription:
@@ -293,6 +383,23 @@ public:
         {
           DDSLog::LogVerbose("Destroying subscription");
           obj_data.m_Subscriptions.erase(sub_itr);
+          break;
+        }
+      }
+    }
+    break;
+    case DDSServerToServerMessageType::kSubscriptionDeleted:
+    {
+      DDSSubscriptionDeleted sub_msg;
+      StormReflParseJson(sub_msg, message);
+
+      auto & obj_data = m_Objects.at(sub_msg.m_Key);
+      for (auto sub_itr = obj_data.m_RequestedSubscriptions.begin(); sub_itr != obj_data.m_RequestedSubscriptions.end(); ++sub_itr)
+      {
+        if (sub_itr->m_SubscriptionId == sub_msg.m_SubscriptionId)
+        {
+          DDSLog::LogVerbose("Destroying requested subscription");
+          obj_data.m_RequestedSubscriptions.erase(sub_itr);
           break;
         }
       }
@@ -348,23 +455,10 @@ public:
 
       for (auto & sub : obj_data.m_Subscriptions)
       {
-        if (StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
+        if (sub.m_State == kSubSentValid && StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
         {
           DDSSendChangeSubscription(change, sub, obj_data.m_ActiveObject.get(), m_NodeState);
         }
-      }
-    }
-
-    for (auto & key : dead_keys)
-    {
-      auto itr = m_Objects.find(key);
-
-      if (itr != m_Objects.end())
-      {
-        auto & obj_data = itr->second;
-
-        DDS_CALL_FUNC(PreDestroy, *obj_data.m_ActiveObject.get());
-        m_Objects.erase(itr);
       }
     }
 
@@ -382,6 +476,11 @@ public:
     }
 
     m_NodeState.EndQueueingMessages();
+
+    for (auto & key : dead_keys)
+    {
+      Destroy(key);
+    }
   }
 
   void LockObject(DDSKey key)

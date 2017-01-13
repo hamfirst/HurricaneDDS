@@ -20,7 +20,7 @@ public:
   void DisconnectLocalConnection(DDSConnectionId connection_id);
 
   DDSKey GetLocalKey() override;
-  int GetObjectTypeId() override;
+  int GetObjectTypeId() const override;
 
   template <typename DatabaseType, typename ReturnObject>
   void UpdateDatabase(const DatabaseType & data, void (ReturnObject::*return_func)(bool), ReturnObject * p_this)
@@ -50,6 +50,8 @@ public:
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
   }
 
+  void DestroySelf() override;
+
   DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) override;
 
 private:
@@ -60,7 +62,7 @@ private:
   
   void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message) override;
   void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
-    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg) override;
+    int responder_object_type, DDSKey responder_key, int responder_method_id, int err_method_id, std::string && message, std::string && return_arg) override;
   void SendMessageToSharedObject(int target_object_type, int target_method_id, std::string && message) override;
   void SendMessageToSharedObjectWithResponderReturnArg(int target_object_type, int target_method_id,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg) override;
@@ -78,14 +80,7 @@ private:
   void CreateHttpRequestInternal(const DDSHttpRequest & request, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg) override;
 
   DDSKey CreateSubscriptionInternal(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
-    DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg) override;
-  DDSKey CreateDataSubscriptionInternal(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
-    DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg) override;
-
-  DDSKey CreateExistSubscriptionInternal(int target_object_type, DDSKey target_key, int return_object_type,
-    DDSKey return_key, int return_method_id, std::string && return_arg) override;
-  DDSKey CreateDataExistSubscriptionInternal(int target_object_type, DDSKey target_key, int return_object_type,
-    DDSKey return_key, int return_method_id, std::string && return_arg) override;
+    DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg, int err_method_id, bool force_load, bool data_sub) override;
 
   void DestroySubscriptionInternal(int return_object_type, DDSKey return_key, DDSKey subscription_id) override;
 

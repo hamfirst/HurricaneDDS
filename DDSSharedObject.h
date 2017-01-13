@@ -134,9 +134,12 @@ public:
         sub_data.m_ResponderKey = sub_msg.m_ResponderKey;
         sub_data.m_ResponderObjectType = sub_msg.m_ResponderObjectType;
         sub_data.m_ResponderMethodId = sub_msg.m_ResponderMethodId;
+        sub_data.m_ErrorMethodId = sub_msg.m_ErrorMethodId;
         sub_data.m_ResponderArgs = std::move(sub_msg.m_ReturnArg);
-        sub_data.m_IsDataSubscription = (message_type == DDSCoordinatorProtocolMessageType::kCreateDataSubscription);
+        sub_data.m_IsDataSubscription = sub_msg.m_DataSubscription;
+        sub_data.m_ForceLoad = sub_msg.m_ForceLoad;
         sub_data.m_DeltaOnly = sub_msg.m_DeltaOnly;
+        sub_data.m_State = kSubUnsent;
         m_Subscriptions.emplace_back(std::move(sub_data));
 
         DDSResponderCallData responder_call;
@@ -232,8 +235,6 @@ public:
     return m_SharedObjectType;
   }
 
-
-
   void ProcessDelta(const DDSCoordinatorSharedObjectDelta & delta) override
   {
     for (auto & elem : delta.m_Deltas)
@@ -272,6 +273,8 @@ public:
     std::vector<DDSExportedSubscription> & sub_list = result.first->second;
     sub_list.emplace_back(std::move(sub_data));
 
+    auto & sub = sub_list.back();
+
     DDSResponderCallData responder_call;
     if (sub_data.m_IsDataSubscription)
     {
@@ -279,7 +282,7 @@ public:
     }
     else
     {
-      if (DDSCreateInitialSubscriptionResponse(*m_DataObject.get(), sub_data, responder_call) == false)
+      if (DDSCreateInitialSubscriptionResponse(*m_DataObject.get(), sub, responder_call) == false)
       {
         DDSLog::LogError("Could not create initial subscription response");
       }

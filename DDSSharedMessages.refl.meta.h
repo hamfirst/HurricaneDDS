@@ -8,7 +8,7 @@
 template <>
 struct StormReflTypeInfo<DDSExportedSubscription>
 {
-  static constexpr int fields_n = 8;
+  static constexpr int fields_n = 11;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -130,17 +130,39 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data<4, Self> : public 
 template <>
 struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<5>
 {
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_ErrorMethodId"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x574B3263; }
+  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr auto GetFieldIndex() { return 5; }
+  static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_ErrorMethodId; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data<5, Self> : public StormReflTypeInfo<DDSExportedSubscription>::field_data_static<5>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_ErrorMethodId; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ErrorMethodId; }
+  void SetDefault() { self.m_ErrorMethodId = StormReflTypeInfo<DDSExportedSubscription>::GetDefault().m_ErrorMethodId; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<6>
+{
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_ResponderArgs"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0xEE5C340B; }
   static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
-  static constexpr auto GetFieldIndex() { return 5; }
+  static constexpr auto GetFieldIndex() { return 6; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_ResponderArgs; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSExportedSubscription>::field_data<5, Self> : public StormReflTypeInfo<DDSExportedSubscription>::field_data_static<5>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data<6, Self> : public StormReflTypeInfo<DDSExportedSubscription>::field_data_static<6>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -150,19 +172,19 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data<5, Self> : public 
 };
 
 template <>
-struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<6>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<7>
 {
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_IsDataSubscription"; }
   static constexpr auto GetType() { return "bool"; }
   static constexpr unsigned GetFieldNameHash() { return 0xDD36DB9E; }
   static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
-  static constexpr auto GetFieldIndex() { return 6; }
+  static constexpr auto GetFieldIndex() { return 7; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_IsDataSubscription; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSExportedSubscription>::field_data<6, Self> : public StormReflTypeInfo<DDSExportedSubscription>::field_data_static<6>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data<7, Self> : public StormReflTypeInfo<DDSExportedSubscription>::field_data_static<7>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -172,25 +194,69 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data<6, Self> : public 
 };
 
 template <>
-struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<7>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<8>
 {
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_DeltaOnly"; }
   static constexpr auto GetType() { return "bool"; }
   static constexpr unsigned GetFieldNameHash() { return 0xB3B163F9; }
   static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
-  static constexpr auto GetFieldIndex() { return 7; }
+  static constexpr auto GetFieldIndex() { return 8; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_DeltaOnly; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSExportedSubscription>::field_data<7, Self> : public StormReflTypeInfo<DDSExportedSubscription>::field_data_static<7>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data<8, Self> : public StormReflTypeInfo<DDSExportedSubscription>::field_data_static<8>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
   match_const_t<Self, bool> & Get() { return self.m_DeltaOnly; }
   std::add_const_t<std::remove_reference_t<bool>> & Get() const { return self.m_DeltaOnly; }
   void SetDefault() { self.m_DeltaOnly = StormReflTypeInfo<DDSExportedSubscription>::GetDefault().m_DeltaOnly; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<9>
+{
+  using member_type = bool; // bool
+  static constexpr auto GetName() { return "m_ForceLoad"; }
+  static constexpr auto GetType() { return "bool"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x5F320E03; }
+  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr auto GetFieldIndex() { return 9; }
+  static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_ForceLoad; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data<9, Self> : public StormReflTypeInfo<DDSExportedSubscription>::field_data_static<9>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, bool> & Get() { return self.m_ForceLoad; }
+  std::add_const_t<std::remove_reference_t<bool>> & Get() const { return self.m_ForceLoad; }
+  void SetDefault() { self.m_ForceLoad = StormReflTypeInfo<DDSExportedSubscription>::GetDefault().m_ForceLoad; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<10>
+{
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_State"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xB52C29BF; }
+  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr auto GetFieldIndex() { return 10; }
+  static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_State; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSExportedSubscription>::field_data<10, Self> : public StormReflTypeInfo<DDSExportedSubscription>::field_data_static<10>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_State; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_State; }
+  void SetDefault() { self.m_State = StormReflTypeInfo<DDSExportedSubscription>::GetDefault().m_State; }
 };
 
 template <>
@@ -374,7 +440,7 @@ struct StormReflTypeInfo<DDSTargetedMessageBase>::field_data<3, Self> : public S
 template <>
 struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>
 {
-  static constexpr int fields_n = 8;
+  static constexpr int fields_n = 9;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -540,17 +606,39 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data<6, Sel
 template <>
 struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static<7>
 {
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_ErrorMethodId"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x574B3263; }
+  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr auto GetFieldIndex() { return 7; }
+  static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_ErrorMethodId; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data<7, Self> : public StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static<7>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_ErrorMethodId; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ErrorMethodId; }
+  void SetDefault() { self.m_ErrorMethodId = StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::GetDefault().m_ErrorMethodId; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static<8>
+{
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_ReturnArg"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0xBA1409C0; }
   static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
-  static constexpr auto GetFieldIndex() { return 7; }
+  static constexpr auto GetFieldIndex() { return 8; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_ReturnArg; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data<7, Self> : public StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static<7>
+struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data<8, Self> : public StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static<8>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -684,7 +772,7 @@ struct StormReflTypeInfo<DDSResponderCallBase>::field_data<4, Self> : public Sto
 template <>
 struct StormReflTypeInfo<DDSCreateSubscriptionBase>
 {
-  static constexpr int fields_n = 9;
+  static constexpr int fields_n = 12;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -850,17 +938,39 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<6, Self> : publi
 template <>
 struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<7>
 {
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_ErrorMethodId"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x574B3263; }
+  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr auto GetFieldIndex() { return 7; }
+  static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ErrorMethodId; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<7, Self> : public StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<7>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_ErrorMethodId; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ErrorMethodId; }
+  void SetDefault() { self.m_ErrorMethodId = StormReflTypeInfo<DDSCreateSubscriptionBase>::GetDefault().m_ErrorMethodId; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<8>
+{
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_ReturnArg"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0xBA1409C0; }
   static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
-  static constexpr auto GetFieldIndex() { return 7; }
+  static constexpr auto GetFieldIndex() { return 8; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ReturnArg; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<7, Self> : public StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<7>
+struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<8, Self> : public StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<8>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -870,19 +980,41 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<7, Self> : publi
 };
 
 template <>
-struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<8>
+struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<9>
+{
+  using member_type = bool; // bool
+  static constexpr auto GetName() { return "m_DataSubscription"; }
+  static constexpr auto GetType() { return "bool"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xF2369825; }
+  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr auto GetFieldIndex() { return 9; }
+  static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_DataSubscription; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<9, Self> : public StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<9>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, bool> & Get() { return self.m_DataSubscription; }
+  std::add_const_t<std::remove_reference_t<bool>> & Get() const { return self.m_DataSubscription; }
+  void SetDefault() { self.m_DataSubscription = StormReflTypeInfo<DDSCreateSubscriptionBase>::GetDefault().m_DataSubscription; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<10>
 {
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_DeltaOnly"; }
   static constexpr auto GetType() { return "bool"; }
   static constexpr unsigned GetFieldNameHash() { return 0xB3B163F9; }
   static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
-  static constexpr auto GetFieldIndex() { return 8; }
+  static constexpr auto GetFieldIndex() { return 10; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_DeltaOnly; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<8, Self> : public StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<8>
+struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<10, Self> : public StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<10>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -892,19 +1024,25 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<8, Self> : publi
 };
 
 template <>
-struct StormReflTypeInfo<DDSCreateDataSubscriptionBase>
+struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<11>
 {
-  using MyBase = DDSCreateSubscriptionBase;
-  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
-  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
-  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
-  {
-    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
-  };
-  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
-  static constexpr auto GetName() { return "DDSCreateDataSubscriptionBase"; }
-  static constexpr auto GetNameHash() { return 0x95932B79; }
-  static DDSCreateDataSubscriptionBase & GetDefault() { static DDSCreateDataSubscriptionBase def; return def; }
+  using member_type = bool; // bool
+  static constexpr auto GetName() { return "m_ForceLoad"; }
+  static constexpr auto GetType() { return "bool"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x5F320E03; }
+  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr auto GetFieldIndex() { return 11; }
+  static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ForceLoad; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<11, Self> : public StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<11>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, bool> & Get() { return self.m_ForceLoad; }
+  std::add_const_t<std::remove_reference_t<bool>> & Get() const { return self.m_ForceLoad; }
+  void SetDefault() { self.m_ForceLoad = StormReflTypeInfo<DDSCreateSubscriptionBase>::GetDefault().m_ForceLoad; }
 };
 
 template <>
@@ -988,7 +1126,7 @@ struct StormReflTypeInfo<DDSDestroySubscriptionBase>::field_data<2, Self> : publ
 template <>
 struct StormReflTypeInfo<DDSSubscriptionDeletedBase>
 {
-  static constexpr int fields_n = 4;
+  static constexpr int fields_n = 3;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -1000,13 +1138,13 @@ struct StormReflTypeInfo<DDSSubscriptionDeletedBase>
 template <>
 struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<0>
 {
-  using member_type = int; // int
-  static constexpr auto GetName() { return "m_ResponderObjectType"; }
-  static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x6ECD8D43; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  using member_type = DDSKey; // unsigned long long
+  static constexpr auto GetName() { return "m_Key"; }
+  static constexpr auto GetType() { return "unsigned long long"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
+  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
   static constexpr auto GetFieldIndex() { return 0; }
-  static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_ResponderObjectType; }
+  static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_Key; }
 };
 
 template <typename Self>
@@ -1014,113 +1152,13 @@ struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data<0, Self> : publ
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, int> & Get() { return self.m_ResponderObjectType; }
-  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ResponderObjectType; }
-  void SetDefault() { self.m_ResponderObjectType = StormReflTypeInfo<DDSSubscriptionDeletedBase>::GetDefault().m_ResponderObjectType; }
+  match_const_t<Self, DDSKey> & Get() { return self.m_Key; }
+  std::add_const_t<std::remove_reference_t<DDSKey>> & Get() const { return self.m_Key; }
+  void SetDefault() { self.m_Key = StormReflTypeInfo<DDSSubscriptionDeletedBase>::GetDefault().m_Key; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<1>
-{
-  using member_type = DDSKey; // unsigned long long
-  static constexpr auto GetName() { return "m_ResponderKey"; }
-  static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x47BF66BE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
-  static constexpr auto GetFieldIndex() { return 1; }
-  static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_ResponderKey; }
-};
-
-template <typename Self>
-struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data<1, Self> : public StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<1>
-{
-  Self & self;
-  field_data(Self & self) : self(self) {}
-  match_const_t<Self, DDSKey> & Get() { return self.m_ResponderKey; }
-  std::add_const_t<std::remove_reference_t<DDSKey>> & Get() const { return self.m_ResponderKey; }
-  void SetDefault() { self.m_ResponderKey = StormReflTypeInfo<DDSSubscriptionDeletedBase>::GetDefault().m_ResponderKey; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<2>
-{
-  using member_type = int; // int
-  static constexpr auto GetName() { return "m_ResponderMethodId"; }
-  static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x28424F94; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
-  static constexpr auto GetFieldIndex() { return 2; }
-  static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_ResponderMethodId; }
-};
-
-template <typename Self>
-struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data<2, Self> : public StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<2>
-{
-  Self & self;
-  field_data(Self & self) : self(self) {}
-  match_const_t<Self, int> & Get() { return self.m_ResponderMethodId; }
-  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ResponderMethodId; }
-  void SetDefault() { self.m_ResponderMethodId = StormReflTypeInfo<DDSSubscriptionDeletedBase>::GetDefault().m_ResponderMethodId; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<3>
-{
-  using member_type = DDSKey; // unsigned long long
-  static constexpr auto GetName() { return "m_SubscriptionId"; }
-  static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x01DAA775; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
-  static constexpr auto GetFieldIndex() { return 3; }
-  static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_SubscriptionId; }
-};
-
-template <typename Self>
-struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data<3, Self> : public StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<3>
-{
-  Self & self;
-  field_data(Self & self) : self(self) {}
-  match_const_t<Self, DDSKey> & Get() { return self.m_SubscriptionId; }
-  std::add_const_t<std::remove_reference_t<DDSKey>> & Get() const { return self.m_SubscriptionId; }
-  void SetDefault() { self.m_SubscriptionId = StormReflTypeInfo<DDSSubscriptionDeletedBase>::GetDefault().m_SubscriptionId; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>
-{
-  static constexpr int fields_n = 7;
-  template <int N> struct field_data_static {};
-  template <int N, typename Self> struct field_data {};
-  template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
-  static constexpr auto GetName() { return "DDSCreateExistSubscriptionBase"; }
-  static constexpr auto GetNameHash() { return 0xA533D97F; }
-  static DDSCreateExistSubscriptionBase & GetDefault() { static DDSCreateExistSubscriptionBase def; return def; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<0>
-{
-  using member_type = DDSKey; // unsigned long long
-  static constexpr auto GetName() { return "m_Key"; }
-  static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
-  static constexpr auto GetFieldIndex() { return 0; }
-  static constexpr auto GetMemberPtr() { return &DDSCreateExistSubscriptionBase::m_Key; }
-};
-
-template <typename Self>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data<0, Self> : public StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<0>
-{
-  Self & self;
-  field_data(Self & self) : self(self) {}
-  match_const_t<Self, DDSKey> & Get() { return self.m_Key; }
-  std::add_const_t<std::remove_reference_t<DDSKey>> & Get() const { return self.m_Key; }
-  void SetDefault() { self.m_Key = StormReflTypeInfo<DDSCreateExistSubscriptionBase>::GetDefault().m_Key; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<1>
 {
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ObjectType"; }
@@ -1128,21 +1166,21 @@ struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<1>
   static constexpr unsigned GetFieldNameHash() { return 0xD2FBD4E8; }
   static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
   static constexpr auto GetFieldIndex() { return 1; }
-  static constexpr auto GetMemberPtr() { return &DDSCreateExistSubscriptionBase::m_ObjectType; }
+  static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_ObjectType; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data<1, Self> : public StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<1>
+struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data<1, Self> : public StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<1>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
   match_const_t<Self, int> & Get() { return self.m_ObjectType; }
   std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ObjectType; }
-  void SetDefault() { self.m_ObjectType = StormReflTypeInfo<DDSCreateExistSubscriptionBase>::GetDefault().m_ObjectType; }
+  void SetDefault() { self.m_ObjectType = StormReflTypeInfo<DDSSubscriptionDeletedBase>::GetDefault().m_ObjectType; }
 };
 
 template <>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<2>
+struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<2>
 {
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_SubscriptionId"; }
@@ -1150,121 +1188,17 @@ struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<2>
   static constexpr unsigned GetFieldNameHash() { return 0x01DAA775; }
   static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
   static constexpr auto GetFieldIndex() { return 2; }
-  static constexpr auto GetMemberPtr() { return &DDSCreateExistSubscriptionBase::m_SubscriptionId; }
+  static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_SubscriptionId; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data<2, Self> : public StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<2>
+struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data<2, Self> : public StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<2>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
   match_const_t<Self, DDSKey> & Get() { return self.m_SubscriptionId; }
   std::add_const_t<std::remove_reference_t<DDSKey>> & Get() const { return self.m_SubscriptionId; }
-  void SetDefault() { self.m_SubscriptionId = StormReflTypeInfo<DDSCreateExistSubscriptionBase>::GetDefault().m_SubscriptionId; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<3>
-{
-  using member_type = int; // int
-  static constexpr auto GetName() { return "m_ResponderObjectType"; }
-  static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x6ECD8D43; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
-  static constexpr auto GetFieldIndex() { return 3; }
-  static constexpr auto GetMemberPtr() { return &DDSCreateExistSubscriptionBase::m_ResponderObjectType; }
-};
-
-template <typename Self>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data<3, Self> : public StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<3>
-{
-  Self & self;
-  field_data(Self & self) : self(self) {}
-  match_const_t<Self, int> & Get() { return self.m_ResponderObjectType; }
-  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ResponderObjectType; }
-  void SetDefault() { self.m_ResponderObjectType = StormReflTypeInfo<DDSCreateExistSubscriptionBase>::GetDefault().m_ResponderObjectType; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<4>
-{
-  using member_type = DDSKey; // unsigned long long
-  static constexpr auto GetName() { return "m_ResponderKey"; }
-  static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x47BF66BE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
-  static constexpr auto GetFieldIndex() { return 4; }
-  static constexpr auto GetMemberPtr() { return &DDSCreateExistSubscriptionBase::m_ResponderKey; }
-};
-
-template <typename Self>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data<4, Self> : public StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<4>
-{
-  Self & self;
-  field_data(Self & self) : self(self) {}
-  match_const_t<Self, DDSKey> & Get() { return self.m_ResponderKey; }
-  std::add_const_t<std::remove_reference_t<DDSKey>> & Get() const { return self.m_ResponderKey; }
-  void SetDefault() { self.m_ResponderKey = StormReflTypeInfo<DDSCreateExistSubscriptionBase>::GetDefault().m_ResponderKey; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<5>
-{
-  using member_type = int; // int
-  static constexpr auto GetName() { return "m_ResponderMethodId"; }
-  static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x28424F94; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
-  static constexpr auto GetFieldIndex() { return 5; }
-  static constexpr auto GetMemberPtr() { return &DDSCreateExistSubscriptionBase::m_ResponderMethodId; }
-};
-
-template <typename Self>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data<5, Self> : public StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<5>
-{
-  Self & self;
-  field_data(Self & self) : self(self) {}
-  match_const_t<Self, int> & Get() { return self.m_ResponderMethodId; }
-  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_ResponderMethodId; }
-  void SetDefault() { self.m_ResponderMethodId = StormReflTypeInfo<DDSCreateExistSubscriptionBase>::GetDefault().m_ResponderMethodId; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<6>
-{
-  using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
-  static constexpr auto GetName() { return "m_ReturnArg"; }
-  static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xBA1409C0; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
-  static constexpr auto GetFieldIndex() { return 6; }
-  static constexpr auto GetMemberPtr() { return &DDSCreateExistSubscriptionBase::m_ReturnArg; }
-};
-
-template <typename Self>
-struct StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data<6, Self> : public StormReflTypeInfo<DDSCreateExistSubscriptionBase>::field_data_static<6>
-{
-  Self & self;
-  field_data(Self & self) : self(self) {}
-  match_const_t<Self, std::string> & Get() { return self.m_ReturnArg; }
-  std::add_const_t<std::remove_reference_t<std::string>> & Get() const { return self.m_ReturnArg; }
-  void SetDefault() { self.m_ReturnArg = StormReflTypeInfo<DDSCreateExistSubscriptionBase>::GetDefault().m_ReturnArg; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCreateDataExistSubscriptionBase>
-{
-  using MyBase = DDSCreateExistSubscriptionBase;
-  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
-  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
-  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
-  {
-    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
-  };
-  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
-  static constexpr auto GetName() { return "DDSCreateDataExistSubscriptionBase"; }
-  static constexpr auto GetNameHash() { return 0xAB2A0345; }
-  static DDSCreateDataExistSubscriptionBase & GetDefault() { static DDSCreateDataExistSubscriptionBase def; return def; }
+  void SetDefault() { self.m_SubscriptionId = StormReflTypeInfo<DDSSubscriptionDeletedBase>::GetDefault().m_SubscriptionId; }
 };
 
 template <>
@@ -1427,7 +1361,7 @@ namespace StormReflFileInfo
 {
   struct DDSSharedMessages
   {
-    static const int types_n = 13;
+    static const int types_n = 10;
     template <int i> struct type_info { using type = void; };
   };
 
@@ -1470,41 +1404,23 @@ namespace StormReflFileInfo
   template <>
   struct DDSSharedMessages::type_info<6>
   {
-    using type = ::DDSCreateDataSubscriptionBase;
+    using type = ::DDSDestroySubscriptionBase;
   };
 
   template <>
   struct DDSSharedMessages::type_info<7>
   {
-    using type = ::DDSDestroySubscriptionBase;
+    using type = ::DDSSubscriptionDeletedBase;
   };
 
   template <>
   struct DDSSharedMessages::type_info<8>
   {
-    using type = ::DDSSubscriptionDeletedBase;
-  };
-
-  template <>
-  struct DDSSharedMessages::type_info<9>
-  {
-    using type = ::DDSCreateExistSubscriptionBase;
-  };
-
-  template <>
-  struct DDSSharedMessages::type_info<10>
-  {
-    using type = ::DDSCreateDataExistSubscriptionBase;
-  };
-
-  template <>
-  struct DDSSharedMessages::type_info<11>
-  {
     using type = ::DDSValidateTokenRequestBase;
   };
 
   template <>
-  struct DDSSharedMessages::type_info<12>
+  struct DDSSharedMessages::type_info<9>
   {
     using type = ::DDSValidateTokenResponseBase;
   };
