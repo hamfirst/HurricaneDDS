@@ -125,6 +125,7 @@ bool DDSCoordinatorServerProtocol::HandleMessage(const char * msg, int length)
 
       DDSCoordinatorNodeInitialization response;
       response.m_NodeId = m_NodeId;
+      response.m_NetworkTime = time(nullptr);
       response.m_InitialNode = m_CoordinatorState.GetRoutingTable().m_Table.size() == 1;
       response.m_ClientSecret = m_CoordinatorState.GetClientSecret();
       response.m_ServerSecret = m_CoordinatorState.GetServerSecret();

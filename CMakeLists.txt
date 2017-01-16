@@ -14,6 +14,7 @@ add_library(HurricaneDDS STATIC
             DDSCoordinatorServerProtocol.cpp
             DDSCoordinatorState.cpp
             DDSDatabaseBootstrap.cpp
+            DDSDatabaseConnection.cpp
             DDSDatabaseConnectionPool.cpp
             DDSDatabaseSetup.cpp
             DDSDeferredCallback.cpp
@@ -33,8 +34,8 @@ add_library(HurricaneDDS STATIC
             DDSOutgoingKeyspaceTransfer.cpp
             DDSOutgoingKeyspaceTransferManager.cpp
             DDSRandom.cpp
-            DDSResolverBackend.cpp
             DDSResolver.cpp
+            DDSResolverBackend.cpp
             DDSResponder.cpp
             DDSRoutingTable.cpp
             DDSServerToServerReceiver.cpp
@@ -42,13 +43,14 @@ add_library(HurricaneDDS STATIC
             DDSSharedObjectInterface.cpp
             DDSShutdown.cpp
             DDSTimerSystem.cpp
+            DDSThrottle.refl.cpp
             DDSTokenBroker.cpp
             DDSTokenValidator.cpp
             DDSVersion.cpp
             DDSWebsiteFactoryBase.cpp
             DDSWebsiteFactoryStaticContent.cpp
-            DDSWebsiteFilesystemBuilder.cpp
             DDSWebsiteFilesystem.cpp
+            DDSWebsiteFilesystemBuilder.cpp
             DDSWebsiteInterface.cpp)
 
 

@@ -229,3 +229,8 @@ DDSRoutingTableNodeInfo DDSNodeInterface::GetNodeInfo(DDSKey key)
 {
   return m_NodeState.GetNodeInfo(key);
 }
+
+time_t DDSNodeInterface::GetNetworkTime()
+{
+  return m_NodeState.GetNetworkTime();
+}

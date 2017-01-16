@@ -199,6 +199,11 @@ DDSRoutingTableNodeInfo DDSSharedObjectInterface::GetNodeInfo(DDSKey key)
   return m_CoordinatorState.GetNodeInfo(key);
 }
 
+time_t DDSSharedObjectInterface::GetNetworkTime()
+{
+  return m_CoordinatorState.GetNetworkTime();
+}
+
 void DDSSharedObjectCopyInterface::NotImplemented() const
 {
   DDSLog::LogError("Calling shared object function from outside coordinator");

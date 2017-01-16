@@ -156,6 +156,7 @@ struct StormReflEnumInfo<DDSExportedObjectState>::elems<2>
 template <>
 struct StormReflTypeInfo<DDSServerToServerHandshakeRequest>
 {
+  using MyBase = void;
   static constexpr int fields_n = 4;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -256,6 +257,7 @@ struct StormReflTypeInfo<DDSServerToServerHandshakeRequest>::field_data<3, Self>
 template <>
 struct StormReflTypeInfo<DDSServerToServerHandshakeResponse>
 {
+  using MyBase = void;
   static constexpr int fields_n = 4;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -356,6 +358,7 @@ struct StormReflTypeInfo<DDSServerToServerHandshakeResponse>::field_data<3, Self
 template <>
 struct StormReflTypeInfo<DDSServerToServerHandshakeFinalize>
 {
+  using MyBase = void;
   static constexpr int fields_n = 1;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -390,6 +393,7 @@ struct StormReflTypeInfo<DDSServerToServerHandshakeFinalize>::field_data<0, Self
 template <>
 struct StormReflTypeInfo<DDSExportedMessage>
 {
+  using MyBase = void;
   static constexpr int fields_n = 2;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -446,6 +450,7 @@ struct StormReflTypeInfo<DDSExportedMessage>::field_data<1, Self> : public Storm
 template <>
 struct StormReflTypeInfo<DDSExportedObject>
 {
+  using MyBase = void;
   static constexpr int fields_n = 8;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -634,6 +639,7 @@ struct StormReflTypeInfo<DDSExportedObject>::field_data<7, Self> : public StormR
 template <>
 struct StormReflTypeInfo<DDSDataObjectListSync>
 {
+  using MyBase = void;
   static constexpr int fields_n = 5;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -756,6 +762,7 @@ struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<4, Self> : public St
 template <>
 struct StormReflTypeInfo<DDSUnlockObject>
 {
+  using MyBase = void;
   static constexpr int fields_n = 3;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};

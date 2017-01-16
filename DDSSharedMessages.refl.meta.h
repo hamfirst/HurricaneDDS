@@ -8,6 +8,7 @@
 template <>
 struct StormReflTypeInfo<DDSExportedSubscription>
 {
+  using MyBase = void;
   static constexpr int fields_n = 11;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -262,6 +263,7 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data<10, Self> : public
 template <>
 struct StormReflTypeInfo<DDSExportedRequestedSubscription>
 {
+  using MyBase = void;
   static constexpr int fields_n = 3;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -340,6 +342,7 @@ struct StormReflTypeInfo<DDSExportedRequestedSubscription>::field_data<2, Self> 
 template <>
 struct StormReflTypeInfo<DDSTargetedMessageBase>
 {
+  using MyBase = void;
   static constexpr int fields_n = 4;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -440,6 +443,7 @@ struct StormReflTypeInfo<DDSTargetedMessageBase>::field_data<3, Self> : public S
 template <>
 struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>
 {
+  using MyBase = void;
   static constexpr int fields_n = 9;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -650,6 +654,7 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data<8, Sel
 template <>
 struct StormReflTypeInfo<DDSResponderCallBase>
 {
+  using MyBase = void;
   static constexpr int fields_n = 5;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -772,6 +777,7 @@ struct StormReflTypeInfo<DDSResponderCallBase>::field_data<4, Self> : public Sto
 template <>
 struct StormReflTypeInfo<DDSCreateSubscriptionBase>
 {
+  using MyBase = void;
   static constexpr int fields_n = 12;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -1048,6 +1054,7 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data<11, Self> : publ
 template <>
 struct StormReflTypeInfo<DDSDestroySubscriptionBase>
 {
+  using MyBase = void;
   static constexpr int fields_n = 3;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -1126,6 +1133,7 @@ struct StormReflTypeInfo<DDSDestroySubscriptionBase>::field_data<2, Self> : publ
 template <>
 struct StormReflTypeInfo<DDSSubscriptionDeletedBase>
 {
+  using MyBase = void;
   static constexpr int fields_n = 3;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -1204,6 +1212,7 @@ struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data<2, Self> : publ
 template <>
 struct StormReflTypeInfo<DDSValidateTokenRequestBase>
 {
+  using MyBase = void;
   static constexpr int fields_n = 3;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -1282,6 +1291,7 @@ struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data<2, Self> : pub
 template <>
 struct StormReflTypeInfo<DDSValidateTokenResponseBase>
 {
+  using MyBase = void;
   static constexpr int fields_n = 3;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};

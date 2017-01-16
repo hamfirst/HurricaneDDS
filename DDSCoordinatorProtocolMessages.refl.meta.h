@@ -131,6 +131,7 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<13>
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeRequest>
 {
+  using MyBase = void;
   static constexpr int fields_n = 2;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -187,6 +188,7 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeRequest>::field_data<1, Self> : 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeResponse>
 {
+  using MyBase = void;
   static constexpr int fields_n = 2;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -243,6 +245,7 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeResponse>::field_data<1, Self> :
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>
 {
+  using MyBase = void;
   static constexpr int fields_n = 5;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -365,7 +368,8 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data<4, Self> :
 template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>
 {
-  static constexpr int fields_n = 5;
+  using MyBase = void;
+  static constexpr int fields_n = 6;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -465,17 +469,39 @@ struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<3, Self> 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<4>
 {
+  using member_type = int64_t; // long long
+  static constexpr auto GetName() { return "m_NetworkTime"; }
+  static constexpr auto GetType() { return "long long"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x00681933; }
+  static constexpr unsigned GetTypeNameHash() { return 0xB9C79D4E; }
+  static constexpr auto GetFieldIndex() { return 4; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeInitialization::m_NetworkTime; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<4, Self> : public StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<4>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int64_t> & Get() { return self.m_NetworkTime; }
+  std::add_const_t<std::remove_reference_t<int64_t>> & Get() const { return self.m_NetworkTime; }
+  void SetDefault() { self.m_NetworkTime = StormReflTypeInfo<DDSCoordinatorNodeInitialization>::GetDefault().m_NetworkTime; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<5>
+{
   using member_type = std::vector<std::string>; // std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >
   static constexpr auto GetName() { return "m_SharedObjects"; }
   static constexpr auto GetType() { return "std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >"; }
   static constexpr unsigned GetFieldNameHash() { return 0xF6FB05AB; }
   static constexpr unsigned GetTypeNameHash() { return 0x89A3A511; }
-  static constexpr auto GetFieldIndex() { return 4; }
+  static constexpr auto GetFieldIndex() { return 5; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeInitialization::m_SharedObjects; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<4, Self> : public StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<4>
+struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<5, Self> : public StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<5>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -487,6 +513,7 @@ struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<4, Self> 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeShutdown>
 {
+  using MyBase = void;
   static constexpr int fields_n = 0;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -499,6 +526,7 @@ struct StormReflTypeInfo<DDSCoordinatorNodeShutdown>
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>
 {
+  using MyBase = void;
   static constexpr int fields_n = 4;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -599,6 +627,7 @@ struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::field_data<3, 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDelta>
 {
+  using MyBase = void;
   static constexpr int fields_n = 2;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};

@@ -8,6 +8,7 @@
 template <>
 struct StormReflTypeInfo<DDSNodeElementBase>
 {
+  using MyBase = void;
   static constexpr int fields_n = 5;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
@@ -168,6 +169,7 @@ struct StormReflTypeInfo<DDSNodeElement>::field_data<0 + StormReflTypeInfo<DDSNo
 template <>
 struct StormReflTypeInfo<DDSRoutingTable>
 {
+  using MyBase = void;
   static constexpr int fields_n = 3;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};

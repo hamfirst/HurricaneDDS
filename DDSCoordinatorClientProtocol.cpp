@@ -181,6 +181,7 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
       m_InitialNode = response.m_InitialNode;
       m_ClientSecret = response.m_ClientSecret;
       m_ServerSecret = response.m_ServerSecret;
+      m_NetworkTime = response.m_NetworkTime - time(nullptr);
       m_State = kRoutingTableInit;
       return true;
     }
@@ -277,6 +278,11 @@ void DDSCoordinatorClientProtocol::SendMessageToCoordinator(const std::string &&
   m_ClientFrontend->FinalizeOutgoingPacket(writer);
   m_ClientFrontend->SendPacketToConnection(writer, m_ConnectionId);
   m_ClientFrontend->FreeOutgoingPacket(writer);
+}
+
+time_t DDSCoordinatorClientProtocol::GetNetworkTime()
+{
+  return m_NetworkTime + time(nullptr);
 }
 
 bool DDSCoordinatorClientProtocol::ShutDown()

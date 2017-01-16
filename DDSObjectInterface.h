@@ -267,6 +267,8 @@ public:
 
   virtual DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) = 0;
 
+  virtual time_t GetNetworkTime() = 0;
+
 private:
 
   friend void DDSResponderCallFinalize(const DDSResponder & responder, const DDSResponderCallBase & call_data);

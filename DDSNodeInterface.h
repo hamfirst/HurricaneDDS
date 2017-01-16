@@ -54,6 +54,8 @@ public:
 
   DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) override;
 
+  time_t GetNetworkTime() override;
+
 private:
 
   int GetObjectType(uint32_t object_type_name_hash) override;

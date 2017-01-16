@@ -238,6 +238,12 @@
     <ClInclude Include="DDSTokenValidator.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="DDSThrottle.refl.h">
+      <Filter>Security</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSThrottle.refl.meta.h">
+      <Filter>Security</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSCoordinatorNetworkService.cpp">
@@ -368,6 +374,9 @@
     </ClCompile>
     <ClCompile Include="DDSTokenValidator.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSThrottle.refl.cpp">
+      <Filter>Security</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

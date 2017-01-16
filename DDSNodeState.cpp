@@ -380,7 +380,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
   {
     if (m_IncomingKeyspace.IsCompleteForKey(addr))
     {
-      DDSLog::LogVerbose("- Sending targeted message %s", StormReflGetEnumAsString(type));
+      DDSLog::LogVerbose("- Sending targeted message %s (T: %d)", StormReflGetEnumAsString(type), addr.m_ObjectType);
       HandleIncomingTargetedMessage(addr, type, message);
       return;
     }
@@ -402,6 +402,17 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
 DDSRoutingTableNodeInfo DDSNodeState::GetNodeInfo(DDSKey key)
 {
   return GetNodeDataForKey(key, *m_RoutingTable, m_RoutingKeyRanges);
+}
+
+time_t DDSNodeState::GetNetworkTime()
+{
+  if (!m_LocalNodeId)
+  {
+    DDSLog::LogError("Requesting time before we have a proper node id");
+    return 0;
+  }
+
+  return m_CoordinatorConnection.GetNetworkTime();
 }
 
 void DDSNodeState::SendSubscriptionCreate(DDSCreateSubscription && req)

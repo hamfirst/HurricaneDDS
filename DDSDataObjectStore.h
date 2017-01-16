@@ -116,12 +116,6 @@ public:
                 DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(error_msg));
             }
           }
-
-          DDSSubscriptionDeleted deleted_msg;
-          DDSCreateDeletedSubscriptionResponse(sub, deleted_msg);
-
-          m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ deleted_msg.m_ObjectType, deleted_msg.m_Key },
-            DDSServerToServerMessageType::kSubscriptionDeleted, StormReflEncodeJson(deleted_msg));
         }
 
         for (auto & sub : obj_data.m_RequestedSubscriptions)
@@ -136,7 +130,12 @@ public:
         }
 
         m_NodeState.DeleteObjectData(m_ObjectTypeId, key, m_Collection.data(), nullptr);
-        m_Objects.erase(itr);
+        obj_data.m_ActiveObject.reset();
+        obj_data.m_DatabaseObject.reset();
+        obj_data.m_RequestedSubscriptions.clear();
+        obj_data.m_PendingMessages.clear();
+        obj_data.m_State = kDeleted;
+       
         EndObjectModification();
       }
     }
@@ -211,6 +210,13 @@ public:
     {
       obj_data.m_State = kDeleted;
 
+      for (auto & msg : obj_data.m_PendingMessages)
+      {
+        ProcessMessage(key, obj_data, msg.m_Type, msg.m_Message.c_str());
+      }
+
+      obj_data.m_PendingMessages.clear();
+
       for (auto & sub : obj_data.m_Subscriptions)
       {
         if (sub.m_State != kSubSentInvalid)
@@ -224,34 +230,6 @@ public:
         }
       }
 
-      std::vector<DDSExportedMessage> remaining_messages;
-      for (auto & msg : obj_data.m_PendingMessages)
-      {
-        if (msg.m_Type == DDSServerToServerMessageType::kTargetedMessageResponder)
-        {
-          DDSTargetedMessageWithResponder targeted_msg;
-          StormReflParseJson(targeted_msg, msg.m_Message.data());
-
-          if (targeted_msg.m_ErrorMethodId != -1)
-          {
-            DDSResponderCallData responder_call;
-            responder_call.m_Key = targeted_msg.m_ResponderKey;
-            responder_call.m_MethodArgs = "[]";
-            responder_call.m_MethodId = targeted_msg.m_ErrorMethodId;
-            responder_call.m_ObjectType = targeted_msg.m_ResponderObjectType;
-            responder_call.m_ResponderArgs = targeted_msg.m_ReturnArg;
-
-            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ targeted_msg.m_ResponderObjectType, targeted_msg.m_ResponderKey },
-              DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
-          }
-        }
-        else if (DDSRequiresAnyObject(msg.m_Type) == false)
-        {
-          remaining_messages.emplace_back(std::move(msg));
-        }
-      }
-
-      obj_data.m_PendingMessages = remaining_messages;
       return;
     }
 
@@ -440,10 +418,13 @@ public:
         DDSTargetedMessage targeted_msg;
         StormReflParseJson(targeted_msg, message);
 
-        DDSNodeInterface node_interface(m_NodeState, this, key);
-        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, targeted_msg) == false)
+        if (obj_data.m_ActiveObject)
         {
-          DDSLog::LogError("Failed to process message for object");
+          DDSNodeInterface node_interface(m_NodeState, this, key);
+          if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, targeted_msg) == false)
+          {
+            DDSLog::LogError("Failed to process message for object");
+          }
         }
         EndObjectModification();
       }
@@ -454,10 +435,28 @@ public:
         DDSTargetedMessageWithResponder targeted_msg;
         StormReflParseJson(targeted_msg, message);
 
-        DDSNodeInterface node_interface(m_NodeState, this, key);
-        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, targeted_msg) == false)
+        if (obj_data.m_ActiveObject)
         {
-          DDSLog::LogError("Failed to process message for object");
+          DDSNodeInterface node_interface(m_NodeState, this, key);
+          if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, targeted_msg) == false)
+          {
+            DDSLog::LogError("Failed to process message for object");
+          }
+        }
+        else
+        {
+          if (targeted_msg.m_ErrorMethodId != -1)
+          {
+            DDSResponderCallData responder_call;
+            responder_call.m_Key = targeted_msg.m_ResponderKey;
+            responder_call.m_MethodArgs = "[]";
+            responder_call.m_MethodId = targeted_msg.m_ErrorMethodId;
+            responder_call.m_ObjectType = targeted_msg.m_ResponderObjectType;
+            responder_call.m_ResponderArgs = targeted_msg.m_ReturnArg;
+
+            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ targeted_msg.m_ResponderObjectType, targeted_msg.m_ResponderKey },
+              DDSServerToServerMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+          }
         }
         EndObjectModification();
       }
@@ -468,11 +467,15 @@ public:
         DDSResponderCallData responder_call;
         StormReflParseJson(responder_call, message);
 
-        DDSNodeInterface node_interface(m_NodeState, this, key);
-        if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, responder_call) == false)
+        if (obj_data.m_ActiveObject)
         {
-          DDSLog::LogError("Failed to process message for object");
+          DDSNodeInterface node_interface(m_NodeState, this, key);
+          if (DDSDataObjectHandleMessage(*obj_data.m_ActiveObject.get(), node_interface, responder_call) == false)
+          {
+            DDSLog::LogError("Failed to process message for object");
+          }
         }
+
         EndObjectModification();
       }
       break;
@@ -504,7 +507,14 @@ public:
         bool send_responder = true;
 
         DDSResponderCallData responder_call;
-        if (sub.m_IsDataSubscription)
+        if (obj_data.m_State == kDeleted)
+        {
+          if (DDSCreateErrorSubscriptionResponse(sub, responder_call) == false)
+          {
+            send_responder = false;
+          }
+        }
+        else if (sub.m_IsDataSubscription)
         {
           if (obj_data.m_DatabaseObject.get() == nullptr)
           {

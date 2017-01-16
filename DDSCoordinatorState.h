@@ -48,6 +48,8 @@ public:
   void CreateHttpRequest(const DDSHttpRequest & request, DDSCoordinatorResponderCallData && responder_data);
 
   DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key);
+
+  time_t GetNetworkTime();
 private:
 
   friend class DDSCoordinatorServerProtocol;

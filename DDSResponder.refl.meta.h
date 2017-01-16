@@ -8,6 +8,7 @@
 template <>
 struct StormReflTypeInfo<DDSResponderData>
 {
+  using MyBase = void;
   static constexpr int fields_n = 5;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};

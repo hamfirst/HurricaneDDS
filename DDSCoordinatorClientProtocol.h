@@ -29,7 +29,9 @@ public:
   bool HandleConnectionEstablished();
   bool HandleMessage(const char * msg, int length);
 
+
   void SendMessageToCoordinator(const std::string && data);
+  time_t GetNetworkTime();
 
   bool ShutDown();
   void Disconnect();
@@ -60,6 +62,7 @@ private:
   std::string m_CoordinatorIpAddr;
   int m_CoordinatorPort;
 
+  time_t m_NetworkTime;
   std::vector<char> m_MessageBuffer;
 
   DDSNodeId m_NodeId;

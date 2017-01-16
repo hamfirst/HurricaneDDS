@@ -134,6 +134,11 @@ DDSRoutingTableNodeInfo DDSCoordinatorState::GetNodeInfo(DDSKey key)
   return GetNodeDataForKey(key, m_RoutingTable, m_RoutingKeyRanges);
 }
 
+time_t DDSCoordinatorState::GetNetworkTime()
+{
+  return time(nullptr);
+}
+
 void DDSCoordinatorState::GotMessageFromServer(DDSNodeId server_id, DDSCoordinatorProtocolMessageType type, const char * data)
 {
   if (type == DDSCoordinatorProtocolMessageType::kTargetedMessage)

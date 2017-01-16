@@ -145,6 +145,8 @@ public:
   void SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message, bool force_process = false);
 
   DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key);
+
+  time_t GetNetworkTime();
 private:
 
   friend class DDSCoordinatorClientProtocol;

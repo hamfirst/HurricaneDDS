@@ -67,6 +67,7 @@ struct DDSCoordinatorNodeInitialization
   uint64_t m_ClientSecret;
   uint64_t m_ServerSecret;
   bool m_InitialNode;
+  int64_t m_NetworkTime;
 
   std::vector<std::string> m_SharedObjects;
 };

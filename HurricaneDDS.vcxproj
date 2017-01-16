@@ -340,6 +340,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSThrottle.refl.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSThrottle.refl.meta.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSTimerSystem.h">
       <SubType>
       </SubType>
@@ -504,6 +512,7 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="DDSThrottle.refl.cpp" />
     <ClCompile Include="DDSTimerSystem.cpp">
       <SubType>
       </SubType>

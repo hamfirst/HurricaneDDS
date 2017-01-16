@@ -20,6 +20,7 @@ public:
 
   DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) override;
 
+  time_t GetNetworkTime() override;
 private:
 
   int GetObjectType(uint32_t object_type_name_hash) override;
@@ -47,6 +48,7 @@ private:
     DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg, int err_method_id, bool force_load, bool data_sub) override;
 
   void DestroySubscriptionInternal(int return_object_type, DDSKey return_key, DDSKey subscription_id) override;
+
 private:
   DDSCoordinatorState & m_CoordinatorState;
   DDSSharedObjectBase * m_DataStore;
@@ -62,6 +64,8 @@ public:
   void DestroySelf() override { NotImplemented(); }
 
   DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) override { NotImplemented(); return{}; };
+
+  time_t GetNetworkTime() override { NotImplemented(); return{}; };
 
 private:
 
