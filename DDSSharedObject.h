@@ -47,6 +47,11 @@ public:
     return m_SharedObjectType;
   }
 
+  const void * GetSharedObjectPointer() override
+  {
+    return m_DataObject.get();
+  }
+
   void HandleDataObjectChange(const ReflectionChangeNotification & change)
   {
     m_Changes.emplace_back(change);
@@ -233,6 +238,11 @@ public:
   int GetObjectTypeId() override
   {
     return m_SharedObjectType;
+  }
+
+  const void * GetSharedObjectPointer() override
+  {
+    return m_DataObject.get();
   }
 
   void ProcessDelta(const DDSCoordinatorSharedObjectDelta & delta) override

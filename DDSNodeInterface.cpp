@@ -55,6 +55,17 @@ int DDSNodeInterface::GetSharedObjectType(uint32_t object_type_name_hash)
   return m_NodeState.GetSharedObjectTypeIdForNameHash(object_type_name_hash);
 }
 
+const void * DDSNodeInterface::GetSharedObjectPointer(uint32_t object_type_name_hash)
+{
+  auto type_id = m_NodeState.GetSharedObjectTypeIdForNameHash(object_type_name_hash);
+  if (type_id == -1)
+  {
+    return nullptr;
+  }
+
+  return m_NodeState.GetSharedObjectPointer(type_id);
+}
+
 void DDSNodeInterface::SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message)
 {
   DDSTargetedMessage packet;

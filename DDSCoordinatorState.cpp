@@ -246,7 +246,10 @@ bool DDSCoordinatorState::SendTargetedMessage(DDSDataObjectAddress addr, DDSCoor
       }
     }
 
-    return m_NetworkService.SendMessageToNode(node_id, message.c_str(), message.length());
+    std::string data = StormReflGetEnumAsString(type);
+    data += " " + message;
+
+    return m_NetworkService.SendMessageToNode(node_id, data.c_str(), data.length());
   }
 }
 
@@ -348,6 +351,7 @@ void DDSCoordinatorState::EndQueueingMessages()
     {
       auto message = m_QueuedTargetedMessages.back();
       SendTargetedMessage(std::get<0>(message), std::get<1>(message), std::move(std::get<2>(message)), true);
+      m_QueuedTargetedMessages.pop();
     }
 
     m_QueueMessageDepth--;
@@ -490,3 +494,7 @@ uint64_t DDSCoordinatorState::GetServerSecret() const
   return m_ServerSecret;
 }
 
+const void * DDSCoordinatorState::GetSharedObjectPointer(int shared_object_type)
+{
+  return m_SharedObjects[shared_object_type - m_NumDataObjects]->GetSharedObjectPointer();
+}

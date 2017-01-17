@@ -263,6 +263,12 @@ public:
     DestroySubscriptionInternal(GetDataObjectType(StormReflTypeInfo<TargetDatabaseObject>::GetNameHash()), target_key, subscription_id);
   }
 
+  template <typename SharedObjectType>
+  const SharedObjectType * GetSharedObject()
+  {
+    return (SharedObjectType *)GetSharedObjectPointer(StormReflTypeInfo<SharedObjectType>::GetNameHash());
+  }
+
   virtual void DestroySelf() = 0;
 
   virtual DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) = 0;
@@ -276,6 +282,8 @@ private:
   virtual int GetObjectType(uint32_t object_type_name_hash) = 0;
   virtual int GetDataObjectType(uint32_t object_type_name_hash) = 0;
   virtual int GetSharedObjectType(uint32_t object_type_name_hash) = 0;
+
+  virtual const void * GetSharedObjectPointer(uint32_t object_type_name_hash) = 0;
 
   virtual void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message) = 0;
   virtual void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,

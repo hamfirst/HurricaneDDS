@@ -249,7 +249,7 @@ private:
   void HandleIncomingTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string & message);
   void DestroyDeferredCallback(DDSDeferredCallback * callback);
 
-
+  const void * GetSharedObjectPointer(int shared_object_type);
 private:
 
   bool m_IsReady = false;

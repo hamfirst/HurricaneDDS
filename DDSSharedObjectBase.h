@@ -11,6 +11,8 @@ public:
   virtual uint32_t GetObjectClassNameHash() = 0;
   virtual int GetObjectTypeId() = 0;
 
+  virtual const void * GetSharedObjectPointer() = 0;
+
   virtual void ProcessMessage(DDSCoordinatorProtocolMessageType message_type, const char * message) = 0;
 
   virtual void AssignRequestedSubscription(const DDSExportedRequestedSubscription & requested_sub) = 0;
@@ -22,6 +24,8 @@ class DDSSharedObjectCopyBase
 public:
   virtual uint32_t GetObjectClassNameHash() = 0;
   virtual int GetObjectTypeId() = 0;
+
+  virtual const void * GetSharedObjectPointer() = 0;
 
   virtual void ProcessDelta(const DDSCoordinatorSharedObjectDelta & delta) = 0;
 

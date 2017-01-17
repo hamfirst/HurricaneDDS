@@ -995,3 +995,8 @@ void DDSNodeState::DestroyDeferredCallback(DDSDeferredCallback * callback)
     }
   }
 }
+
+const void * DDSNodeState::GetSharedObjectPointer(int shared_object_type)
+{
+  return m_SharedObjects[shared_object_type - m_DataObjectList.size()].get()->GetSharedObjectPointer();
+}

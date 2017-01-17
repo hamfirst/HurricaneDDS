@@ -27,6 +27,8 @@ private:
   int GetDataObjectType(uint32_t object_type_name_hash) override;
   int GetSharedObjectType(uint32_t object_type_name_hash) override;
 
+  const void * GetSharedObjectPointer(uint32_t object_type_name_hash) override;
+
   void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message) override;
   void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
     int responder_object_type, DDSKey responder_key, int responder_method_id, int err_method_id, std::string && message, std::string && return_arg) override;
@@ -74,6 +76,8 @@ private:
   int GetObjectType(uint32_t object_type_name_hash) override { NotImplemented(); return 0; };
   int GetDataObjectType(uint32_t object_type_name_hash) override { NotImplemented(); return 0; };
   int GetSharedObjectType(uint32_t object_type_name_hash) override { NotImplemented(); return 0; };
+
+  const void * GetSharedObjectPointer(uint32_t object_type_name_hash) override { NotImplemented(); return nullptr; };
 
   void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message) override { NotImplemented(); };
   void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,

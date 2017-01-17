@@ -44,6 +44,12 @@ int DDSSharedObjectInterface::GetSharedObjectType(uint32_t object_type_name_hash
   return m_CoordinatorState.GetSharedObjectTypeIdForNameHash(object_type_name_hash);
 }
 
+const void * DDSSharedObjectInterface::GetSharedObjectPointer(uint32_t object_type_name_hash)
+{
+  auto type_id = GetSharedObjectType(object_type_name_hash);
+  return m_CoordinatorState.GetSharedObjectPointer(type_id);
+}
+
 void DDSSharedObjectInterface::SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message)
 {
   DDSCoordinatorTargetedMessage packet;

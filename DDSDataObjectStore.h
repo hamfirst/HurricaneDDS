@@ -575,6 +575,8 @@ public:
         DDSDestroySubscription sub_msg;
         StormReflParseJson(sub_msg, message);
 
+        bool found_sub = false;
+
         auto & obj_data = m_Objects.at(sub_msg.m_Key);
         for (auto sub_itr = obj_data.m_Subscriptions.begin(); sub_itr != obj_data.m_Subscriptions.end(); ++sub_itr)
         {
@@ -582,8 +584,14 @@ public:
           {
             DDSLog::LogVerbose("Destroying subscription");
             obj_data.m_Subscriptions.erase(sub_itr);
+            found_sub = true;
             break;
           }
+        }
+
+        if (found_sub == false)
+        {
+          DDSLog::LogError("Could not find subscription to destroy");
         }
       }
       break;

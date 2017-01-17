@@ -94,7 +94,7 @@ private:
   uint64_t GetClientSecret() const;
   uint64_t GetServerSecret() const;
 
-
+  const void * GetSharedObjectPointer(int shared_object_type);
 private:
 
   DDSNetworkBackend m_Backend;
