@@ -27,7 +27,10 @@ void DDSSetupShutdownSignalHandler()
 {
   signal(SIGINT, DDSSignalHandler);
   signal(SIGTERM, DDSSignalHandler);
+
+#ifndef _LINUX
   signal(SIGBREAK, DDSSignalHandler);
+#endif
 }
 
 bool DDSWantsShutdown()
