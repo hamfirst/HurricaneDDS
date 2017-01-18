@@ -16,6 +16,11 @@ DDSResolverBackend::~DDSResolverBackend()
 void DDSResolverBackend::Update()
 {
   m_IoService.poll();
+
+  if (m_IoService.stopped())
+  {
+    m_IoService.reset();
+  }
 }
 
 int DDSResolverBackend::RequestResolve(const char * addr, bool reverse_lookup, DDSResolverRequest * request)
