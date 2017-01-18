@@ -14,7 +14,19 @@ DDSWebsiteFilesystem::DDSWebsiteFilesystem(DDSNetworkBackend & backend, const DD
   for (auto & file_info : fs_data.m_MappedFiles)
   {
     auto writer = m_Backend.m_Backend->CreateHttpResponseWriter(200, "OK");
-    writer.WriteBody(file_info.second.data(), (int)file_info.second.size());
+
+    auto & file_data = file_info.second;
+    if (file_data.m_MimeType)
+    {
+      writer.GetHeaderWriter().WriteString("Content-Type: ");
+      writer.GetHeaderWriter().WriteString(file_data.m_MimeType);
+      writer.GetHeaderWriter().WriteString("\r\n");
+    }
+
+    writer.WriteHeader("Keep-Alive: timeout=2, max=100");
+    writer.WriteHeader("Connection: Keep-Alive");
+
+    writer.WriteBody(file_data.m_Buffer.data(), (int)file_data.m_Buffer.size());
     writer.FinalizeHeaders();
 
     m_Responses.emplace(std::make_pair(crc32(file_info.first), writer));
