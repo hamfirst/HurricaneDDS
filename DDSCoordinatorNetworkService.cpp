@@ -35,6 +35,7 @@ void DDSCoordinatorNetworkService::ProcessEvents()
       HandleConnect(event.ConnectionId, event.RemoteIP, event.RemotePort);
       break;
     case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
+      DDSLog::LogVerbose("Got coordinator client handshake complete from %d", event.ConnectionId.GetIndex());
       break;
     case StormSockets::StormSocketEventType::Data:
       HandleData(event.ConnectionId, event.GetWebsocketReader());

@@ -54,6 +54,7 @@ void DDSCoordinatorClientProtocol::ProcessEvents()
     switch (event.Type)
     {
     case StormSockets::StormSocketEventType::ClientConnected:
+      DDSLog::LogInfo("Coordinator websocket connected");
       break;
     case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
       HandleConnectionEstablished();
