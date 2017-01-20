@@ -205,6 +205,7 @@ DDSKey DDSNodeInterface::CreateSubscriptionInternal(int target_object_type, DDSK
   sub_data.m_ErrorMethodId = err_method_id;
   sub_data.m_ReturnArg = return_arg;
   sub_data.m_DeltaOnly = delta_only;
+  sub_data.m_ForceLoad = force_load;
   sub_data.m_DataSubscription = data_sub;
 
   DDSExportedRequestedSubscription req_sub;
