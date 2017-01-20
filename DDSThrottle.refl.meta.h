@@ -14,7 +14,7 @@ struct StormReflTypeInfo<DDSThrottle>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSThrottle"; }
-  static constexpr auto GetNameHash() { return 0x42DF8E76; }
+  static constexpr auto GetNameHash() { return 0xA610F43B; }
   static DDSThrottle & GetDefault() { static DDSThrottle def; return def; }
 };
 
@@ -24,8 +24,8 @@ struct StormReflTypeInfo<DDSThrottle>::field_data_static<0>
   using member_type = float; // float
   static constexpr auto GetName() { return "m_Credits"; }
   static constexpr auto GetType() { return "float"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x96A34DE1; }
-  static constexpr unsigned GetTypeNameHash() { return 0x92634175; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD4E5A4AB; }
+  static constexpr unsigned GetTypeNameHash() { return 0xC9A55E95; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSThrottle::m_Credits; }
 };
@@ -46,8 +46,8 @@ struct StormReflTypeInfo<DDSThrottle>::field_data_static<1>
   using member_type = float; // float
   static constexpr auto GetName() { return "m_Rate"; }
   static constexpr auto GetType() { return "float"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x839446E3; }
-  static constexpr unsigned GetTypeNameHash() { return 0x92634175; }
+  static constexpr unsigned GetFieldNameHash() { return 0xE171AA26; }
+  static constexpr unsigned GetTypeNameHash() { return 0xC9A55E95; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSThrottle::m_Rate; }
 };
@@ -68,8 +68,8 @@ struct StormReflTypeInfo<DDSThrottle>::field_data_static<2>
   using member_type = float; // float
   static constexpr auto GetName() { return "m_Max"; }
   static constexpr auto GetType() { return "float"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x160991B4; }
-  static constexpr unsigned GetTypeNameHash() { return 0x92634175; }
+  static constexpr unsigned GetFieldNameHash() { return 0x6E94E66E; }
+  static constexpr unsigned GetTypeNameHash() { return 0xC9A55E95; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSThrottle::m_Max; }
 };
@@ -90,8 +90,8 @@ struct StormReflTypeInfo<DDSThrottle>::field_data_static<3>
   using member_type = time_t; // long long
   static constexpr auto GetName() { return "m_CreditStart"; }
   static constexpr auto GetType() { return "long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xF1AAD3B1; }
-  static constexpr unsigned GetTypeNameHash() { return 0xB9C79D4E; }
+  static constexpr unsigned GetFieldNameHash() { return 0xE100B249; }
+  static constexpr unsigned GetTypeNameHash() { return 0x40FF8523; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSThrottle::m_CreditStart; }
 };

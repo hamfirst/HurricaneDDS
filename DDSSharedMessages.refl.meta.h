@@ -14,7 +14,7 @@ struct StormReflTypeInfo<DDSExportedSubscription>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSExportedSubscription"; }
-  static constexpr auto GetNameHash() { return 0x37AB8B23; }
+  static constexpr auto GetNameHash() { return 0xE420CC8A; }
   static DDSExportedSubscription & GetDefault() { static DDSExportedSubscription def; return def; }
 };
 
@@ -24,8 +24,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<0>
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_DataPath"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x8780827D; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0x54AD0850; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_DataPath; }
 };
@@ -46,8 +46,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<1>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_SubscriptionId"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x01DAA775; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD0097192; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_SubscriptionId; }
 };
@@ -68,8 +68,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<2>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_ResponderKey"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x47BF66BE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x44270BC4; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_ResponderKey; }
 };
@@ -90,8 +90,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<3>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ResponderObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x6ECD8D43; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x61C42C92; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_ResponderObjectType; }
 };
@@ -112,8 +112,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<4>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ResponderMethodId"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x28424F94; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x30ED1712; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 4; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_ResponderMethodId; }
 };
@@ -134,8 +134,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<5>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ErrorMethodId"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x574B3263; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x3D403BAD; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 5; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_ErrorMethodId; }
 };
@@ -156,8 +156,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<6>
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_ResponderArgs"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xEE5C340B; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0x25D684E7; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 6; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_ResponderArgs; }
 };
@@ -178,8 +178,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<7>
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_IsDataSubscription"; }
   static constexpr auto GetType() { return "bool"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDD36DB9E; }
-  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x1FFBB31C; }
+  static constexpr unsigned GetTypeNameHash() { return 0x55813692; }
   static constexpr auto GetFieldIndex() { return 7; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_IsDataSubscription; }
 };
@@ -200,8 +200,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<8>
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_DeltaOnly"; }
   static constexpr auto GetType() { return "bool"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xB3B163F9; }
-  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xBAF53F0B; }
+  static constexpr unsigned GetTypeNameHash() { return 0x55813692; }
   static constexpr auto GetFieldIndex() { return 8; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_DeltaOnly; }
 };
@@ -222,8 +222,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<9>
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_ForceLoad"; }
   static constexpr auto GetType() { return "bool"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x5F320E03; }
-  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x1CAEAF78; }
+  static constexpr unsigned GetTypeNameHash() { return 0x55813692; }
   static constexpr auto GetFieldIndex() { return 9; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_ForceLoad; }
 };
@@ -244,8 +244,8 @@ struct StormReflTypeInfo<DDSExportedSubscription>::field_data_static<10>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_State"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xB52C29BF; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2EA5429B; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 10; }
   static constexpr auto GetMemberPtr() { return &DDSExportedSubscription::m_State; }
 };
@@ -269,7 +269,7 @@ struct StormReflTypeInfo<DDSExportedRequestedSubscription>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSExportedRequestedSubscription"; }
-  static constexpr auto GetNameHash() { return 0x3F684543; }
+  static constexpr auto GetNameHash() { return 0x259AC373; }
   static DDSExportedRequestedSubscription & GetDefault() { static DDSExportedRequestedSubscription def; return def; }
 };
 
@@ -279,8 +279,8 @@ struct StormReflTypeInfo<DDSExportedRequestedSubscription>::field_data_static<0>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_Key"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x79726F4E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSExportedRequestedSubscription::m_Key; }
 };
@@ -301,8 +301,8 @@ struct StormReflTypeInfo<DDSExportedRequestedSubscription>::field_data_static<1>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xD2FBD4E8; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2C75B4A5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSExportedRequestedSubscription::m_ObjectType; }
 };
@@ -323,8 +323,8 @@ struct StormReflTypeInfo<DDSExportedRequestedSubscription>::field_data_static<2>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_SubscriptionId"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x01DAA775; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD0097192; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSExportedRequestedSubscription::m_SubscriptionId; }
 };
@@ -348,7 +348,7 @@ struct StormReflTypeInfo<DDSTargetedMessageBase>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSTargetedMessageBase"; }
-  static constexpr auto GetNameHash() { return 0x64542CEA; }
+  static constexpr auto GetNameHash() { return 0x3AF384DD; }
   static DDSTargetedMessageBase & GetDefault() { static DDSTargetedMessageBase def; return def; }
 };
 
@@ -358,8 +358,8 @@ struct StormReflTypeInfo<DDSTargetedMessageBase>::field_data_static<0>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_Key"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x79726F4E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageBase::m_Key; }
 };
@@ -380,8 +380,8 @@ struct StormReflTypeInfo<DDSTargetedMessageBase>::field_data_static<1>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xD2FBD4E8; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2C75B4A5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageBase::m_ObjectType; }
 };
@@ -402,8 +402,8 @@ struct StormReflTypeInfo<DDSTargetedMessageBase>::field_data_static<2>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_MethodId"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xF7823FFB; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x7F607B90; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageBase::m_MethodId; }
 };
@@ -424,8 +424,8 @@ struct StormReflTypeInfo<DDSTargetedMessageBase>::field_data_static<3>
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_MethodArgs"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xE5505EE5; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0xC9E065FA; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageBase::m_MethodArgs; }
 };
@@ -449,7 +449,7 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSTargetedMessageWithResponderBase"; }
-  static constexpr auto GetNameHash() { return 0x37FF8E28; }
+  static constexpr auto GetNameHash() { return 0xBA9BF921; }
   static DDSTargetedMessageWithResponderBase & GetDefault() { static DDSTargetedMessageWithResponderBase def; return def; }
 };
 
@@ -459,8 +459,8 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_Key"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x79726F4E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_Key; }
 };
@@ -481,8 +481,8 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xD2FBD4E8; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2C75B4A5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_ObjectType; }
 };
@@ -503,8 +503,8 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static
   using member_type = int; // int
   static constexpr auto GetName() { return "m_MethodId"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xF7823FFB; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x7F607B90; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_MethodId; }
 };
@@ -525,8 +525,8 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_MethodArgs"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xE5505EE5; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0xC9E065FA; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_MethodArgs; }
 };
@@ -547,8 +547,8 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ResponderObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x6ECD8D43; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x61C42C92; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 4; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_ResponderObjectType; }
 };
@@ -569,8 +569,8 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_ResponderKey"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x47BF66BE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x44270BC4; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 5; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_ResponderKey; }
 };
@@ -591,8 +591,8 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ResponderMethodId"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x28424F94; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x30ED1712; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 6; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_ResponderMethodId; }
 };
@@ -613,8 +613,8 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ErrorMethodId"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x574B3263; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x3D403BAD; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 7; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_ErrorMethodId; }
 };
@@ -635,8 +635,8 @@ struct StormReflTypeInfo<DDSTargetedMessageWithResponderBase>::field_data_static
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_ReturnArg"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xBA1409C0; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD8D32394; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 8; }
   static constexpr auto GetMemberPtr() { return &DDSTargetedMessageWithResponderBase::m_ReturnArg; }
 };
@@ -660,7 +660,7 @@ struct StormReflTypeInfo<DDSResponderCallBase>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSResponderCallBase"; }
-  static constexpr auto GetNameHash() { return 0xDC4C7AD2; }
+  static constexpr auto GetNameHash() { return 0x87E6D78C; }
   static DDSResponderCallBase & GetDefault() { static DDSResponderCallBase def; return def; }
 };
 
@@ -670,8 +670,8 @@ struct StormReflTypeInfo<DDSResponderCallBase>::field_data_static<0>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_Key"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x79726F4E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSResponderCallBase::m_Key; }
 };
@@ -692,8 +692,8 @@ struct StormReflTypeInfo<DDSResponderCallBase>::field_data_static<1>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xD2FBD4E8; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2C75B4A5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSResponderCallBase::m_ObjectType; }
 };
@@ -714,8 +714,8 @@ struct StormReflTypeInfo<DDSResponderCallBase>::field_data_static<2>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_MethodId"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xF7823FFB; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x7F607B90; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSResponderCallBase::m_MethodId; }
 };
@@ -736,8 +736,8 @@ struct StormReflTypeInfo<DDSResponderCallBase>::field_data_static<3>
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_ResponderArgs"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xEE5C340B; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0x25D684E7; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSResponderCallBase::m_ResponderArgs; }
 };
@@ -758,8 +758,8 @@ struct StormReflTypeInfo<DDSResponderCallBase>::field_data_static<4>
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_MethodArgs"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xE5505EE5; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0xC9E065FA; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 4; }
   static constexpr auto GetMemberPtr() { return &DDSResponderCallBase::m_MethodArgs; }
 };
@@ -783,7 +783,7 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSCreateSubscriptionBase"; }
-  static constexpr auto GetNameHash() { return 0x97A653B0; }
+  static constexpr auto GetNameHash() { return 0x64CEBCD5; }
   static DDSCreateSubscriptionBase & GetDefault() { static DDSCreateSubscriptionBase def; return def; }
 };
 
@@ -793,8 +793,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<0>
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_DataPath"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x8780827D; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0x54AD0850; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_DataPath; }
 };
@@ -815,8 +815,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<1>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_Key"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x79726F4E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_Key; }
 };
@@ -837,8 +837,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<2>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xD2FBD4E8; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2C75B4A5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ObjectType; }
 };
@@ -859,8 +859,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<3>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_SubscriptionId"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x01DAA775; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD0097192; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_SubscriptionId; }
 };
@@ -881,8 +881,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<4>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ResponderObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x6ECD8D43; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x61C42C92; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 4; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ResponderObjectType; }
 };
@@ -903,8 +903,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<5>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_ResponderKey"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x47BF66BE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x44270BC4; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 5; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ResponderKey; }
 };
@@ -925,8 +925,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<6>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ResponderMethodId"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x28424F94; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x30ED1712; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 6; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ResponderMethodId; }
 };
@@ -947,8 +947,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<7>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ErrorMethodId"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x574B3263; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x3D403BAD; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 7; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ErrorMethodId; }
 };
@@ -969,8 +969,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<8>
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_ReturnArg"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xBA1409C0; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD8D32394; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 8; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ReturnArg; }
 };
@@ -991,8 +991,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<9>
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_DataSubscription"; }
   static constexpr auto GetType() { return "bool"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xF2369825; }
-  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x1EE0651D; }
+  static constexpr unsigned GetTypeNameHash() { return 0x55813692; }
   static constexpr auto GetFieldIndex() { return 9; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_DataSubscription; }
 };
@@ -1013,8 +1013,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<10>
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_DeltaOnly"; }
   static constexpr auto GetType() { return "bool"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xB3B163F9; }
-  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xBAF53F0B; }
+  static constexpr unsigned GetTypeNameHash() { return 0x55813692; }
   static constexpr auto GetFieldIndex() { return 10; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_DeltaOnly; }
 };
@@ -1035,8 +1035,8 @@ struct StormReflTypeInfo<DDSCreateSubscriptionBase>::field_data_static<11>
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_ForceLoad"; }
   static constexpr auto GetType() { return "bool"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x5F320E03; }
-  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x1CAEAF78; }
+  static constexpr unsigned GetTypeNameHash() { return 0x55813692; }
   static constexpr auto GetFieldIndex() { return 11; }
   static constexpr auto GetMemberPtr() { return &DDSCreateSubscriptionBase::m_ForceLoad; }
 };
@@ -1060,7 +1060,7 @@ struct StormReflTypeInfo<DDSDestroySubscriptionBase>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSDestroySubscriptionBase"; }
-  static constexpr auto GetNameHash() { return 0xF2D3DB2E; }
+  static constexpr auto GetNameHash() { return 0xF427137A; }
   static DDSDestroySubscriptionBase & GetDefault() { static DDSDestroySubscriptionBase def; return def; }
 };
 
@@ -1070,8 +1070,8 @@ struct StormReflTypeInfo<DDSDestroySubscriptionBase>::field_data_static<0>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_Key"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x79726F4E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSDestroySubscriptionBase::m_Key; }
 };
@@ -1092,8 +1092,8 @@ struct StormReflTypeInfo<DDSDestroySubscriptionBase>::field_data_static<1>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xD2FBD4E8; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2C75B4A5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSDestroySubscriptionBase::m_ObjectType; }
 };
@@ -1114,8 +1114,8 @@ struct StormReflTypeInfo<DDSDestroySubscriptionBase>::field_data_static<2>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_SubscriptionId"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x01DAA775; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD0097192; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSDestroySubscriptionBase::m_SubscriptionId; }
 };
@@ -1139,7 +1139,7 @@ struct StormReflTypeInfo<DDSSubscriptionDeletedBase>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSSubscriptionDeletedBase"; }
-  static constexpr auto GetNameHash() { return 0x4631EDE5; }
+  static constexpr auto GetNameHash() { return 0xA49AD769; }
   static DDSSubscriptionDeletedBase & GetDefault() { static DDSSubscriptionDeletedBase def; return def; }
 };
 
@@ -1149,8 +1149,8 @@ struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<0>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_Key"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDC126BCE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x79726F4E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_Key; }
 };
@@ -1171,8 +1171,8 @@ struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<1>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_ObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xD2FBD4E8; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2C75B4A5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_ObjectType; }
 };
@@ -1193,8 +1193,8 @@ struct StormReflTypeInfo<DDSSubscriptionDeletedBase>::field_data_static<2>
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_SubscriptionId"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x01DAA775; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD0097192; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSSubscriptionDeletedBase::m_SubscriptionId; }
 };
@@ -1218,7 +1218,7 @@ struct StormReflTypeInfo<DDSValidateTokenRequestBase>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSValidateTokenRequestBase"; }
-  static constexpr auto GetNameHash() { return 0x67C18764; }
+  static constexpr auto GetNameHash() { return 0x64B10987; }
   static DDSValidateTokenRequestBase & GetDefault() { static DDSValidateTokenRequestBase def; return def; }
 };
 
@@ -1228,8 +1228,8 @@ struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data_static<0>
   using member_type = uint64_t; // unsigned long long
   static constexpr auto GetName() { return "m_RequestId"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x6DDE17CC; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x7D43511A; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSValidateTokenRequestBase::m_RequestId; }
 };
@@ -1250,8 +1250,8 @@ struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data_static<1>
   using member_type = uint32_t; // unsigned int
   static constexpr auto GetName() { return "m_Token"; }
   static constexpr auto GetType() { return "unsigned int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xD094062A; }
-  static constexpr unsigned GetTypeNameHash() { return 0xB306EEF4; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD201315B; }
+  static constexpr unsigned GetTypeNameHash() { return 0x562EF932; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSValidateTokenRequestBase::m_Token; }
 };
@@ -1272,8 +1272,8 @@ struct StormReflTypeInfo<DDSValidateTokenRequestBase>::field_data_static<2>
   using member_type = int; // int
   static constexpr auto GetName() { return "m_Type"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x70F58FB9; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0xB243C236; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSValidateTokenRequestBase::m_Type; }
 };
@@ -1297,7 +1297,7 @@ struct StormReflTypeInfo<DDSValidateTokenResponseBase>
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSValidateTokenResponseBase"; }
-  static constexpr auto GetNameHash() { return 0x2B768F1B; }
+  static constexpr auto GetNameHash() { return 0x9A90A8D1; }
   static DDSValidateTokenResponseBase & GetDefault() { static DDSValidateTokenResponseBase def; return def; }
 };
 
@@ -1307,8 +1307,8 @@ struct StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data_static<0>
   using member_type = uint64_t; // unsigned long long
   static constexpr auto GetName() { return "m_RequestId"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x6DDE17CC; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x7D43511A; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSValidateTokenResponseBase::m_RequestId; }
 };
@@ -1329,8 +1329,8 @@ struct StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data_static<1>
   using member_type = bool; // bool
   static constexpr auto GetName() { return "m_Success"; }
   static constexpr auto GetType() { return "bool"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x5F99A014; }
-  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xFAF2AA67; }
+  static constexpr unsigned GetTypeNameHash() { return 0x55813692; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSValidateTokenResponseBase::m_Success; }
 };
@@ -1351,8 +1351,8 @@ struct StormReflTypeInfo<DDSValidateTokenResponseBase>::field_data_static<2>
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_TokenData"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x92972060; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0x45A2D9E0; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSValidateTokenResponseBase::m_TokenData; }
 };
