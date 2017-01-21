@@ -90,7 +90,6 @@ public:
     auto & obj_data = m_Objects.at(key);
     if (obj_data.m_Active)
     {
-      DDSLog::LogError("Incosistent object state");
       return;
     }
 

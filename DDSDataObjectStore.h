@@ -324,6 +324,11 @@ public:
 
     SetNotifyCallback(*obj_data.m_ActiveObject.get(), data_obj_callback, obj_data.m_CallbackData.get());
 
+    if (obj_data.m_State == kLocked || obj_data.m_State == kActive)
+    {
+      return;
+    }
+
     if (obj_data.m_State != kCreating)
     {
       DDSLog::LogError("Incosistent object state");
