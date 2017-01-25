@@ -21,7 +21,7 @@ void DDSDatabaseBoostrapFullInternal(const std::vector<DDSDatabaseBoostrapCollec
   auto database = mongoc_client_get_database(client, settings.DatabaseName);
   auto destroy_database = gsl::finally([&]() { mongoc_database_destroy(database); });
 
-  bson_error_t err;
+  bson_error_t err = {};
   mongoc_database_drop(database, &err);
 
   if (err.code != 0)
