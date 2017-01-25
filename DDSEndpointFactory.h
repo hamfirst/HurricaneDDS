@@ -57,9 +57,9 @@ private:
       return;
     }
 
-    auto & ep = *itr->second.get();
+    auto ep = itr->second.get();
 
-    DDS_CALL_FUNC(HandleDisconnect, ep);
+    DDS_CALL_FUNC(HandleDisconnect, (*ep));
     m_Connections.erase(itr);
   }
 
