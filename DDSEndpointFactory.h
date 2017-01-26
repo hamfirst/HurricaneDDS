@@ -58,8 +58,11 @@ private:
     }
 
     auto ep = itr->second.get();
+    if (ep)
+    {
+      DDS_CALL_FUNC(HandleDisconnect, (*ep));
+    }
 
-    DDS_CALL_FUNC(HandleDisconnect, (*ep));
     m_Connections.erase(itr);
   }
 
