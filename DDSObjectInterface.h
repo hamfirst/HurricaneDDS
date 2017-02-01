@@ -61,6 +61,17 @@ public:
       DDSSerializeCallData(std::forward<CallArgs>(args)...), std::string());
   }
 
+  template <typename TargetObject, typename ReturnObject, typename ... Args, typename ... CallArgs, typename ... ReturnArgs>
+  void CallWithResponderErrorBack(void (TargetObject::* target_func)(DDSResponder &, Args...), DDSKey key, 
+    void (ReturnObject::* return_func)(ReturnArgs...), void (ReturnObject::* error_func)(), ReturnObject * p_this, CallArgs && ... args)
+  {
+    static_assert(std::is_convertible<std::tuple<CallArgs...>, std::tuple<Args...>>::value, "Invalid call args for function");
+
+    SendMessageToObjectWithResponderReturnArg(GetObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), key, StormReflGetMemberFunctionIndex(target_func),
+      GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(), StormReflGetMemberFunctionIndex(return_func), StormReflGetMemberFunctionIndex(error_func),
+      DDSSerializeCallData(std::forward<CallArgs>(args)...), std::string());
+  }
+
   template <typename TargetObject, typename ReturnObject, typename ReturnArg, typename ... Args, typename ... CallArgs, typename ... ReturnArgs>
   void CallWithResponderReturnArg(void (TargetObject::* target_func)(DDSResponder &, Args...), DDSKey key,
     void (ReturnObject::* return_func)(ReturnArg, ReturnArgs...), ReturnObject * p_this, const ReturnArg & return_arg, CallArgs && ... args)
@@ -154,9 +165,10 @@ public:
       StormReflGetMemberFunctionIndex(return_func), std::string());
   }
 
-  template <typename DatabaseType, typename ReturnObject, typename ReturnArg>
-  void InsertIntoDatabase(const DatabaseType & data, DDSKey key, void (ReturnObject::*return_func)(ReturnArg return_arg, int ec), ReturnObject * p_this, ReturnArg && return_arg)
+  template <typename DatabaseType, typename ReturnObject, typename ReturnArg, typename ReturnFuncArg>
+  void InsertIntoDatabase(const DatabaseType & data, DDSKey key, void (ReturnObject::*return_func)(ReturnFuncArg return_arg, int ec), ReturnObject * p_this, ReturnArg && return_arg)
   {
+    static_assert(std::is_convertible<ReturnArg, ReturnFuncArg>::value, "Invalid call args for database insert");
     InsertIntoDatabaseWithResponderReturnArg(DatabaseType::Collection(), GetDataObjectType(StormReflTypeInfo<DatabaseType>::GetNameHash()),
       StormReflEncodeJson(data), key, GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));

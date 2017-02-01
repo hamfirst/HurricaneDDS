@@ -227,7 +227,7 @@ void DDSNodeInterface::DestroySubscriptionInternal(int return_object_type, DDSKe
   sub_data.m_ObjectType = return_object_type;
   sub_data.m_SubscriptionId = subscription_id;
 
-  m_DataStore->RemoveRequestedSubscription(return_key, subscription_id);
+  m_DataStore->RemoveRequestedSubscription(m_Key, subscription_id);
   m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ return_object_type, return_key },
     DDSServerToServerMessageType::kDestroySubscription, StormReflEncodeJson(sub_data));
 }

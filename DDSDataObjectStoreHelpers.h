@@ -200,7 +200,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTa
     }
   };
 
-  DDSResponder responder = { iface, { 0, -1, -1, -1 } };
+  DDSResponder responder = CreateEmptyResponder(iface);
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -326,7 +326,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSRe
     }
   };
 
-  DDSResponder responder = { iface, { 0, -1, -1, -1 } };
+  DDSResponder responder = CreateEmptyResponder(iface);
 
   bool parsed = false;
   auto func_visitor = [&](auto f)

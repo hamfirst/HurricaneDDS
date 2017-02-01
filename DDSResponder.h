@@ -11,4 +11,5 @@ struct DDSResponder
   DDSResponderData m_Data;
 };
 
+DDSResponder CreateEmptyResponder(DDSObjectInterface & iface);
 void DDSResponderCallFinalize(const DDSResponder & responder, const DDSResponderCallBase & call_data);

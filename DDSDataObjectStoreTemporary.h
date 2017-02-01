@@ -354,6 +354,10 @@ public:
           send_responder = false;
         }
       }
+      else
+      {
+        send_responder = false;
+      }
 
       if (send_responder)
       {
