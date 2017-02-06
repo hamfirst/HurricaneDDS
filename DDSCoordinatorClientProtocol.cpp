@@ -69,6 +69,7 @@ void DDSCoordinatorClientProtocol::ProcessEvents()
       {
         DDSLog::LogError("Could not process message data from state %d: %s", m_State, m_MessageBuffer.data());
       }
+      m_ClientFrontend->FreeIncomingPacket(event.GetWebsocketReader());
       break;
     case StormSockets::StormSocketEventType::Disconnected:
       if (m_State == kConnecting)

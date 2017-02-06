@@ -39,6 +39,7 @@ void DDSCoordinatorNetworkService::ProcessEvents()
       break;
     case StormSockets::StormSocketEventType::Data:
       HandleData(event.ConnectionId, event.GetWebsocketReader());
+      m_ServerFrontend->FreeIncomingPacket(event.GetWebsocketReader());
       break;
     case StormSockets::StormSocketEventType::Disconnected:
       DDSLog::LogVerbose("Got coordinator client disconnect from %d", event.ConnectionId.GetIndex());

@@ -37,6 +37,7 @@ void DDSEndpointFactoryBase::ProcessEvents()
       break;
     case StormSockets::StormSocketEventType::Data:
       HandleData(event.ConnectionId, event.GetWebsocketReader());
+      m_Frontend->FreeIncomingPacket(event.GetWebsocketReader());
       break;
     }
   }

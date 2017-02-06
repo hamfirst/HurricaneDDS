@@ -133,6 +133,7 @@ void DDSNodeNetworkService::ProcessEvents()
       {
         auto & sender = m_Senders.at(event.ConnectionId);
         sender.HandleIncomingMessage(event.GetWebsocketReader());
+        m_ClientFrontend->FreeIncomingPacket(event.GetWebsocketReader());
       }
       break;
       case StormSockets::StormSocketEventType::Disconnected:
@@ -164,6 +165,7 @@ void DDSNodeNetworkService::ProcessEvents()
       {
         auto & receiver = m_Receievers.at(event.ConnectionId);
         receiver.HandleIncomingMessage(event.GetWebsocketReader());
+        m_ServerFrontend->FreeIncomingPacket(event.GetWebsocketReader());
       }
       break;
       case StormSockets::StormSocketEventType::Disconnected:
