@@ -244,6 +244,15 @@
     <ClInclude Include="DDSThrottle.refl.meta.h">
       <Filter>Security</Filter>
     </ClInclude>
+    <ClInclude Include="DDSLoadBalancer.h">
+      <Filter>LoadBalancer</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSLoadBalancerMessages.refl.h">
+      <Filter>LoadBalancer</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSLoadBalancerMessages.refl.meta.h">
+      <Filter>LoadBalancer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSCoordinatorNetworkService.cpp">
@@ -378,6 +387,9 @@
     <ClCompile Include="DDSThrottle.refl.cpp">
       <Filter>Security</Filter>
     </ClCompile>
+    <ClCompile Include="DDSLoadBalancer.cpp">
+      <Filter>LoadBalancer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Coordinator">
@@ -406,6 +418,9 @@
     </Filter>
     <Filter Include="Shared">
       <UniqueIdentifier>{49a58f87-4c5f-4c85-a1f9-de15cba9f119}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LoadBalancer">
+      <UniqueIdentifier>{5a7c40d4-9ddb-43c3-a5ab-3229aa0cf5d4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

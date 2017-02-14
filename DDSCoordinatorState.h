@@ -24,10 +24,11 @@ public:
     DataTypeList && data_list, 
     SharedObjectList && shared_object,
     const StormSockets::StormSocketInitSettings & backend_settings,
-    const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings,
+    const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings,
+    const StormSockets::StormSocketServerFrontendWebsocketSettings & lb_server_settings,
     const StormSockets::StormSocketClientFrontendHttpSettings & http_client_settings,
     const DDSDatabaseSettings & database_settings) :
-    DDSCoordinatorState(backend_settings, server_settings, http_client_settings, database_settings)
+    DDSCoordinatorState(backend_settings, node_server_settings, lb_server_settings, http_client_settings, database_settings)
   {
     m_NumDataObjects = std::decay_t<DataTypeList>::NumTypes;
     data_list(m_DataObjectNameHashes, m_DatabaseObjectNameHashes);
@@ -60,7 +61,8 @@ private:
   friend class DDSSharedObject;
 
   DDSCoordinatorState(const StormSockets::StormSocketInitSettings & backend_settings,
-    const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings,
+    const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings,
+    const StormSockets::StormSocketServerFrontendWebsocketSettings & lb_server_settings,
     const StormSockets::StormSocketClientFrontendHttpSettings & http_client_settings,
     const DDSDatabaseSettings & database_settings);
 

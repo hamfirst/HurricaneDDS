@@ -15,11 +15,12 @@
 
 
 DDSCoordinatorState::DDSCoordinatorState(const StormSockets::StormSocketInitSettings & backend_settings,
-  const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings,
+  const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings,
+  const StormSockets::StormSocketServerFrontendWebsocketSettings & lb_server_settings,
   const StormSockets::StormSocketClientFrontendHttpSettings & http_client_settings,
   const DDSDatabaseSettings & database_settings) :
   m_Backend(backend_settings),
-  m_NetworkService(m_Backend, *this, server_settings),
+  m_NetworkService(m_Backend, *this, node_server_settings),
   m_NextNodeId(0),
   m_ClientSecret(DDSGetRandomNumber64()),
   m_ServerSecret(DDSGetRandomNumber64()),

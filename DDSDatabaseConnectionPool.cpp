@@ -312,7 +312,7 @@ void DDSDatabaseConnectionPool::TriggerCallbacks()
 
     while(m_Threads[index].m_PendingInputs.size())
     {
-      auto & query = m_Threads[index].m_PendingInputs.back();
+      auto & query = m_Threads[index].m_PendingInputs.front();
       if (m_Threads[index].m_InputQueue.Enqueue(query) == false)
       {
         break;

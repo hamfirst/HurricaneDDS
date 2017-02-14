@@ -238,6 +238,18 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="DDSKey.h" />
+    <ClInclude Include="DDSLoadBalancer.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSLoadBalancerMessages.refl.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSLoadBalancerMessages.refl.meta.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSLog.h">
       <SubType>
       </SubType>
@@ -447,6 +459,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSKey.cpp" />
+    <ClCompile Include="DDSLoadBalancer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSLog.cpp">
       <SubType>
       </SubType>
