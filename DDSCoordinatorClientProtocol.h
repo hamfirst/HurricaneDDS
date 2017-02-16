@@ -31,6 +31,7 @@ public:
 
 
   void SendMessageToCoordinator(const std::string && data);
+  void SendCPUUsage();
   time_t GetNetworkTime();
 
   bool ShutDown();

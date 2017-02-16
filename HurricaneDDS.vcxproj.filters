@@ -253,6 +253,12 @@
     <ClInclude Include="DDSLoadBalancerMessages.refl.meta.h">
       <Filter>LoadBalancer</Filter>
     </ClInclude>
+    <ClInclude Include="DDSCPUUsage.h">
+      <Filter>LoadBalancer</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSLoadBalancerNetworkService.h">
+      <Filter>Coordinator</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSCoordinatorNetworkService.cpp">
@@ -389,6 +395,12 @@
     </ClCompile>
     <ClCompile Include="DDSLoadBalancer.cpp">
       <Filter>LoadBalancer</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSCPUUsage.cpp">
+      <Filter>LoadBalancer</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSLoadBalancerNetworkService.cpp">
+      <Filter>Coordinator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

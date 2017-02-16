@@ -26,6 +26,6 @@ struct DDSLoadBalancerInfo
 struct DDSLoadBalancerResponse
 {
   STORM_REFL;
-  std::string m_IpAddr;
-  int m_Port;
+  std::string host;
+  int port;
 };

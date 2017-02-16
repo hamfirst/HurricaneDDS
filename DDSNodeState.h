@@ -293,5 +293,7 @@ private:
 
   uint64_t m_ClientSecret = 0;
   uint64_t m_ServerSecret = 0;
+
+  time_t m_LastCPUUsageSync;
 };
 

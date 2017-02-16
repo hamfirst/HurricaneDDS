@@ -136,12 +136,12 @@ template <>
 struct StormReflTypeInfo<DDSLoadBalancerResponse>::field_data_static<0>
 {
   using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
-  static constexpr auto GetName() { return "m_IpAddr"; }
+  static constexpr auto GetName() { return "host"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xF938AA21; }
+  static constexpr unsigned GetFieldNameHash() { return 0xCF2713FD; }
   static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 0; }
-  static constexpr auto GetMemberPtr() { return &DDSLoadBalancerResponse::m_IpAddr; }
+  static constexpr auto GetMemberPtr() { return &DDSLoadBalancerResponse::host; }
 };
 
 template <typename Self>
@@ -149,21 +149,21 @@ struct StormReflTypeInfo<DDSLoadBalancerResponse>::field_data<0, Self> : public 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, std::string> & Get() { return self.m_IpAddr; }
-  std::add_const_t<std::remove_reference_t<std::string>> & Get() const { return self.m_IpAddr; }
-  void SetDefault() { self.m_IpAddr = StormReflTypeInfo<DDSLoadBalancerResponse>::GetDefault().m_IpAddr; }
+  match_const_t<Self, std::string> & Get() { return self.host; }
+  std::add_const_t<std::remove_reference_t<std::string>> & Get() const { return self.host; }
+  void SetDefault() { self.host = StormReflTypeInfo<DDSLoadBalancerResponse>::GetDefault().host; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSLoadBalancerResponse>::field_data_static<1>
 {
   using member_type = int; // int
-  static constexpr auto GetName() { return "m_Port"; }
+  static constexpr auto GetName() { return "port"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x7D0CC8D3; }
+  static constexpr unsigned GetFieldNameHash() { return 0x43915DCC; }
   static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 1; }
-  static constexpr auto GetMemberPtr() { return &DDSLoadBalancerResponse::m_Port; }
+  static constexpr auto GetMemberPtr() { return &DDSLoadBalancerResponse::port; }
 };
 
 template <typename Self>
@@ -171,9 +171,9 @@ struct StormReflTypeInfo<DDSLoadBalancerResponse>::field_data<1, Self> : public 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, int> & Get() { return self.m_Port; }
-  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_Port; }
-  void SetDefault() { self.m_Port = StormReflTypeInfo<DDSLoadBalancerResponse>::GetDefault().m_Port; }
+  match_const_t<Self, int> & Get() { return self.port; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.port; }
+  void SetDefault() { self.port = StormReflTypeInfo<DDSLoadBalancerResponse>::GetDefault().port; }
 };
 
 namespace StormReflFileInfo

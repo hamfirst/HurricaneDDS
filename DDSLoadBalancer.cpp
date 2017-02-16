@@ -60,6 +60,7 @@ void DDSLoadBalancer::ProcessEvents()
         m_RecvBuffer[event.GetWebsocketReader().GetDataLength()] = 0;
 
         StormReflParseJson(m_NodeList, m_RecvBuffer.data());
+        m_Client->FreeIncomingPacket(event.GetWebsocketReader());
         break;
       }
 
@@ -78,13 +79,12 @@ void DDSLoadBalancer::ProcessEvents()
     {
       if (event.Type == StormSockets::StormSocketEventType::Data)
       {
-        m_State = kReady;
-
         m_RecvBuffer.resize(event.GetWebsocketReader().GetDataLength() + 1);
         event.GetWebsocketReader().ReadByteBlock(m_RecvBuffer.data(), event.GetWebsocketReader().GetDataLength());
         m_RecvBuffer[event.GetWebsocketReader().GetDataLength()] = 0;
 
         StormReflParseJson(m_NodeList, m_RecvBuffer.data());
+        m_Client->FreeIncomingPacket(event.GetWebsocketReader());
         break;
       }
 
@@ -105,11 +105,12 @@ void DDSLoadBalancer::ProcessEvents()
           auto itr = std::min_element(m_NodeList.m_Nodes.begin(), m_NodeList.m_Nodes.end(), search_func);
 
           DDSLoadBalancerResponse resp;
-          resp.m_IpAddr = itr->m_IpAddr;
-          resp.m_Port = itr->m_Port;
+          resp.host = itr->m_IpAddr;
+          resp.port = itr->m_Port;
 
           auto writer = m_Frontend->CreateOutgoingPacket(StormSockets::StormSocketWebsocketDataType::Text, true);
           writer.WriteString(StormReflEncodeJson(resp).c_str());
+          m_Frontend->FinalizeOutgoingPacket(writer);
 
           m_Frontend->SendPacketToConnection(writer, event.ConnectionId);
           m_Frontend->FreeOutgoingPacket(writer);

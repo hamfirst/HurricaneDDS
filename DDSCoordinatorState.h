@@ -12,6 +12,7 @@
 #include "DDSHttpClient.h"
 #include "DDSResolver.h"
 #include "DDSDatabaseConnectionPool.h"
+#include "DDSLoadBalancerNetworkService.h"
 
 #include "DDSCoordinatorProtocolMessages.refl.h"
 
@@ -25,10 +26,9 @@ public:
     SharedObjectList && shared_object,
     const StormSockets::StormSocketInitSettings & backend_settings,
     const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings,
-    const StormSockets::StormSocketServerFrontendWebsocketSettings & lb_server_settings,
     const StormSockets::StormSocketClientFrontendHttpSettings & http_client_settings,
     const DDSDatabaseSettings & database_settings) :
-    DDSCoordinatorState(backend_settings, node_server_settings, lb_server_settings, http_client_settings, database_settings)
+    DDSCoordinatorState(backend_settings, node_server_settings, http_client_settings, database_settings)
   {
     m_NumDataObjects = std::decay_t<DataTypeList>::NumTypes;
     data_list(m_DataObjectNameHashes, m_DatabaseObjectNameHashes);
@@ -42,6 +42,9 @@ public:
   int GetDatabaseObjectTypeIdForNameHash(uint32_t name_hash) const;
   int GetSharedObjectTypeIdForNameHash(uint32_t name_hash) const;
   int GetTargetObjectIdForNameHash(uint32_t name_hash) const;
+
+  void InitializeLoadBalancerServer(
+    const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings, int endpoint_id);
 
   void ProcessEvents();
 
@@ -62,7 +65,6 @@ private:
 
   DDSCoordinatorState(const StormSockets::StormSocketInitSettings & backend_settings,
     const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings,
-    const StormSockets::StormSocketServerFrontendWebsocketSettings & lb_server_settings,
     const StormSockets::StormSocketClientFrontendHttpSettings & http_client_settings,
     const DDSDatabaseSettings & database_settings);
 
@@ -102,6 +104,8 @@ private:
   DDSNetworkBackend m_Backend;
   DDSCoordinatorNetworkService m_NetworkService;
 
+  std::vector<std::unique_ptr<DDSLoadBalancerNetworkService>> m_LoadBalancerServices;
+
   DDSTimerSystem m_TimerSystem;
   DDSHttpClient m_HttpClient;
   DDSResolver m_Resolver;
@@ -125,4 +129,6 @@ private:
 
   uint64_t m_ClientSecret;
   uint64_t m_ServerSecret;
+
+  time_t m_LastLoadBalancerSync;
 };

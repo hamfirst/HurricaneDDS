@@ -20,6 +20,7 @@ enum STORM_REFL_ENUM class DDSCoordinatorProtocolMessageType
   kRoutingTable,
   kShutDown,
   kSharedObjectDelta,
+  kCPUUsage,
   kResponderCall,
   kTargetedMessage,
   kTargetedMessageResponder,
@@ -76,6 +77,13 @@ struct DDSCoordinatorNodeShutdown
 {
   STORM_REFL;
   static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kShutDown;
+};
+
+struct DDSCoordinatorNodeCPUUsage
+{
+  STORM_REFL;
+  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kCPUUsage;
+  float m_Usage;
 };
 
 struct DDSCoordinatorSharedObjectDeltaMessage

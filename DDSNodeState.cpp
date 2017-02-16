@@ -35,6 +35,7 @@ DDSNodeState::DDSNodeState(
 {
   inet_pton(AF_INET, node_server_settings.ListenSettings.LocalInterface, &m_LocalInterface);
   m_LocalPort = node_server_settings.ListenSettings.Port;
+  m_LastCPUUsageSync = time(nullptr);
   
   m_CoordinatorConnection.RequestConnect();
   DDSShutdownRegisterNode(this);
@@ -78,6 +79,16 @@ void DDSNodeState::ProcessEvents()
 
   RecheckOutgoingTargetedMessages();
   EndQueueingMessages();
+
+  if (m_IsReady)
+  {
+    auto cur_time = time(nullptr);
+    if (cur_time - m_LastCPUUsageSync > 3)
+    {
+      m_CoordinatorConnection.SendCPUUsage();
+      m_LastCPUUsageSync = cur_time;
+    }
+  }
 }
 
 void DDSNodeState::Shutdown()

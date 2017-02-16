@@ -26,6 +26,7 @@ private:
   friend class DDSWebsiteFilesystem;
   friend class DDSHttpClient;
   friend class DDSLoadBalancer;
+  friend class DDSLoadBalancerNetworkService;
 
   std::unique_ptr<StormSockets::StormSocketBackend> m_Backend;
 };

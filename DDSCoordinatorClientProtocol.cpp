@@ -5,6 +5,7 @@
 #include "DDSChallenge.h"
 #include "DDSNodeState.h"
 #include "DDSServerMessage.h"
+#include "DDSCPUUsage.h"
 #include "DDSCoordinatorClientProtocol.h"
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
 #include "DDSRoutingTable.refl.meta.h"
@@ -280,6 +281,11 @@ void DDSCoordinatorClientProtocol::SendMessageToCoordinator(const std::string &&
   m_ClientFrontend->FinalizeOutgoingPacket(writer);
   m_ClientFrontend->SendPacketToConnection(writer, m_ConnectionId);
   m_ClientFrontend->FreeOutgoingPacket(writer);
+}
+
+void DDSCoordinatorClientProtocol::SendCPUUsage()
+{
+  SendMessageToCoordinator(DDSGetServerMessage(DDSCoordinatorNodeCPUUsage{ DDSGetCPUUsage() }));
 }
 
 time_t DDSCoordinatorClientProtocol::GetNetworkTime()

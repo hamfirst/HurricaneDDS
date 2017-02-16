@@ -16,11 +16,11 @@
 
 DDSCoordinatorState::DDSCoordinatorState(const StormSockets::StormSocketInitSettings & backend_settings,
   const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings,
-  const StormSockets::StormSocketServerFrontendWebsocketSettings & lb_server_settings,
   const StormSockets::StormSocketClientFrontendHttpSettings & http_client_settings,
   const DDSDatabaseSettings & database_settings) :
   m_Backend(backend_settings),
   m_NetworkService(m_Backend, *this, node_server_settings),
+  m_LastLoadBalancerSync(time(nullptr)),
   m_NextNodeId(0),
   m_ClientSecret(DDSGetRandomNumber64()),
   m_ServerSecret(DDSGetRandomNumber64()),
@@ -94,6 +94,12 @@ int DDSCoordinatorState::GetTargetObjectIdForNameHash(uint32_t name_hash) const
 
   DDSLog::LogError("Invalid object id request");
   return -1;
+}
+
+void DDSCoordinatorState::InitializeLoadBalancerServer(
+  const StormSockets::StormSocketServerFrontendWebsocketSettings & lb_server_settings, int endpoint_id)
+{
+  m_LoadBalancerServices.emplace_back(std::make_unique<DDSLoadBalancerNetworkService>(m_Backend, *this, lb_server_settings, endpoint_id));
 }
 
 void DDSCoordinatorState::CreateTimer(std::chrono::system_clock::duration duration, DDSCoordinatorResponderCallData && responder_data)
@@ -213,6 +219,20 @@ void DDSCoordinatorState::GotMessageFromServer(DDSNodeId server_id, DDSCoordinat
     SetNodeDefunct(server_id);
     SyncRoutingTable();
   }
+  else if (type == DDSCoordinatorProtocolMessageType::kCPUUsage)
+  {
+    DDSCoordinatorNodeCPUUsage msg;
+    if (StormReflParseJson(msg, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    for (auto & elem : m_LoadBalancerServices)
+    {
+      elem->UpdateNode(server_id, msg.m_Usage);
+    }
+  }
 }
 
 bool DDSCoordinatorState::SendTargetedMessage(DDSDataObjectAddress addr, DDSCoordinatorProtocolMessageType type, std::string && message, bool force_process)
@@ -265,9 +285,25 @@ void DDSCoordinatorState::ProcessEvents()
 
   m_NetworkService.ProcessEvents();
 
+  for (auto & elem : m_LoadBalancerServices)
+  {
+    elem->ProcessEvents();
+  }
+
   m_Resolver.Update();
   m_HttpClient.Update();
   m_TimerSystem.Update();
+
+  auto cur_time = time(nullptr);
+  if (cur_time - m_LastLoadBalancerSync > 5)
+  {
+    for (auto & elem : m_LoadBalancerServices)
+    {
+      elem->SyncNodeList();
+    }
+
+    m_LastLoadBalancerSync = cur_time;
+  }
 }
 
 void DDSCoordinatorState::SyncRoutingTable()
@@ -279,6 +315,11 @@ void DDSCoordinatorState::SyncRoutingTable()
   DDSLog::LogVerbose(StormReflEncodePrettyJson(m_RoutingTable));
 
   m_NetworkService.SendMessageToAllConnectedClients(buffer.c_str(), buffer.length());
+
+  for (auto & elem : m_LoadBalancerServices)
+  {
+    elem->UpdateRoutingTable(m_RoutingTable);
+  }
 }
 
 void DDSCoordinatorState::QueryObjectData(int object_type_id, DDSKey key, const char * collection)
