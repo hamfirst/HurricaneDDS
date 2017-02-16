@@ -25,6 +25,8 @@ add_library(HurricaneDDS STATIC
             DDSIncomingKeyspaceTransfer.cpp
             DDSIncomingKeyspaceTransferManager.cpp
             DDSKey.cpp
+            DDSLoadBalancer.cpp
+            DDSLoadBalancerNetworkService.cpp
             DDSLog.cpp
             DDSNetworkBackend.cpp
             DDSNodeInterface.cpp
