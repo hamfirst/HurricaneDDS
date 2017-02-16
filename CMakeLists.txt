@@ -13,6 +13,7 @@ add_library(HurricaneDDS STATIC
             DDSCoordinatorNetworkService.cpp
             DDSCoordinatorServerProtocol.cpp
             DDSCoordinatorState.cpp
+            DDSCPUUsage.cpp
             DDSDatabaseBootstrap.cpp
             DDSDatabaseConnection.cpp
             DDSDatabaseConnectionPool.cpp
