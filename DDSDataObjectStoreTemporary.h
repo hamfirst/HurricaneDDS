@@ -246,12 +246,12 @@ public:
   {
     if (obj_data.m_Active == false && DDSRequiresActiveObject(message_type))
     {
-      DDSLog::LogInfo("- Queueing message (not active) - %s", message);
+      DDSLog::LogVerbose("- Queueing message (not active) - %s", message);
       obj_data.m_PendingMessages.emplace_back(DDSExportedMessage{ message_type, message });
       return false;
     }
 
-    DDSLog::LogInfo("- Processing message - %s", message);
+    DDSLog::LogVerbose("- Processing message - %s", message);
     ProcessMessage(key, obj_data, message_type, message);
     return true;
   }

@@ -6,8 +6,20 @@
 
 #include <stdexcept>
 
+static DDSLog::LogLevel s_LogLevel = DDSLog::kVerbose;
+
+void DDSLog::SetLogLevel(LogLevel level)
+{
+  s_LogLevel = level;
+}
+
 void DDSLog::LogInfo(const char * fmt, ...)
 {
+  if (s_LogLevel == DDSLog::kNone)
+  {
+    return;
+  }
+
   va_list args;
   va_start(args, fmt);
   vprintf(fmt, args);
@@ -18,6 +30,11 @@ void DDSLog::LogInfo(const char * fmt, ...)
 
 void DDSLog::LogVerbose(const char * fmt, ...)
 {
+  if (s_LogLevel == DDSLog::kNone || s_LogLevel == DDSLog::kInfo)
+  {
+    return;
+  }
+
   va_list args;
   va_start(args, fmt);
   vprintf(fmt, args);
@@ -28,6 +45,11 @@ void DDSLog::LogVerbose(const char * fmt, ...)
 
 void DDSLog::LogVerbose(const std::string & str)
 {
+  if (s_LogLevel == DDSLog::kNone || s_LogLevel == DDSLog::kInfo)
+  {
+    return;
+  }
+
   printf("%s\r\n", str.c_str());
 }
 

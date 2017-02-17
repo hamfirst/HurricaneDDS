@@ -379,13 +379,13 @@ public:
       (obj_data.m_State != kLoading && requires_full_object == false) ||
       (message_type == DDSServerToServerMessageType::kUnlockObject))
     {
-      DDSLog::LogInfo("- Message processed - (obj_state: %d) %s", (int)obj_data.m_State, msg);
+      DDSLog::LogVerbose("- Message processed - (obj_state: %d) %s", (int)obj_data.m_State, msg);
 
       ProcessMessage(key, obj_data, message_type, msg);
       return true;
     }
 
-    DDSLog::LogInfo("- Queueing message (obj_state: %d) %s", (int)obj_data.m_State, msg);
+    DDSLog::LogVerbose("- Queueing message (obj_state: %d) %s", (int)obj_data.m_State, msg);
     return false;
   }
 
