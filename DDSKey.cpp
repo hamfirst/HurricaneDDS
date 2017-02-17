@@ -4,7 +4,7 @@
 
 DDSKey GetKeyRangeSize(DDSKeyRange range)
 {
-  return (range.m_Max >= range.m_Min ? (range.m_Max - range.m_Min) : (kMaxKey - range.m_Max + range.m_Min)) + 1;
+  return (range.m_Max >= range.m_Min ? (range.m_Max - range.m_Min) : (kMaxKey - range.m_Min + range.m_Max)) + 1;
 }
 
 DDSKey GetRandomKeyInRange(DDSKeyRange range)
