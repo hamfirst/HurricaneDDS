@@ -84,7 +84,7 @@ bool DDSOutgoingKeyspaceTransfer::Send(DDSNodeState & node_state)
     object_list.m_KeyRangeMin = output_key_range.m_Min;
     object_list.m_KeyRangeMax = output_key_range.m_Max;
 
-    DDSLog::LogInfo("Sending object id %d keys %llu to %llu node %d", object_type, output_key_range.m_Min, output_key_range.m_Max, node_id);
+    DDSLog::LogInfo("Sending object id %d keys %llX to %llX node %d", object_type, output_key_range.m_Min, output_key_range.m_Max, node_id);
     DDSLog::LogInfo("Object list has %d elements", object_list.m_Objects.size());
 
     node_state.GetNodeNetwork().SendMessageToServer(node_id, DDSGetServerMessage(object_list));

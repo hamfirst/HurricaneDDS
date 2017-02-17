@@ -233,7 +233,7 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
       return;
     }
 
-    DDSLog::LogInfo("Got object id %d keys %llu to %llu node %d", obj_list.m_DataObjectType, obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax, node_id);
+    DDSLog::LogInfo("Got object id %d keys %llX to %llX node %d", obj_list.m_DataObjectType, obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax, node_id);
     DDSLog::LogInfo("Object list has %d elements", obj_list.m_Objects.size());
 
     auto & data_store = GetDataObjectStore(obj_list.m_DataObjectType);

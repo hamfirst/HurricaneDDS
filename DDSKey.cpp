@@ -158,7 +158,7 @@ int GetKeyRangeDifference(DDSKeyRange a, DDSKeyRange b, DDSKeyRange & out1, DDSK
       return 0;
     }
 
-    out1 = DDSKeyRange{ b.m_Min + 1, a.m_Max };
+    out1 = DDSKeyRange{ b.m_Max + 1, a.m_Max };
     return 1;
   }
 

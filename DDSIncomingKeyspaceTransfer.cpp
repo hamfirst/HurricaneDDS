@@ -70,10 +70,14 @@ int DDSIncomingKeyspaceTransfer::GetTableGeneration() const
 
 void DDSIncomingKeyspaceTransfer::SetKeyRangeComplete(int object_type_id, DDSKeyRange key_range)
 {
+  printf("Setting key range complete %llX to %llX\n", key_range.m_Min, key_range.m_Max);
+
   std::vector<DDSKeyRange> new_unsynced_key_list;
 
   for (auto src_key_range : m_UnsyncedKeys[object_type_id])
   {
+    printf("Starting key range %llX to %llX\n", src_key_range.m_Min, src_key_range.m_Max);
+
     DDSKeyRange r1, r2;
     int outp = GetKeyRangeDifference(src_key_range, key_range, r1, r2);
 
@@ -89,6 +93,12 @@ void DDSIncomingKeyspaceTransfer::SetKeyRangeComplete(int object_type_id, DDSKey
   }
 
   m_UnsyncedKeys[object_type_id] = std::move(new_unsynced_key_list);
+
+
+  for (auto src_key_range : m_UnsyncedKeys[object_type_id])
+  {
+    printf("Remaining key range %llX to %llX\n", src_key_range.m_Min, src_key_range.m_Max);
+  }
 
   bool has_unsynced_keys = false;
   for (int index = 0; index < m_NumObjectTypes; index++)

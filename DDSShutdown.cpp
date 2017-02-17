@@ -17,10 +17,12 @@ void DDSSignalHandler(int signal)
 {
   s_WantsShutdown = true;
 
+#ifndef _LINUX
   while (s_IsShutDown == false)
   {
     std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
+#endif
 }
 
 void DDSSetupShutdownSignalHandler()
