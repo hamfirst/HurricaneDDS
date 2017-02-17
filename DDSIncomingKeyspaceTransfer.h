@@ -13,16 +13,13 @@ class DDSIncomingKeyspaceTransfer
 {
 public:
   DDSIncomingKeyspaceTransfer(int num_object_types, int table_gen, DDSKeyRange key_range);
-  DDSIncomingKeyspaceTransfer(int num_object_types, int table_gen, const std::vector<DDSKeyRange> & key_ranges);
+  DDSIncomingKeyspaceTransfer(int num_object_types, int table_gen, const std::vector<DDSKeyRange> & key_ranges, DDSKeyRange full_key_range);
 
   DDSIncomingKeyspaceTransfer(DDSIncomingKeyspaceTransfer && rhs) = default;
 
   DDSIncomingKeyspaceTransfer & operator = (DDSIncomingKeyspaceTransfer && rhs) = default;
 
   bool IsComplete() const;
-  bool IsCompleteForKey(DDSDataObjectAddress addr) const;
-  bool IsCompleteForKeyRange(DDSKeyRange key_range) const;
-
   int GetTableGeneration() const;
 
   void SetKeyRangeComplete(int object_type_id, DDSKeyRange key_range);

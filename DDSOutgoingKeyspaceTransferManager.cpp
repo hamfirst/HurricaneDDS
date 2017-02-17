@@ -39,7 +39,7 @@ void DDSOutgoingKeyspaceTransferManager::ProcessNewRoutingTable(const DDSRouting
 
   if (keyspace_transfers.size() > 0)
   {
-    m_PendingTransfers.emplace_back(m_NumObjectTypes, new_routing_table.m_TableGeneration, keyspace_transfers);
+    m_PendingTransfers.emplace_back(m_NodeState.m_LocalNodeId.value(), m_NumObjectTypes, new_routing_table.m_TableGeneration, keyspace_transfers);
   }
 }
 
@@ -68,7 +68,7 @@ void DDSOutgoingKeyspaceTransferManager::ProcessDefunctRoutingTable(const DDSRou
 
   if (keyspace_transfers.size() > 0)
   {
-    m_PendingTransfers.emplace_back(m_NumObjectTypes, new_routing_table.m_TableGeneration, keyspace_transfers);
+    m_PendingTransfers.emplace_back(m_NodeState.m_LocalNodeId.value(), m_NumObjectTypes, new_routing_table.m_TableGeneration, keyspace_transfers);
   }
 }
 

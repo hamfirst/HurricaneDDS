@@ -10,11 +10,13 @@
 
 #include <StormRefl/StormReflJsonStd.h>
 
-DDSOutgoingKeyspaceTransfer::DDSOutgoingKeyspaceTransfer(int num_object_types, int table_gen, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & output_keyranges) :
+DDSOutgoingKeyspaceTransfer::DDSOutgoingKeyspaceTransfer(DDSNodeId local_node_id, int num_object_types, int table_gen, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & output_keyranges) :
   m_NumObjectTypes(num_object_types), m_TableGen(table_gen), m_TransferBegun(false)
 {
   for (auto & val : output_keyranges)
   {
+    DDSLog::LogVerbose("Transfering %llX - %llX to node %d from node %d", val.second.m_Min, val.second.m_Min, val.first, local_node_id);
+
     m_PendingKeyRanges.emplace_back(val.second);
 
     for (int index = 0; index < num_object_types; index++)
@@ -31,12 +33,9 @@ bool DDSOutgoingKeyspaceTransfer::IsReady(DDSNodeState & node_state)
     return true;
   }
 
-  for (auto & key_range : m_PendingKeyRanges)
+  if (node_state.GetIncomingKeyspace().IsReadyForOutgoingKeyspaceTransfer(m_TableGen) == false)
   {
-    if (node_state.GetIncomingKeyspace().IsCompleteForKeyRange(key_range) == false)
-    {
-      return false;
-    }
+    return false;
   }
 
   m_TransferBegun = true;
@@ -45,6 +44,7 @@ bool DDSOutgoingKeyspaceTransfer::IsReady(DDSNodeState & node_state)
   {
     node_state.PrepareObjectsForMove(key_range);
   }
+
   return false;
 }
 
@@ -68,6 +68,7 @@ bool DDSOutgoingKeyspaceTransfer::Send(DDSNodeState & node_state)
     DDSKeyRange remainder_key_range, output_key_range;
 
     DDSDataObjectListSync object_list;
+    object_list.m_TargetNode = node_id;
     object_list.m_DataObjectType = object_type;
     object_list.m_RoutingTableGen = m_TableGen;
 
@@ -83,9 +84,6 @@ bool DDSOutgoingKeyspaceTransfer::Send(DDSNodeState & node_state)
 
     object_list.m_KeyRangeMin = output_key_range.m_Min;
     object_list.m_KeyRangeMax = output_key_range.m_Max;
-
-    DDSLog::LogInfo("Sending object id %d keys %llX to %llX node %d", object_type, output_key_range.m_Min, output_key_range.m_Max, node_id);
-    DDSLog::LogInfo("Object list has %d elements", object_list.m_Objects.size());
 
     node_state.GetNodeNetwork().SendMessageToServer(node_id, DDSGetServerMessage(object_list));
   }

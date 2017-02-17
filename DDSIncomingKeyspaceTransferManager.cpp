@@ -1,5 +1,6 @@
 
 #include "DDSIncomingKeyspaceTransferManager.h"
+#include "DDSLog.h"
 
 
 DDSIncomingKeyspaceTransferManager::DDSIncomingKeyspaceTransferManager(int num_object_types) :
@@ -39,63 +40,53 @@ void DDSIncomingKeyspaceTransferManager::ProcessNewRoutingTable(
 
     if (num_overlaps >= 1)
     {
+      assert(KeyRangeEntirelyInKeyRange(new_key_range, r1));
       incoming_key_ranges.push_back(r1);
     }
 
     if (num_overlaps >= 2)
     {
+      assert(KeyRangeEntirelyInKeyRange(new_key_range, r2));
       incoming_key_ranges.push_back(r2);
     }
   }
 
   if (incoming_key_ranges.size() > 0)
   {
-    m_PendingTransfers.emplace_back(m_NumObjectTypes, new_routing_table.m_TableGeneration, incoming_key_ranges);
+    m_PendingTransfers.emplace_back(m_NumObjectTypes, new_routing_table.m_TableGeneration, incoming_key_ranges, new_key_range);
   }
 }
 
-void DDSIncomingKeyspaceTransferManager::SetKeyRangeComplete(int table_gen, int object_type, DDSKeyRange key_range)
+bool DDSIncomingKeyspaceTransferManager::SetKeyRangeComplete(int table_gen, int object_type, DDSKeyRange key_range)
 {
-  for (int index = 0; index < (int)m_PendingTransfers.size(); index++)
+  if (m_PendingTransfers.size() == 0)
   {
-    if (m_PendingTransfers[index].GetTableGeneration() == table_gen)
-    {
-      m_PendingTransfers[index].SetKeyRangeComplete(object_type, key_range);
-
-      if (m_PendingTransfers[index].IsComplete())
-      {
-        m_PendingTransfers.erase(m_PendingTransfers.begin() + index);
-      }
-
-      return;
-    }
+    return false;
   }
-}
 
-bool DDSIncomingKeyspaceTransferManager::IsCompleteForKey(DDSDataObjectAddress addr) const
-{
-  for (auto & transfer : m_PendingTransfers)
+  if (m_PendingTransfers[0].GetTableGeneration() != table_gen)
   {
-    if (transfer.IsCompleteForKey(addr) == false)
-    {
-      return false;
-    }
+    return false;
+  }
+
+  m_PendingTransfers[0].SetKeyRangeComplete(object_type, key_range);
+
+  if (m_PendingTransfers[0].IsComplete())
+  {
+    m_PendingTransfers.erase(m_PendingTransfers.begin());
   }
 
   return true;
 }
 
-bool DDSIncomingKeyspaceTransferManager::IsCompleteForKeyRange(DDSKeyRange key_range) const
+bool DDSIncomingKeyspaceTransferManager::IsReadyForOutgoingKeyspaceTransfer(int table_gen) const
 {
-  for (auto & transfer : m_PendingTransfers)
+  if (IsComplete())
   {
-    if (transfer.IsCompleteForKeyRange(key_range) == false)
-    {
-      return false;
-    }
+    return true;
   }
 
-  return true;
+  return m_PendingTransfers[0].GetTableGeneration() >= table_gen;
 }
 
 bool DDSIncomingKeyspaceTransferManager::IsComplete() const

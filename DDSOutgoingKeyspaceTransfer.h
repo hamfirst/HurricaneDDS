@@ -11,7 +11,7 @@ class DDSNodeState;
 class DDSOutgoingKeyspaceTransfer
 {
 public:
-  DDSOutgoingKeyspaceTransfer(int num_object_types, int table_gen, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & output_keyranges);
+  DDSOutgoingKeyspaceTransfer(DDSNodeId local_node_id, int num_object_types, int table_gen, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & output_keyranges);
   DDSOutgoingKeyspaceTransfer(DDSOutgoingKeyspaceTransfer && rhs) = default;
 
   DDSOutgoingKeyspaceTransfer & operator = (DDSOutgoingKeyspaceTransfer && rhs) = default;

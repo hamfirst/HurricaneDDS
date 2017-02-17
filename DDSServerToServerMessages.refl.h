@@ -92,6 +92,7 @@ struct DDSDataObjectListSync
   STORM_REFL;
   static const DDSServerToServerMessageType Type = DDSServerToServerMessageType::kDataObjectListSync;
 
+  DDSNodeId m_TargetNode;
   int m_DataObjectType;
   int m_RoutingTableGen;
   DDSKey m_KeyRangeMin;

@@ -17,6 +17,8 @@
 #include <StormSockets/StormSocketClientFrontendWebsocket.h>
 #include <StormSockets/StormSocketServerFrontendWebsocket.h>
 
+#include <sb/vector.h>
+
 DDSNodeState::DDSNodeState(
   int num_data_object_types,
   const StormSockets::StormSocketInitSettings & backend_settings,
@@ -80,15 +82,8 @@ void DDSNodeState::ProcessEvents()
   RecheckOutgoingTargetedMessages();
   EndQueueingMessages();
 
-  if (m_IsReady)
-  {
-    auto cur_time = time(nullptr);
-    if (cur_time - m_LastCPUUsageSync > 3)
-    {
-      m_CoordinatorConnection.SendCPUUsage();
-      m_LastCPUUsageSync = cur_time;
-    }
-  }
+  UpdateCPUUsage();
+  ProcessPendingExportedObjects();
 }
 
 void DDSNodeState::Shutdown()
@@ -233,13 +228,21 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
       return;
     }
 
-    DDSLog::LogInfo("Got object id %d keys %llX to %llX node %d", obj_list.m_DataObjectType, obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax, node_id);
-    DDSLog::LogInfo("Object list has %d elements", obj_list.m_Objects.size());
+    if (obj_list.m_TargetNode != m_LocalNodeId.value())
+    {
+      DDSLog::LogError("Got object list packet for the wrong node");
+      return;
+    }
 
-    auto & data_store = GetDataObjectStore(obj_list.m_DataObjectType);
-    data_store.ProcessExportedObjects(obj_list.m_Objects, obj_list.m_RoutingTableGen);
-
-    m_IncomingKeyspace.SetKeyRangeComplete(obj_list.m_RoutingTableGen, obj_list.m_DataObjectType, DDSKeyRange{ obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax });
+    if (m_IncomingKeyspace.SetKeyRangeComplete(obj_list.m_RoutingTableGen, obj_list.m_DataObjectType, DDSKeyRange{ obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax }))
+    {
+      auto & data_store = GetDataObjectStore(obj_list.m_DataObjectType);
+      data_store.ProcessExportedObjects(obj_list.m_Objects, obj_list.m_RoutingTableGen);
+    }
+    else
+    {
+      m_PendingIncomingExportedObjects.emplace_back(std::move(obj_list));
+    }
   }
   else if (type == DDSServerToServerMessageType::kTargetedMessage)
   {
@@ -355,7 +358,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
   if (m_QueueMessageDepth && force_process == false)
   {
     DDSLog::LogVerbose("-- Queueing targeted message %s", StormReflGetEnumAsString(type));
-    m_QueuedTargetedMessages.emplace(std::make_tuple(addr, type, message));
+    m_QueuedTargetedMessages.emplace(std::make_tuple(addr, type, std::move(message)));
     return;
   }
 
@@ -389,7 +392,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
   }
   else if (m_IsDefunct == false && KeyInKeyRange(addr.m_ObjectKey, *m_LocalKeyRange))
   {
-    if (m_IncomingKeyspace.IsCompleteForKey(addr))
+    if (m_IncomingKeyspace.IsComplete())
     {
       DDSLog::LogVerbose("- Sending targeted message %s (T: %d)", StormReflGetEnumAsString(type), addr.m_ObjectType);
       HandleIncomingTargetedMessage(addr, type, message);
@@ -561,7 +564,7 @@ DDSDataObjectStoreBase & DDSNodeState::GetDataObjectStore(int object_type_id)
 
 bool DDSNodeState::IsReadyToCreateObjects()
 {
-  return m_IsReady && m_IsDefunct == false && m_IncomingKeyspace.IsCompleteForKeyRange(*m_LocalKeyRange);
+  return m_IsReady && m_IsDefunct == false && m_IncomingKeyspace.IsComplete();
 }
 
 bool DDSNodeState::CreateNewDataObject(int object_type_id, DDSKey & output_key)
@@ -823,6 +826,39 @@ void DDSNodeState::EndQueueingMessages()
   }
 }
 
+void DDSNodeState::UpdateCPUUsage()
+{
+  if (m_IsReady)
+  {
+    auto cur_time = time(nullptr);
+    if (cur_time - m_LastCPUUsageSync > 3)
+    {
+      m_CoordinatorConnection.SendCPUUsage();
+      m_LastCPUUsageSync = cur_time;
+    }
+  }
+}
+
+void DDSNodeState::ProcessPendingExportedObjects()
+{
+  std::size_t index = 0;
+  while (index < m_PendingIncomingExportedObjects.size())
+  {
+    auto & obj_list = m_PendingIncomingExportedObjects[index];
+    if (m_IncomingKeyspace.SetKeyRangeComplete(obj_list.m_RoutingTableGen, obj_list.m_DataObjectType, DDSKeyRange{ obj_list.m_KeyRangeMin, obj_list.m_KeyRangeMax }))
+    {
+      auto & data_store = GetDataObjectStore(obj_list.m_DataObjectType);
+      data_store.ProcessExportedObjects(obj_list.m_Objects, obj_list.m_RoutingTableGen);
+
+      vremove_index_quick(m_PendingIncomingExportedObjects, index);
+    }
+    else
+    {
+      index++;
+    }
+  }
+}
+
 DDSNetworkBackend & DDSNodeState::GetBackend()
 {
   return m_Backend;
@@ -932,7 +968,7 @@ void DDSNodeState::RecheckOutgoingTargetedMessages()
 
     if (KeyInKeyRange(itr_copy->first.m_ObjectKey, *m_LocalKeyRange))
     {
-      if (m_IncomingKeyspace.IsCompleteForKey(itr_copy->first))
+      if (m_IncomingKeyspace.IsComplete())
       {
         for (auto & message : itr_copy->second)
         {

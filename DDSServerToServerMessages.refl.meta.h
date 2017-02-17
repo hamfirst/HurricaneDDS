@@ -640,7 +640,7 @@ template <>
 struct StormReflTypeInfo<DDSDataObjectListSync>
 {
   using MyBase = void;
-  static constexpr int fields_n = 5;
+  static constexpr int fields_n = 6;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -652,17 +652,39 @@ struct StormReflTypeInfo<DDSDataObjectListSync>
 template <>
 struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<0>
 {
+  using member_type = DDSNodeId; // unsigned int
+  static constexpr auto GetName() { return "m_TargetNode"; }
+  static constexpr auto GetType() { return "unsigned int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2D8F95B9; }
+  static constexpr unsigned GetTypeNameHash() { return 0x562EF932; }
+  static constexpr auto GetFieldIndex() { return 0; }
+  static constexpr auto GetMemberPtr() { return &DDSDataObjectListSync::m_TargetNode; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<0, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<0>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, DDSNodeId> & Get() { return self.m_TargetNode; }
+  std::add_const_t<std::remove_reference_t<DDSNodeId>> & Get() const { return self.m_TargetNode; }
+  void SetDefault() { self.m_TargetNode = StormReflTypeInfo<DDSDataObjectListSync>::GetDefault().m_TargetNode; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<1>
+{
   using member_type = int; // int
   static constexpr auto GetName() { return "m_DataObjectType"; }
   static constexpr auto GetType() { return "int"; }
   static constexpr unsigned GetFieldNameHash() { return 0x31DC1DA8; }
   static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
-  static constexpr auto GetFieldIndex() { return 0; }
+  static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSDataObjectListSync::m_DataObjectType; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<0, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<0>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<1, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<1>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -672,19 +694,19 @@ struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<0, Self> : public St
 };
 
 template <>
-struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<1>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<2>
 {
   using member_type = int; // int
   static constexpr auto GetName() { return "m_RoutingTableGen"; }
   static constexpr auto GetType() { return "int"; }
   static constexpr unsigned GetFieldNameHash() { return 0x608D0035; }
   static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
-  static constexpr auto GetFieldIndex() { return 1; }
+  static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSDataObjectListSync::m_RoutingTableGen; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<1, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<1>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<2, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<2>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -694,19 +716,19 @@ struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<1, Self> : public St
 };
 
 template <>
-struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<2>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<3>
 {
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_KeyRangeMin"; }
   static constexpr auto GetType() { return "unsigned long long"; }
   static constexpr unsigned GetFieldNameHash() { return 0xDF42EE40; }
   static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
-  static constexpr auto GetFieldIndex() { return 2; }
+  static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSDataObjectListSync::m_KeyRangeMin; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<2, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<2>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<3, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<3>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -716,19 +738,19 @@ struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<2, Self> : public St
 };
 
 template <>
-struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<3>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<4>
 {
   using member_type = DDSKey; // unsigned long long
   static constexpr auto GetName() { return "m_KeyRangeMax"; }
   static constexpr auto GetType() { return "unsigned long long"; }
   static constexpr unsigned GetFieldNameHash() { return 0xE34FD119; }
   static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
-  static constexpr auto GetFieldIndex() { return 3; }
+  static constexpr auto GetFieldIndex() { return 4; }
   static constexpr auto GetMemberPtr() { return &DDSDataObjectListSync::m_KeyRangeMax; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<3, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<3>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<4, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<4>
 {
   Self & self;
   field_data(Self & self) : self(self) {}
@@ -738,19 +760,19 @@ struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<3, Self> : public St
 };
 
 template <>
-struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<4>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<5>
 {
   using member_type = std::vector<DDSExportedObject>; // std::vector<DDSExportedObject, std::allocator<DDSExportedObject> >
   static constexpr auto GetName() { return "m_Objects"; }
   static constexpr auto GetType() { return "std::vector<DDSExportedObject, std::allocator<DDSExportedObject> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0x27E8B926; }
   static constexpr unsigned GetTypeNameHash() { return 0x88B81936; }
-  static constexpr auto GetFieldIndex() { return 4; }
+  static constexpr auto GetFieldIndex() { return 5; }
   static constexpr auto GetMemberPtr() { return &DDSDataObjectListSync::m_Objects; }
 };
 
 template <typename Self>
-struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<4, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<4>
+struct StormReflTypeInfo<DDSDataObjectListSync>::field_data<5, Self> : public StormReflTypeInfo<DDSDataObjectListSync>::field_data_static<5>
 {
   Self & self;
   field_data(Self & self) : self(self) {}

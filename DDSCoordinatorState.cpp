@@ -462,22 +462,24 @@ DDSNodeId DDSCoordinatorState::CreateNode(uint32_t addr, uint16_t port, const st
     return node.m_Id;
   }
 
-  DDSKey biggest_gap = 0;
-  DDSKey best_key = 0;
-  for (std::size_t index = 0; index < table_size; index++)
+  std::vector<DDSKey> node_keys;
+  for (auto & node : m_RoutingTable.m_Table)
   {
-    auto & elem = m_RoutingTable.m_Table[index];
-    auto & next_elem = m_RoutingTable.m_Table[(index + 1) % table_size];
-
-    DDSKeyRange range = DDSKeyRange{ elem.m_CentralKey, next_elem.m_CentralKey };
-    DDSKey range_size = GetKeyRangeSize(range);
-
-    if (range_size > biggest_gap)
-    {
-      biggest_gap = range_size;
-      best_key = elem.m_CentralKey + range_size / 2;
-    }
+    node_keys.push_back(node.m_CentralKey);
   }
+
+  std::sort(node_keys.begin(), node_keys.end());
+
+  std::vector<DDSKeyRange> node_key_ranges;
+  for(std::size_t index = 0; index < node_keys.size(); index++)
+  {
+    node_key_ranges.emplace_back(DDSKeyRange{ node_keys[index], node_keys[(index + 1) % node_keys.size()] });
+  }
+
+  auto best_itr = std::max_element(node_key_ranges.begin(), node_key_ranges.end(), [](auto & a, auto & b) { return GetKeyRangeSize(a) < GetKeyRangeSize(b); });
+  auto best_key_range = *best_itr;
+
+  auto best_key = best_key_range.m_Min + (GetKeyRangeSize(best_key_range) / 2);
 
   node.m_CentralKey = best_key;
 

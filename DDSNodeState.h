@@ -151,6 +151,7 @@ private:
 
   friend class DDSCoordinatorClientProtocol;
   friend class DDSOutgoingKeyspaceTransfer;
+  friend class DDSOutgoingKeyspaceTransferManager;
   friend class DDSServerToServerReceiver;
   friend class DDSServerToServerSender;
   friend class DDSNodeNetworkService;
@@ -214,6 +215,9 @@ private:
   void BeginQueueingMessages();
   void EndQueueingMessages();
 
+  void UpdateCPUUsage();
+  void ProcessPendingExportedObjects();
+
   DDSNodeId GetNodeIdForKey(DDSKey key) const;
 
   DDSDataObjectStoreBase & GetDataObjectStore(int object_type_id);
@@ -263,6 +267,8 @@ private:
   DDSIncomingKeyspaceTransferManager m_IncomingKeyspace;
   DDSOutgoingKeyspaceTransferManager m_OutgoingKeyspace;
   DDSNodeSharedObjectResolver m_SharedResolver;
+
+  std::vector<DDSDataObjectListSync> m_PendingIncomingExportedObjects;
 
   DDSTimerSystem m_TimerSystem;
   DDSHttpClient m_HttpClient;
