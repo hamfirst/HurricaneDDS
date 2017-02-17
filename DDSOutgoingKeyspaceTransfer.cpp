@@ -15,7 +15,7 @@ DDSOutgoingKeyspaceTransfer::DDSOutgoingKeyspaceTransfer(DDSNodeId local_node_id
 {
   for (auto & val : output_keyranges)
   {
-    DDSLog::LogVerbose("Transfering %llX - %llX to node %d from node %d", val.second.m_Min, val.second.m_Min, val.first, local_node_id);
+    DDSLog::LogVerbose("Transfering %llX - %llX to node %d from node %d", val.second.m_Min, val.second.m_Max, val.first, local_node_id);
 
     m_PendingKeyRanges.emplace_back(val.second);
 

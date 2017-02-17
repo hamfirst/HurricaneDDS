@@ -359,10 +359,12 @@ public:
 
     if (obj_data.m_State == kDatabaseOnly && requires_full_object)
     {
+      DDSLog::LogInfo("- Promoting Object");
       PromoteObject(key);
     }
     else if (obj_data.m_State == kDeleted)
     {
+      DDSLog::LogInfo("- Reloading Object");
       ReloadObjectByKey(key, obj_data);
     }
 
@@ -375,6 +377,7 @@ public:
       return true;
     }
 
+    DDSLog::LogInfo("- Queueing message (obj_state: %d) %s", (int)obj_data.m_State, msg);
     return false;
   }
 
