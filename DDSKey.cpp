@@ -15,7 +15,13 @@ DDSKey GetRandomKeyInRange(DDSKeyRange range)
   }
 
   DDSKey size = GetKeyRangeSize(range);
-  DDSKey val = DDSGetRandomNumberRange64(0, size);
+
+  if (size <= 1)
+  {
+    return range.m_Min;
+  }
+
+  DDSKey val = DDSGetRandomNumberRange64(0, size - 1);
 
   return range.m_Min + val;
 }

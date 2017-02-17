@@ -576,6 +576,11 @@ bool DDSNodeState::CreateNewDataObject(int object_type_id, DDSKey & output_key)
 
   output_key = m_DataObjectList[object_type_id]->GetUnusedKeyInRange(*m_LocalKeyRange);
 
+  if (KeyInKeyRange(output_key, m_LocalKeyRange.value()) == false)
+  {
+    DDSLog::LogError("Got invalid key value for object create");
+  }
+
   m_DataObjectList[object_type_id]->SpawnNewNonDatabaseBackedType(output_key);
   return true;
 }
