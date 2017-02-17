@@ -173,6 +173,8 @@ public:
 
   ObjectData & LoadObjectByKey(DDSKey key)
   {
+    DDSLog::LogInfo("- Loading Object");
+
     auto insert_data = m_Objects.emplace(std::make_pair(key, ObjectData{ kLoading }));
     m_NodeState.QueryObjectData(m_ObjectTypeId, key, m_Collection.c_str());
 
@@ -206,8 +208,10 @@ public:
       return;
     }
 
+
     if (ec)
     {
+      DDSLog::LogInfo("- Object loading complete (failure)");
       obj_data.m_State = kDeleted;
 
       for (auto & msg : obj_data.m_PendingMessages)
@@ -232,6 +236,8 @@ public:
 
       return;
     }
+
+    DDSLog::LogInfo("- Object loading complete");
 
     obj_data.m_State = kDatabaseOnly;
     obj_data.m_DatabaseObject = std::make_unique<DatabaseBackedType>();
