@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_map>
+#include <map>
 
 #include <StormData/StormDataChangeNotifier.h>
 #include <StormData/StormDataChangePacket.h>
@@ -19,6 +19,7 @@ public:
   void AddRef(int version);
   void DecRef(int version);
 
+
 protected:
 
   friend class DDSSharedLocalCopy;
@@ -36,10 +37,11 @@ protected:
   virtual void FreeObject(void * obj) = 0;
 
   void InstantiateVersion(Version & version, int data_gen);
+  void CheckOldestVersion();
 
 protected:
 
-  std::unordered_map<int, Version> m_Versions;
+  std::map<int, Version> m_Versions;
 };
 
 

@@ -39,22 +39,7 @@ void DDSBaseSharedLocalCopyData::DecRef(int version)
   }
 
   itr->second.m_RefCount--;
-  if (itr->second.m_RefCount <= 0)
-  {
-    auto next_itr = m_Versions.find(version + 1);
-
-    if (next_itr != m_Versions.end() && next_itr->second.m_Obj == nullptr)
-    {
-      InstantiateVersion(next_itr->second, version + 1);
-    }
-
-    if (itr->second.m_Obj != nullptr)
-    {
-      FreeObject(itr->second.m_Obj);
-    }
-
-    m_Versions.erase(itr);
-  }
+  CheckOldestVersion();
 }
 
 void DDSBaseSharedLocalCopyData::InstantiateVersion(Version & version, int data_gen)
@@ -86,4 +71,32 @@ void DDSBaseSharedLocalCopyData::InstantiateVersion(Version & version, int data_
   }
 
   version.m_Obj = ApplyChangePacketInternal(version.m_Change, prev_obj);
+}
+
+void DDSBaseSharedLocalCopyData::CheckOldestVersion()
+{
+  while (true)
+  {
+    auto itr = m_Versions.begin();
+    if (itr == m_Versions.end() || itr->second.m_RefCount > 0)
+    {
+      break;
+    }
+
+    auto next_itr = itr;
+    next_itr++;
+
+    if (next_itr != m_Versions.end() && next_itr->second.m_Obj == nullptr)
+    {
+      InstantiateVersion(next_itr->second, next_itr->first);
+    }
+
+    if (itr->second.m_Obj != nullptr)
+    {
+      FreeObject(itr->second.m_Obj);
+    }
+
+    m_Versions.erase(itr);
+  }
+
 }
