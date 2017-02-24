@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 
 add_library(HurricaneDDS STATIC
+            DDSAggregateSubscription.cpp
             DDSConnectionInterface.cpp
             DDSCoordinatorClientProtocol.cpp
             DDSCoordinatorNetworkService.cpp
@@ -43,6 +44,10 @@ add_library(HurricaneDDS STATIC
             DDSRoutingTable.cpp
             DDSServerToServerReceiver.cpp
             DDSServerToServerSender.cpp
+            DDSSharedLocalCopy.cpp
+            DDSSharedLocalCopyData.cpp
+            DDSSharedLocalCopyDatabase.cpp
+            DDSSharedLocalCopyPtr.cpp
             DDSSharedObjectInterface.cpp
             DDSShutdown.cpp
             DDSTimerSystem.cpp
