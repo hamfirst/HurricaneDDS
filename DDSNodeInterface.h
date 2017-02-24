@@ -35,8 +35,7 @@ public:
       (p_this->*return_func)(false);
       return;
     }
-    
-  auto func = []() { return std::make_unique<DDSSharedLocalCopyData<}
+
     UpdateDatabase(DatabaseType::Collection(), GetObjectTypeId(), StormReflEncodeJson(data), GetLocalKey(), GetObjectTypeId(), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), std::string());
   }
