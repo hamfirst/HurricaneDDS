@@ -57,7 +57,7 @@ public:
   template <typename TargetSubDataType>
   static std::unique_ptr<DDSBaseSharedLocalCopyData> CreateSharedLocalCopyData()
   {
-    return std::make_unique<typename DDSSharedLocalCopyData<TargetSubDataType>>();
+    return std::make_unique<DDSSharedLocalCopyData<TargetSubDataType>>();
   }
 
   template <typename TargetObject, typename TargetSubDataType, typename ReturnObject>
