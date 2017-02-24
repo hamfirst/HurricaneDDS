@@ -9,6 +9,7 @@
 #include "DDSNodeId.h"
 #include "DDSServerToServerSender.h"
 #include "DDSServerToServerReceiver.h"
+#include "DDSServerToServerMessages.refl.h"
 
 namespace StormSockets
 {
@@ -28,9 +29,12 @@ public:
   ~DDSNodeNetworkService();
 
   void ProcessEvents();
-  void SendMessageToServer(DDSNodeId node_id, std::string && data);
+  void SendMessageToServer(DDSNodeId node_id, DDSServerToServerMessageType type, std::string && data);
+  void SendMessageToServer(DDSNodeId node_id, DDSServerToServerMessageType type, const std::string & data);
 
   bool RequestNodeConnection(DDSNodeId node_id); // Returns true if the node is already connected
+
+  bool HasPendingMessages() const;
 
 protected:
 
@@ -50,6 +54,6 @@ private:
   std::map<StormSockets::StormSocketConnectionId, DDSServerToServerReceiver> m_Receievers;
 
   std::map<DDSNodeId, StormSockets::StormSocketConnectionId> m_NodeConnectionMap;
-  std::map<DDSNodeId, std::vector<std::string>> m_PendingMessages;
+  std::map<DDSNodeId, std::vector<std::pair<DDSServerToServerMessageType, std::string>>> m_PendingMessages;
 };
 

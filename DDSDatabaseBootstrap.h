@@ -69,6 +69,19 @@ void DDSDatabaseBoostrapFull(const DDSDataObjectTypeList<Args...> & list, const 
 }
 
 template <class ... Args>
+void DDSDatabaseBoostrapFull(const DDSDataObjectTypeList<Args...> & list, 
+  const std::vector<DDSDatabaseBoostrapCollectionInfo> & additional_collections, const DDSDatabaseSettings & settings)
+{
+  std::vector<DDSDatabaseBoostrapCollectionInfo> collection_info;
+  DDSDatabaseBoostrapInfo<Args...>::Process(collection_info);
+
+  collection_info.insert(additional_collections.end(), additional_collections.begin(), additional_collections.end());
+
+  DDSDatabaseBoostrapFullInternal(collection_info, settings);
+}
+
+
+template <class ... Args>
 void DDSDatabaseBoostrapIndices(const DDSDataObjectTypeList<Args...> & list, const DDSDatabaseSettings & settings)
 {
   std::vector<DDSDatabaseBoostrapCollectionInfo> collection_info;

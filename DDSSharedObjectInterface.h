@@ -42,6 +42,9 @@ private:
 
   void QueryDatabaseInternal(const char * collection, std::string && query,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override;
+  void QueryDatabaseByKeyInternal(const char * collection, DDSKey key,
+    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override;
+  void DeleteFromDatabaseInternal(const char * collection, DDSKey key) override;
 
   void CreateTimerInternal(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg) override;
   void CreateHttpRequestInternal(const DDSHttpRequest & request, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg) override;
@@ -92,6 +95,9 @@ private:
 
   void QueryDatabaseInternal(const char * collection, std::string && query,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override { NotImplemented(); };
+  void QueryDatabaseByKeyInternal(const char * collection, DDSKey key,
+    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override { NotImplemented(); };
+  void DeleteFromDatabaseInternal(const char * collection, DDSKey key) override { NotImplemented(); };
 
   void CreateTimerInternal(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg) override { NotImplemented(); };
   void CreateHttpRequestInternal(const DDSHttpRequest & request, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg) override { NotImplemented(); };

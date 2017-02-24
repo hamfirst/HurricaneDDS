@@ -307,7 +307,10 @@ void DDSDatabaseConnectionPool::TriggerCallbacks()
     DatabaseQueryResult result;
     while (m_Threads[index].m_OutputQueue.TryDequeue(result))
     {
-      result.m_Callback(result.m_ResultData.data(), result.m_ErrorCode);
+      if (result.m_Callback)
+      {
+        result.m_Callback(result.m_ResultData.data(), result.m_ErrorCode);
+      }
     }
 
     while(m_Threads[index].m_PendingInputs.size())

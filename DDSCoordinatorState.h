@@ -73,10 +73,13 @@ private:
   void SendToAllConnectedClients(std::string && message);
 
   void SyncRoutingTable();
+  void CheckForAllClear();
 
   void QueryObjectData(int object_type_id, DDSKey key, const char * collection);
+  void QueryObjectData(const char * collection, DDSKey key, DDSCoordinatorResponderCallData && responder_call);
   void QueryObjectData(const char * collection, const char * query, DDSCoordinatorResponderCallData && responder_call);
   void InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSCoordinatorResponderCallData && responder_call);
+  void DeleteObjectData(const char * collection, DDSKey key);
 
   void DestroyDeferredCallback(DDSDeferredCallback * callback);
 
@@ -113,6 +116,8 @@ private:
 
   DDSRoutingTable m_RoutingTable;
   std::vector<std::pair<DDSNodeId, DDSKeyRange>> m_RoutingKeyRanges;
+  std::map<DDSNodeId, int> m_RoutingTableAck;
+
 
   DDSNodeId m_NextNodeId;
   int m_NumDataObjects;

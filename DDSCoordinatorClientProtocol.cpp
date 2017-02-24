@@ -41,7 +41,7 @@ DDSCoordinatorClientProtocol::DDSCoordinatorClientProtocol(DDSNodeState & node_s
   StormSockets::StormSocketClientFrontendWebsocketSettings client_settings;
   client_settings.MaxConnections = 4;
 
-  m_ClientFrontend = std::make_unique<StormSockets::StormSocketClientFrontendWebsocket>(client_settings, m_NodeState.GetBackend().m_Backend.get());
+  m_ClientFrontend = std::make_unique<StormSockets::StormSocketClientFrontendWebsocket>(client_settings, m_NodeState.m_Backend.m_Backend.get());
 
   m_CoordinatorIpAddr = settings.CoordinatorIpAddr;
   m_CoordinatorPort = settings.CoordinatorPort;
@@ -157,8 +157,8 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
 
       DDSCoordinatorHandshakeFinalize finalize;
       finalize.m_ChallengeResponse = DDSCalculateChallengeResponse(response.m_ChallengeRequest);
-      finalize.m_PublicIp = m_NodeState.GetLocalInterface();
-      finalize.m_NodePort = m_NodeState.GetLocalPort();
+      finalize.m_PublicIp = m_NodeState.m_LocalInterface;
+      finalize.m_NodePort = m_NodeState.m_LocalPort;
       m_NodeState.GetConnectionFactoryPorts(finalize.m_EndpointPorts, finalize.m_WebsitePorts);
 
       m_State = kNodeInit;
@@ -254,10 +254,12 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
       DDSServerToServerMessageType server_type;
       if (StormReflGetEnumFromHash(server_type, hash) == false)
       {
-        return false;
+        return m_NodeState.GotMessageFromCoordinator(type, msg);
       }
-
-      m_NodeState.GotMessageFromCoordinator(server_type, type, msg);
+      else
+      {
+        return m_NodeState.GotMessageFromCoordinator(server_type, type, msg);
+      }
     }
     break;
 

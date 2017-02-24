@@ -31,10 +31,9 @@ void DDSServerToServerSender::HandleConnectionEstablished()
   request.m_NodeId = m_NodeState.GetLocalNodeId();
   request.m_Version = DDS_VERSION;
   request.m_Challenge = DDSGetRandomNumber64();
-  request.m_Secret = m_NodeState.GetClientSecret();
-  std::string message = DDSGetServerMessage(request);
+  request.m_Secret = m_NodeState.m_ClientSecret;
 
-  SendMessageToServer(message);
+  SendMessageToServer(DDSServerToServerMessageType::kHandshakeRequest, StormReflEncodeJson(request));
 
   m_ExpectedChallengeResponse = DDSCalculateChallengeResponse(request.m_Challenge);
 }
@@ -91,7 +90,7 @@ bool DDSServerToServerSender::HandleIncomingMessage(StormSockets::StormWebsocket
       return false;
     }
 
-    if (response.m_Secret != m_NodeState.GetServerSecret())
+    if (response.m_Secret != m_NodeState.m_ServerSecret)
     {
       return false;
     }
@@ -104,12 +103,11 @@ bool DDSServerToServerSender::HandleIncomingMessage(StormSockets::StormWebsocket
     DDSServerToServerHandshakeFinalize finalize;
     finalize.m_Challenge = DDSCalculateChallengeResponse(response.m_Challenge);
 
-    std::string message = DDSGetServerMessage(finalize);
-    SendMessageToServer(message);
+    SendMessageToServer(DDSServerToServerMessageType::kHandshakeFinalize, StormReflEncodeJson(finalize));
 
     m_State = kConnected;
 
-    m_NodeState.GetNodeNetwork().NodeConnectionReady(m_TargetNodeId, *this);
+    m_NodeState.m_NodeNetwork.NodeConnectionReady(m_TargetNodeId, *this);
     return true;
   }
   break;
@@ -133,12 +131,23 @@ DDSNodeId DDSServerToServerSender::GetTargetNodeId() const
   return m_TargetNodeId;
 }
 
-void DDSServerToServerSender::SendMessageToServer(const std::string & message)
+void DDSServerToServerSender::SendMessageToServer(DDSServerToServerMessageType type, const std::string & message)
 {
-  StormSockets::StormSocketBackend * backend = m_NodeState.GetBackend().m_Backend.get();
-  StormSockets::StormSocketClientFrontendWebsocket * frontend = m_NodeState.GetNodeNetwork().m_ClientFrontend.get();
+  StormSockets::StormSocketBackend * backend = m_NodeState.m_Backend.m_Backend.get();
+  StormSockets::StormSocketClientFrontendWebsocket * frontend = m_NodeState.m_NodeNetwork.m_ClientFrontend.get();
 
   auto writer = frontend->CreateOutgoingPacket(StormSockets::StormSocketWebsocketDataType::Binary, true);
+
+  const char * enum_name = StormReflGetEnumAsString(type);
+  auto enum_size = strlen(enum_name);
+
+  if (message[0] == 'k')
+  {
+    DDSLog::LogError("Invalid packet being sent to server");
+  }
+
+  writer.WriteByteBlock(enum_name, 0, enum_size);
+  writer.WriteByte(' ');
   writer.WriteByteBlock(message.c_str(), 0, message.length());
   frontend->FinalizeOutgoingPacket(writer);
   backend->SendPacketToConnectionBlocking(writer, m_ConnectionId);

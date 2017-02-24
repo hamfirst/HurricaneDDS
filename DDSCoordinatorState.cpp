@@ -224,7 +224,7 @@ void DDSCoordinatorState::GotMessageFromServer(DDSNodeId server_id, DDSCoordinat
     DDSCoordinatorNodeCPUUsage msg;
     if (StormReflParseJson(msg, data) == false)
     {
-      DDSLog::LogError("Invalid targeted message");
+      DDSLog::LogError("Invalid cpu usage message");
       return;
     }
 
@@ -232,6 +232,25 @@ void DDSCoordinatorState::GotMessageFromServer(DDSNodeId server_id, DDSCoordinat
     {
       elem->UpdateNode(server_id, msg.m_Usage);
     }
+  }
+  else if (type == DDSCoordinatorProtocolMessageType::kRoutingTableAck)
+  {
+    DDSCoordinatorRoutingTableAck msg;
+    if (StormReflParseJson(msg, data) == false)
+    {
+      DDSLog::LogError("Invalid message");
+      return;
+    }
+
+    auto itr = m_RoutingTableAck.find(server_id);
+    if (itr == m_RoutingTableAck.end())
+    {
+      DDSLog::LogError("Got routing table ack from invalid server");
+      return;
+    }
+
+    itr->second = msg.m_TableGen;
+    CheckForAllClear();
   }
 }
 
@@ -311,8 +330,8 @@ void DDSCoordinatorState::SyncRoutingTable()
   std::string buffer = "kRoutingTable ";
   StormReflEncodeJson(m_RoutingTable, buffer);
 
-  DDSLog::LogVerbose("Syncing new routing table");
-  DDSLog::LogVerbose(StormReflEncodePrettyJson(m_RoutingTable));
+  DDSLog::LogInfo("Syncing new routing table");
+  DDSLog::LogInfo(StormReflEncodePrettyJson(m_RoutingTable));
 
   m_NetworkService.SendMessageToAllConnectedClients(buffer.c_str(), buffer.length());
 
@@ -322,9 +341,44 @@ void DDSCoordinatorState::SyncRoutingTable()
   }
 }
 
+void DDSCoordinatorState::CheckForAllClear()
+{
+  bool is_all_clear = true;
+  for (auto & elem : m_RoutingTableAck)
+  {
+    if (elem.second != m_RoutingTable.m_TableGeneration)
+    {
+      is_all_clear = false;
+    }
+  }
+
+  if (is_all_clear)
+  {
+    std::string msg = DDSGetServerMessage(DDSCoordinatorSyncAllClear{ m_RoutingTable.m_TableGeneration });
+    m_NetworkService.SendMessageToAllConnectedClients(msg.c_str(), msg.length());
+  }
+}
+
 void DDSCoordinatorState::QueryObjectData(int object_type_id, DDSKey key, const char * collection)
 {
   m_Database->QueryDatabaseByKey(key, collection, [&](const char * data, int ec) { HandleQueryByKey(object_type_id, key, data, ec); });
+}
+
+void DDSCoordinatorState::QueryObjectData(const char * collection, DDSKey key, DDSCoordinatorResponderCallData && responder_call)
+{
+  DDSDataObjectAddress address{ responder_call.m_ObjectType, responder_call.m_Key };
+
+  auto callback = [&](const char * data, int ec) {
+
+    std::string sb;
+    StormReflJsonEncodeString(data, sb);
+
+    responder_call.m_MethodArgs = "[" + sb + "," + StormReflEncodeJson(ec) + "]";
+    std::string responder_str = StormReflEncodeJson(responder_call);
+    SendTargetedMessage(address, DDSCoordinatorProtocolMessageType::kResponderCall, std::move(responder_str));
+  };
+
+  m_Database->QueryDatabaseByKey(key, collection, std::move(callback));
 }
 
 void DDSCoordinatorState::QueryObjectData(const char * collection, const char * query, DDSCoordinatorResponderCallData && responder_call)
@@ -347,6 +401,11 @@ void DDSCoordinatorState::QueryObjectData(const char * collection, const char * 
 void DDSCoordinatorState::InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSCoordinatorResponderCallData && responder_call)
 {
   m_Database->QueryDatabaseInsert(key, collection, data, [this, responder_call](const char * data, int ec) mutable { HandleInsertResult(ec, responder_call); });
+}
+
+void DDSCoordinatorState::DeleteObjectData(const char * collection, DDSKey key)
+{
+  m_Database->QueryDatabaseDelete(key, collection, {});
 }
 
 void DDSCoordinatorState::DestroyDeferredCallback(DDSDeferredCallback * callback)
@@ -445,49 +504,47 @@ DDSNodeId DDSCoordinatorState::CreateNode(uint32_t addr, uint16_t port, const st
     m_RoutingTable.m_Table.emplace_back(node);
 
     m_NextNodeId = 2;
-
-    GetKeyRanges(m_RoutingTable, m_RoutingKeyRanges);
-    return node.m_Id;
   }
-
-  if (table_size == 1)
+  else if (table_size == 1)
   {
     node.m_CentralKey = m_RoutingTable.m_Table[0].m_CentralKey + 0x8000000000000000;
 
     m_RoutingTable.m_Table.emplace_back(node);
 
     m_NextNodeId++;
-
-    GetKeyRanges(m_RoutingTable, m_RoutingKeyRanges);
-    return node.m_Id;
   }
-
-  std::vector<DDSKey> node_keys;
-  for (auto & node : m_RoutingTable.m_Table)
+  else
   {
-    node_keys.push_back(node.m_CentralKey);
+    std::vector<DDSKey> node_keys;
+    for (auto & node : m_RoutingTable.m_Table)
+    {
+      node_keys.push_back(node.m_CentralKey);
+    }
+
+    std::sort(node_keys.begin(), node_keys.end());
+
+    std::vector<DDSKeyRange> node_key_ranges;
+    for (std::size_t index = 0; index < node_keys.size(); index++)
+    {
+      node_key_ranges.emplace_back(DDSKeyRange{ node_keys[index], node_keys[(index + 1) % node_keys.size()] });
+    }
+
+    auto best_itr = std::max_element(node_key_ranges.begin(), node_key_ranges.end(), [](auto & a, auto & b) { return GetKeyRangeSize(a) < GetKeyRangeSize(b); });
+    auto best_key_range = *best_itr;
+
+    auto best_key = best_key_range.m_Min + (GetKeyRangeSize(best_key_range) / 2);
+
+    node.m_CentralKey = best_key;
+
+    m_RoutingTable.m_Table.emplace_back(node);
+    m_RoutingTable.m_TableGeneration++;
+
+    m_NextNodeId++;
   }
 
-  std::sort(node_keys.begin(), node_keys.end());
-
-  std::vector<DDSKeyRange> node_key_ranges;
-  for(std::size_t index = 0; index < node_keys.size(); index++)
-  {
-    node_key_ranges.emplace_back(DDSKeyRange{ node_keys[index], node_keys[(index + 1) % node_keys.size()] });
-  }
-
-  auto best_itr = std::max_element(node_key_ranges.begin(), node_key_ranges.end(), [](auto & a, auto & b) { return GetKeyRangeSize(a) < GetKeyRangeSize(b); });
-  auto best_key_range = *best_itr;
-
-  auto best_key = best_key_range.m_Min + (GetKeyRangeSize(best_key_range) / 2);
-
-  node.m_CentralKey = best_key;
-
-  m_RoutingTable.m_Table.emplace_back(node);
-  m_RoutingTable.m_TableGeneration++;
-
-  m_NextNodeId++;
   GetKeyRanges(m_RoutingTable, m_RoutingKeyRanges);
+  m_RoutingTableAck.emplace(node.m_Id, 0);
+
   return node.m_Id;
 }
 
@@ -521,6 +578,8 @@ void DDSCoordinatorState::DestroyNode(DDSNodeId id)
     if (m_RoutingTable.m_Defunct[index].m_Id == id)
     {
       m_RoutingTable.m_Defunct.erase(m_RoutingTable.m_Defunct.begin() + index);
+      m_RoutingTableAck.erase(id);
+      CheckForAllClear();
       return;
     }
   }

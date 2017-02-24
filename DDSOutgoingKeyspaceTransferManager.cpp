@@ -2,6 +2,8 @@
 #include "DDSOutgoingKeyspaceTransferManager.h"
 #include "DDSNodeState.h"
 
+#include "DDSServerToServerMessages.refl.meta.h"
+
 DDSOutgoingKeyspaceTransferManager::DDSOutgoingKeyspaceTransferManager(DDSNodeState & node_state, int num_object_types) :
   m_NodeState(node_state),
   m_NumObjectTypes(num_object_types)
@@ -39,7 +41,12 @@ void DDSOutgoingKeyspaceTransferManager::ProcessNewRoutingTable(const DDSRouting
 
   if (keyspace_transfers.size() > 0)
   {
-    m_PendingTransfers.emplace_back(m_NodeState.m_LocalNodeId.value(), m_NumObjectTypes, new_routing_table.m_TableGeneration, keyspace_transfers);
+    DDSSharedLocalCopyDatabaseDump slc_transfer;
+    m_NodeState.m_SharedLocalCopyDatabase.Export(slc_transfer);
+
+    auto slc_packet = std::make_shared<std::string>(StormReflEncodeJson(slc_transfer));
+
+    m_PendingTransfers.emplace_back(m_NodeState.m_LocalNodeId.value(), m_NumObjectTypes, new_routing_table.m_TableGeneration, keyspace_transfers, slc_packet);
   }
 }
 
@@ -68,7 +75,11 @@ void DDSOutgoingKeyspaceTransferManager::ProcessDefunctRoutingTable(const DDSRou
 
   if (keyspace_transfers.size() > 0)
   {
-    m_PendingTransfers.emplace_back(m_NodeState.m_LocalNodeId.value(), m_NumObjectTypes, new_routing_table.m_TableGeneration, keyspace_transfers);
+    DDSSharedLocalCopyDatabaseDump slc_transfer;
+    m_NodeState.m_SharedLocalCopyDatabase.Export(slc_transfer);
+
+    auto slc_packet = std::make_shared<std::string>(StormReflEncodeJson(slc_transfer));
+    m_PendingTransfers.emplace_back(m_NodeState.m_LocalNodeId.value(), m_NumObjectTypes, new_routing_table.m_TableGeneration, keyspace_transfers, slc_packet);
   }
 }
 

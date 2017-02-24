@@ -34,7 +34,7 @@ public:
 
   void TriggerCallbacks();
 
-  static const int kQueueSize = 256;
+  static const int kQueueSize = 1024;
 
 private:
   void QueueResult(int thread_index, const DatabaseQueryResult & result);

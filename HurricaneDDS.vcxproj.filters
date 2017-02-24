@@ -259,6 +259,21 @@
     <ClInclude Include="DDSLoadBalancerNetworkService.h">
       <Filter>Coordinator</Filter>
     </ClInclude>
+    <ClInclude Include="DDSAggregateSubscription.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopy.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopyPtr.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopyDatabase.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopyData.h">
+      <Filter>DataObject</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSCoordinatorNetworkService.cpp">
@@ -401,6 +416,21 @@
     </ClCompile>
     <ClCompile Include="DDSLoadBalancerNetworkService.cpp">
       <Filter>Coordinator</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopy.cpp">
+      <Filter>DataObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopyPtr.cpp">
+      <Filter>DataObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopyDatabase.cpp">
+      <Filter>DataObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopyData.cpp">
+      <Filter>DataObject</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSAggregateSubscription.cpp">
+      <Filter>DataObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

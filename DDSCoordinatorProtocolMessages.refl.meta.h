@@ -10,7 +10,7 @@
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>
 {
-  static constexpr int elems_n = 15;
+  static constexpr int elems_n = 17;
   static constexpr auto GetName() { return "DDSCoordinatorProtocolMessageType"; }
   static constexpr auto GetNameHash() { return 0xDA65B046; }
   template <int N> struct elems { };
@@ -67,13 +67,29 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<5>
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<6>
 {
+  static constexpr auto GetName() { return "kRoutingTableAck"; }
+  static constexpr auto GetNameHash() { return 0x2316681E; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kRoutingTableAck; }
+};
+
+template <>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<7>
+{
+  static constexpr auto GetName() { return "kSyncAllClear"; }
+  static constexpr auto GetNameHash() { return 0xB6414C8B; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kSyncAllClear; }
+};
+
+template <>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<8>
+{
   static constexpr auto GetName() { return "kShutDown"; }
   static constexpr auto GetNameHash() { return 0x91FBC714; }
   static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kShutDown; }
 };
 
 template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<7>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<9>
 {
   static constexpr auto GetName() { return "kSharedObjectDelta"; }
   static constexpr auto GetNameHash() { return 0x9C3DB581; }
@@ -81,7 +97,7 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<7>
 };
 
 template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<8>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<10>
 {
   static constexpr auto GetName() { return "kCPUUsage"; }
   static constexpr auto GetNameHash() { return 0x37B33843; }
@@ -89,7 +105,7 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<8>
 };
 
 template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<9>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<11>
 {
   static constexpr auto GetName() { return "kResponderCall"; }
   static constexpr auto GetNameHash() { return 0xF561031B; }
@@ -97,7 +113,7 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<9>
 };
 
 template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<10>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<12>
 {
   static constexpr auto GetName() { return "kTargetedMessage"; }
   static constexpr auto GetNameHash() { return 0x646CED86; }
@@ -105,7 +121,7 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<10>
 };
 
 template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<11>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<13>
 {
   static constexpr auto GetName() { return "kTargetedMessageResponder"; }
   static constexpr auto GetNameHash() { return 0x0F29BAFC; }
@@ -113,7 +129,7 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<11>
 };
 
 template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<12>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<14>
 {
   static constexpr auto GetName() { return "kCreateSubscription"; }
   static constexpr auto GetNameHash() { return 0x6310D904; }
@@ -121,7 +137,7 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<12>
 };
 
 template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<13>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<15>
 {
   static constexpr auto GetName() { return "kDestroySubscription"; }
   static constexpr auto GetNameHash() { return 0x005B8D36; }
@@ -129,7 +145,7 @@ struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<13>
 };
 
 template <>
-struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<14>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<16>
 {
   static constexpr auto GetName() { return "kSubscriptionDeleted"; }
   static constexpr auto GetNameHash() { return 0xFA6CC738; }
@@ -519,6 +535,76 @@ struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<5, Self> 
 };
 
 template <>
+struct StormReflTypeInfo<DDSCoordinatorRoutingTableAck>
+{
+  using MyBase = void;
+  static constexpr int fields_n = 1;
+  template <int N> struct field_data_static {};
+  template <int N, typename Self> struct field_data {};
+  template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
+  static constexpr auto GetName() { return "DDSCoordinatorRoutingTableAck"; }
+  static constexpr auto GetNameHash() { return 0xCFD42D38; }
+  static DDSCoordinatorRoutingTableAck & GetDefault() { static DDSCoordinatorRoutingTableAck def; return def; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorRoutingTableAck>::field_data_static<0>
+{
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_TableGen"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x4486A8A8; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
+  static constexpr auto GetFieldIndex() { return 0; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorRoutingTableAck::m_TableGen; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCoordinatorRoutingTableAck>::field_data<0, Self> : public StormReflTypeInfo<DDSCoordinatorRoutingTableAck>::field_data_static<0>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_TableGen; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_TableGen; }
+  void SetDefault() { self.m_TableGen = StormReflTypeInfo<DDSCoordinatorRoutingTableAck>::GetDefault().m_TableGen; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorSyncAllClear>
+{
+  using MyBase = void;
+  static constexpr int fields_n = 1;
+  template <int N> struct field_data_static {};
+  template <int N, typename Self> struct field_data {};
+  template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
+  static constexpr auto GetName() { return "DDSCoordinatorSyncAllClear"; }
+  static constexpr auto GetNameHash() { return 0x23C52751; }
+  static DDSCoordinatorSyncAllClear & GetDefault() { static DDSCoordinatorSyncAllClear def; return def; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorSyncAllClear>::field_data_static<0>
+{
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_TableGen"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x4486A8A8; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
+  static constexpr auto GetFieldIndex() { return 0; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorSyncAllClear::m_TableGen; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCoordinatorSyncAllClear>::field_data<0, Self> : public StormReflTypeInfo<DDSCoordinatorSyncAllClear>::field_data_static<0>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_TableGen; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_TableGen; }
+  void SetDefault() { self.m_TableGen = StormReflTypeInfo<DDSCoordinatorSyncAllClear>::GetDefault().m_TableGen; }
+};
+
+template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeShutdown>
 {
   using MyBase = void;
@@ -824,7 +910,7 @@ namespace StormReflFileInfo
 {
   struct DDSCoordinatorProtocolMessages
   {
-    static const int types_n = 14;
+    static const int types_n = 16;
     template <int i> struct type_info { using type = void; };
   };
 
@@ -855,59 +941,71 @@ namespace StormReflFileInfo
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<4>
   {
-    using type = ::DDSCoordinatorNodeShutdown;
+    using type = ::DDSCoordinatorRoutingTableAck;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<5>
   {
-    using type = ::DDSCoordinatorNodeCPUUsage;
+    using type = ::DDSCoordinatorSyncAllClear;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<6>
   {
-    using type = ::DDSCoordinatorSharedObjectDeltaMessage;
+    using type = ::DDSCoordinatorNodeShutdown;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<7>
   {
-    using type = ::DDSCoordinatorSharedObjectDelta;
+    using type = ::DDSCoordinatorNodeCPUUsage;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<8>
   {
-    using type = ::DDSCoordinatorResponderCallData;
+    using type = ::DDSCoordinatorSharedObjectDeltaMessage;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<9>
   {
-    using type = ::DDSCoordinatorTargetedMessage;
+    using type = ::DDSCoordinatorSharedObjectDelta;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<10>
   {
-    using type = ::DDSCoordinatorTargetedMessageWithResponder;
+    using type = ::DDSCoordinatorResponderCallData;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<11>
   {
-    using type = ::DDSCoordinatorCreateSubscription;
+    using type = ::DDSCoordinatorTargetedMessage;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<12>
   {
-    using type = ::DDSCoordinatorDestroySubscription;
+    using type = ::DDSCoordinatorTargetedMessageWithResponder;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<13>
+  {
+    using type = ::DDSCoordinatorCreateSubscription;
+  };
+
+  template <>
+  struct DDSCoordinatorProtocolMessages::type_info<14>
+  {
+    using type = ::DDSCoordinatorDestroySubscription;
+  };
+
+  template <>
+  struct DDSCoordinatorProtocolMessages::type_info<15>
   {
     using type = ::DDSCoordinatorSubscriptionDeleted;
   };

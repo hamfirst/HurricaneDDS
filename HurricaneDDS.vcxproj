@@ -119,6 +119,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_WINDOWS;_WIN32_WINNT=0x0A00;USE_MBED</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)External</AdditionalIncludeDirectories>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +138,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_WINDOWS;_WIN32_WINNT=0x0A00;USE_MBED</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)External</AdditionalIncludeDirectories>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,6 +148,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DDSAggregateSubscription.h" />
     <ClInclude Include="DDSCall.h" />
     <ClInclude Include="DDSChallenge.h" />
     <ClInclude Include="DDSConnectionFactoryBase.h" />
@@ -344,6 +347,19 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopy.h" />
+    <ClInclude Include="DDSSharedLocalCopyData.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopyDatabase.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopyPtr.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSSharedMessages.refl.h">
       <SubType>
       </SubType>
@@ -405,6 +421,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DDSAggregateSubscription.cpp" />
     <ClCompile Include="DDSConnectionInterface.cpp">
       <SubType>
       </SubType>
@@ -536,6 +553,19 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSServerToServerSender.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopy.cpp" />
+    <ClCompile Include="DDSSharedLocalCopyData.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopyDatabase.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopyPtr.cpp">
       <SubType>
       </SubType>
     </ClCompile>

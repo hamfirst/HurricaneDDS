@@ -28,6 +28,16 @@ void DDSLog::LogInfo(const char * fmt, ...)
   printf("\r\n");
 }
 
+void DDSLog::LogInfo(const std::string & str)
+{
+  if (s_LogLevel == DDSLog::kNone)
+  {
+    return;
+  }
+
+  printf("%s\r\n", str.c_str());
+}
+
 void DDSLog::LogVerbose(const char * fmt, ...)
 {
   if (s_LogLevel == DDSLog::kNone || s_LogLevel == DDSLog::kInfo)

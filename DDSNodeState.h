@@ -31,6 +31,7 @@
 #include "DDSIncomingKeyspaceTransferManager.h"
 #include "DDSOutgoingKeyspaceTransferManager.h"
 #include "DDSNodeSharedObjectResolver.h"
+#include "DDSSharedLocalCopyDatabase.h"
 #include "DDSWebsiteFilesystem.h"
 #include "DDSWebsiteFilesystemBuilder.h"
 
@@ -38,6 +39,8 @@
 
 struct DDSResponder;
 struct DDSResponderCallData;
+
+class DDSSharedLocalCopyPtrBase;
 
 template <typename T>
 using Optional = std::experimental::optional<T>;
@@ -76,6 +79,8 @@ public:
   int GetDatabaseObjectTypeIdForNameHash(uint32_t name_hash) const;
   int GetSharedObjectTypeIdForNameHash(uint32_t name_hash) const;
   int GetTargetObjectIdForNameHash(uint32_t name_hash) const;
+
+  bool IsDatabaseObjectType(uint32_t name_has) const;
 
   template <typename DataType>
   int GetDataObjectTypeId() const
@@ -162,6 +167,8 @@ private:
   friend class DDSConnectionInterface;
   friend class DDSEndpointInterface;
   friend class DDSHttpClient;
+  friend class DDSAggregateSubscription;
+  friend class DDSSharedLocalCopy;
   friend struct DDSResponder;
 
   template <class DataType, class DatabaseBackedType>
@@ -171,6 +178,8 @@ private:
   friend class DDSSharedObjectCopy;
 
   friend void DDSResponderCallFinalize(const DDSResponder & responder, const DDSResponderCallData & call_data);
+  friend void * DDSGetSharedLocalCopyPtr(DDSNodeState * node_state, DDSKey shared_local_copy_key, int data_gen, std::unique_ptr<DDSBaseSharedLocalCopyData>(*CreateFunc)());
+  friend void DDSSetSharedLocalCopyVersion(DDSSharedLocalCopyPtrBase & ptr, int data_gen, std::unique_ptr<DDSBaseSharedLocalCopyData>(*CreateFunc)());
 
   DDSNodeState(
     int num_data_object_types,
@@ -202,15 +211,18 @@ private:
   void GotInitialCoordinatorSync(DDSNodeId node_id, const DDSRoutingTable & routing_table, bool initial_node, uint64_t server_secret, uint64_t client_secret);
   void GotNewRoutingTable(const DDSRoutingTable & routing_table);
 
-  void GotMessageFromCoordinator(DDSServerToServerMessageType type, DDSCoordinatorProtocolMessageType coordinator_type, const char * data);
+  bool GotMessageFromCoordinator(DDSServerToServerMessageType type, DDSCoordinatorProtocolMessageType coordinator_type, const char * data);
+  bool GotMessageFromCoordinator(DDSCoordinatorProtocolMessageType coordinator_type, const char * data);
   void GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMessageType type, const char * data);
 
   void QueryObjectData(int object_type_id, DDSKey key, const char * collection);
+  void QueryObjectData(const char * collection, DDSKey key, DDSResponderCallData && responder_call);
   void QueryObjectData(const char * collection, const char * query, DDSResponderCallData && responder_call);
 
   void InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData && responder_call);
   void UpdateObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData * responder_call);
   void DeleteObjectData(int object_type_id, DDSKey key, const char * collection, DDSResponderCallData * responder_call);
+  void DeleteObjectData(const char * collection, DDSKey key);
 
   void BeginQueueingMessages();
   void EndQueueingMessages();
@@ -218,26 +230,17 @@ private:
   void UpdateCPUUsage();
   void ProcessPendingExportedObjects();
 
+  void HandleAllClear();
+  bool IsAllClear() const;
+
   DDSNodeId GetNodeIdForKey(DDSKey key) const;
 
   DDSDataObjectStoreBase & GetDataObjectStore(int object_type_id);
-
-  DDSNetworkBackend & GetBackend();
-  DDSNodeNetworkService & GetNodeNetwork();
-  DDSCoordinatorClientProtocol & GetCoordinatorConnection();
-
-  DDSIncomingKeyspaceTransferManager & GetIncomingKeyspace();
-  DDSOutgoingKeyspaceTransferManager & GetOutgoingKeyspace();
 
   DDSNodeId GetLocalNodeId() const;
   const DDSRoutingTable & GetRoutingTable() const;
   DDSKeyRange GetLocalKeyRange() const;
 
-  uint64_t GetClientSecret() const;
-  uint64_t GetServerSecret() const;
-
-  uint32_t GetLocalInterface() const;
-  int GetLocalPort() const;
   void GetConnectionFactoryPorts(std::vector<DDSNodePort> & endpoint_ports, std::vector<DDSNodePort> & website_ports) const;
 
   void PrepareObjectsForMove(DDSKeyRange requested_range);
@@ -254,6 +257,7 @@ private:
   void DestroyDeferredCallback(DDSDeferredCallback * callback);
 
   const void * GetSharedObjectPointer(int shared_object_type);
+
 private:
 
   bool m_IsReady = false;
@@ -267,6 +271,7 @@ private:
   DDSIncomingKeyspaceTransferManager m_IncomingKeyspace;
   DDSOutgoingKeyspaceTransferManager m_OutgoingKeyspace;
   DDSNodeSharedObjectResolver m_SharedResolver;
+  DDSSharedLocalCopyDatabase m_SharedLocalCopyDatabase;
 
   std::vector<DDSDataObjectListSync> m_PendingIncomingExportedObjects;
 
@@ -281,10 +286,12 @@ private:
   Optional<DDSRoutingTable> m_RoutingTable;
   Optional<DDSKeyRange> m_LocalKeyRange;
   std::vector<std::pair<DDSNodeId, DDSKeyRange>> m_RoutingKeyRanges;
+  int m_LastRoutingTableAck = 0;
+  int m_LastRoutingTableAllClear = 0;
 
   std::map<DDSDataObjectAddress, std::vector<std::pair<DDSServerToServerMessageType, std::string>>> m_PendingTargetedMessages;
 
-  std::queue<std::tuple<DDSDataObjectAddress, DDSServerToServerMessageType, std::string>> m_QueuedTargetedMessages;
+  std::queue<std::tuple<DDSDataObjectAddress, DDSServerToServerMessageType, std::string>> m_QueuedTargetedMessages[(int)DDSDataObjectPriority::kCount];
   int m_QueueMessageDepth = 0;
 
   std::vector<std::unique_ptr<DDSDataObjectStoreBase>> m_DataObjectList;

@@ -80,7 +80,7 @@ bool DDSServerToServerReceiver::HandleIncomingMessage(StormSockets::StormWebsock
       return false;
     }
 
-    if (request.m_Secret != m_NodeState.GetClientSecret())
+    if (request.m_Secret != m_NodeState.m_ClientSecret)
     {
       return false;
     }
@@ -89,8 +89,8 @@ bool DDSServerToServerReceiver::HandleIncomingMessage(StormSockets::StormWebsock
 
     DDSServerToServerHandshakeResponse response;
     response.m_Challenge = DDSGetRandomNumber64();
-    response.m_Secret = m_NodeState.GetServerSecret();
-    response.m_NodeId = m_NodeState.GetLocalNodeId();
+    response.m_Secret = m_NodeState.m_ServerSecret;
+    response.m_NodeId = m_NodeState.m_LocalNodeId.value();
     response.m_ChallengeResponse = DDSCalculateChallengeResponse(request.m_Challenge);
 
     m_ExpectedChallengeResponse = DDSCalculateChallengeResponse(response.m_Challenge);
@@ -143,8 +143,8 @@ bool DDSServerToServerReceiver::IsConnected() const
 
 void DDSServerToServerReceiver::SendMessageToServer(const std::string & message)
 {
-  StormSockets::StormSocketBackend * backend = m_NodeState.GetBackend().m_Backend.get();
-  StormSockets::StormSocketClientFrontendWebsocket * frontend = m_NodeState.GetNodeNetwork().m_ClientFrontend.get();
+  StormSockets::StormSocketBackend * backend = m_NodeState.m_Backend.m_Backend.get();
+  StormSockets::StormSocketClientFrontendWebsocket * frontend = m_NodeState.m_NodeNetwork.m_ClientFrontend.get();
 
   auto writer = frontend->CreateOutgoingPacket(StormSockets::StormSocketWebsocketDataType::Binary, true);
   writer.WriteByteBlock(message.c_str(), 0, message.length());

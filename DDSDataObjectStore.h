@@ -17,6 +17,8 @@
 #include "DDSResponderCall.h"
 #include "DDSNodeInterface.h"
 #include "DDSServerMessage.h"
+#include "DDSAggregateSubscription.h"
+#include "DDSSharedLocalCopy.h"
 #include "DDSDataObjectStoreHelpers.h"
 
 #include <StormRefl/StormReflJsonStd.h>
@@ -25,6 +27,8 @@
 #include <StormData/StormDataPath.h>
 #include <StormData/StormDataJsonUtil.h>
 #include <StormData/StormDataParent.h>
+
+#include <sb/vector.h>
 
 DDS_DECLARE_CALL(BeginLoad);
 DDS_DECLARE_CALL(PreMoveObject);
@@ -54,12 +58,16 @@ class DDSDataObjectStore : public DDSDataObjectStoreBase
   struct ObjectData
   {
     ObjectState m_State;
+    int m_ObjectDataGen;
+    int m_DatabaseDataGen;
     std::unique_ptr<DataType> m_ActiveObject;
     std::unique_ptr<DatabaseBackedType> m_DatabaseObject;
     std::unique_ptr<CallbackData> m_CallbackData;
     std::vector<DDSExportedMessage> m_PendingMessages;
     std::vector<DDSExportedSubscription> m_Subscriptions;
     std::vector<DDSExportedRequestedSubscription> m_RequestedSubscriptions;
+    std::vector<DDSAggregateSubscription> m_AggregateSubscriptions;
+    std::vector<DDSExportedAggregateRequestedSubscription> m_RequestedAggregateSubscriptions;
   };
 
 public:
@@ -83,6 +91,33 @@ public:
   {
     return StormReflTypeInfo<DatabaseBackedType>::GetNameHash();
   }
+
+  DDSDataObjectPriority GetPriority()
+  {
+    return DataType::GetPriority();
+  }
+
+  static bool GetObjectDataAtPath(void * obj, const char * path, std::string & data)
+  {
+    auto visitor = [&](auto & f, const char * str)
+    {
+      data = StormReflEncodeJson(f);
+      return true;
+    };
+
+    return StormDataVisitPath(*(DataType *)obj, visitor, path);
+  };
+
+  static bool GetDatabaseDataAtPath(void * obj, const char * path, std::string & data)
+  {
+    auto visitor = [&](auto & f, const char * str)
+    {
+      data = StormReflEncodeJson(f);
+      return true;
+    };
+
+    return StormDataVisitPath(*(DataType *)obj, visitor, path);
+  };
 
   void SpawnNewNonDatabaseBackedType(DDSKey key)
   {
@@ -135,6 +170,16 @@ public:
         obj_data.m_RequestedSubscriptions.clear();
         obj_data.m_PendingMessages.clear();
         obj_data.m_State = kDeleted;
+
+        for (auto & sub : obj_data.m_RequestedAggregateSubscriptions)
+        {
+          m_NodeState.m_SharedLocalCopyDatabase.DestroySharedLocalCopySubscription(sub.m_SharedLocalCopyKey, sub.m_SubscriptionId);
+        }
+
+        for (auto & sub : obj_data.m_AggregateSubscriptions)
+        {
+          sub.HandleObjectDestroyed();
+        }
        
         EndObjectModification();
       }
@@ -175,7 +220,7 @@ public:
   {
     DDSLog::LogInfo("- Loading Object");
 
-    auto insert_data = m_Objects.emplace(std::make_pair(key, ObjectData{ kLoading }));
+    auto insert_data = m_Objects.emplace(std::make_pair(key, ObjectData{ kLoading, 1, 1 }));
     m_NodeState.QueryObjectData(m_ObjectTypeId, key, m_Collection.c_str());
 
     return insert_data.first->second;
@@ -481,7 +526,10 @@ public:
       {
         BeginObjectModification(key);
         DDSResponderCallData responder_call;
-        StormReflParseJson(responder_call, message);
+        if (StormReflParseJson(responder_call, message) == false)
+        {
+          DDSLog::LogError("Invalid responder call data");
+        }
 
         if (obj_data.m_ActiveObject)
         {
@@ -628,6 +676,83 @@ public:
         }
       }
       break;
+      case DDSServerToServerMessageType::kCreateSharedLocalCopySubscription:
+      {
+        DDSCreateSharedLocalCopySubscription sub_msg;
+        StormReflParseJson(sub_msg, message);
+
+        DDSAggregateSubscription * agg_sub = nullptr;
+
+        auto & obj_data = m_Objects.at(sub_msg.m_Key);
+        for (auto & sub : obj_data.m_AggregateSubscriptions)
+        {
+          if (sub.GetSharedLocalCopyKey() == sub_msg.m_SharedLocalCopyKey)
+          {
+            agg_sub = &sub;
+            break;
+          }
+        }
+
+        if (agg_sub == nullptr)
+        {
+          if (sub_msg.m_DataSubscription)
+          {
+            obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub_msg.m_DataPath, sub_msg.m_SharedLocalCopyKey,
+              obj_data.m_DatabaseDataGen, sub_msg.m_DataSubscription, obj_data.m_DatabaseObject.get(), 
+              &DDSDataObjectStore<DataType, DatabaseBackedType>::GetDatabaseDataAtPath);
+          }
+          else
+          {
+            obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub_msg.m_DataPath, sub_msg.m_SharedLocalCopyKey,
+              obj_data.m_ObjectDataGen, sub_msg.m_DataSubscription, obj_data.m_ActiveObject.get(), 
+              &DDSDataObjectStore<DataType, DatabaseBackedType>::GetObjectDataAtPath);
+          }
+
+          agg_sub = &obj_data.m_AggregateSubscriptions.back();
+        }
+
+        agg_sub->CreateSubscription(sub_msg.m_ReturnNode, sub_msg.m_SubscriptionId, sub_msg.m_DataGen);
+      }
+      break;
+      case DDSServerToServerMessageType::kDestroySharedLocalCopySubscription:
+      {
+        DDSDestroySharedLocalCopySubscription sub_msg;
+        StormReflParseJson(sub_msg, message);
+
+        auto & obj_data = m_Objects.at(sub_msg.m_Key);
+
+        for (std::size_t index = 0; index < obj_data.m_AggregateSubscriptions.size(); index++)
+        {
+          if (obj_data.m_AggregateSubscriptions[index].GetSharedLocalCopyKey() == sub_msg.m_SharedLocalCopyKey)
+          {
+            obj_data.m_AggregateSubscriptions[index].DestroySubscription(sub_msg.m_SubscriptionId);
+
+            if (obj_data.m_AggregateSubscriptions[index].HasSubscriptions() == false)
+            {
+              vremove_index_quick(obj_data.m_AggregateSubscriptions, index);
+            }
+            break;
+          }
+        }
+      }
+      break;
+      case DDSServerToServerMessageType::kSharedLocalCopyAck:
+      {
+        DDSSharedLocalCopyAck sub_msg;
+        StormReflParseJson(sub_msg, message);
+
+        auto & obj_data = m_Objects.at(sub_msg.m_Key);
+
+        for (std::size_t index = 0; index < obj_data.m_AggregateSubscriptions.size(); index++)
+        {
+          if (obj_data.m_AggregateSubscriptions[index].GetSharedLocalCopyKey() == sub_msg.m_SharedLocalCopy)
+          {
+            obj_data.m_AggregateSubscriptions[index].HandleAck(sub_msg.m_NodeId, sub_msg.m_SubscriptionId, sub_msg.m_DataGen, sub_msg.m_RoutingTableGen);
+            break;
+          }
+        }
+      }
+      break;
       case DDSServerToServerMessageType::kUnlockObject:
       {
         DDSUnlockObject unlock;
@@ -710,6 +835,7 @@ public:
 
       if (database_changed)
       {
+        obj_data.m_DatabaseDataGen++;
         for (auto & sub : obj_data.m_Subscriptions)
         {
           if (sub.m_IsDataSubscription && StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
@@ -718,16 +844,33 @@ public:
           }
         }
 
+        for (auto & sub : obj_data.m_AggregateSubscriptions)
+        {
+          if (sub.IsDataSubscription() && StormDataMatchPathPartial(change.m_Path.data(), sub.GetDataPath().data()))
+          {
+            sub.HandleChangePacket(change, obj_data.m_DatabaseDataGen);
+          }
+        }
+
         std::string database_obj = StormReflEncodeJson(*obj_data.m_DatabaseObject.get());
         m_NodeState.UpdateObjectData(m_ObjectTypeId, key, DatabaseBackedType::Collection(), database_obj.data(), nullptr);
       }
       else
       {
+        obj_data.m_ObjectDataGen++;
         for (auto & sub : obj_data.m_Subscriptions)
         {
           if (sub.m_IsDataSubscription == false && sub.m_State == kSubSentValid && StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
           {
             DDSSendChangeSubscription(change, sub, obj_data.m_ActiveObject.get(), m_NodeState);
+          }
+        }
+
+        for (auto & sub : obj_data.m_AggregateSubscriptions)
+        {
+          if (sub.IsDataSubscription() == false && StormDataMatchPathPartial(change.m_Path.data(), sub.GetDataPath().data()))
+          {
+            sub.HandleChangePacket(change, obj_data.m_ObjectDataGen);
           }
         }
       }
@@ -809,6 +952,46 @@ public:
       {
         itr->second.m_RequestedSubscriptions.erase(sub_itr);
         return;
+      }
+    }
+  }
+
+  void AssignRequestedAggregateSubscription(DDSKey key, const DDSExportedAggregateRequestedSubscription & requested_sub)
+  {
+    auto itr = m_Objects.find(key);
+    if (itr == m_Objects.end())
+    {
+      return;
+    }
+
+    itr->second.m_RequestedAggregateSubscriptions.emplace_back(requested_sub);
+  }
+
+  void RemoveRequestedAggregateSubscription(DDSKey key, DDSKey shared_local_copy_key, DDSKey subscription_id)
+  {
+    auto itr = m_Objects.find(key);
+    if (itr == m_Objects.end())
+    {
+      return;
+    }
+
+    for (auto sub_itr = itr->second.m_RequestedAggregateSubscriptions.begin(); sub_itr != itr->second.m_RequestedAggregateSubscriptions.end(); ++sub_itr)
+    {
+      if (sub_itr->m_SubscriptionId == subscription_id && sub_itr->m_SharedLocalCopyKey == shared_local_copy_key)
+      {
+        itr->second.m_RequestedAggregateSubscriptions.erase(sub_itr);
+        return;
+      }
+    }
+  }
+
+  void HandleAllClear(int routing_table_gen)
+  {
+    for (auto & obj : m_Objects)
+    {
+      for (auto & sub : obj.second.m_AggregateSubscriptions)
+      {
+        sub.GotAllClear(routing_table_gen);
       }
     }
   }
@@ -908,6 +1091,11 @@ public:
         }
 
         DDSExportedObject obj = { itr->first, state };
+        obj.m_ObjectDataGen = itr->second.m_ObjectDataGen;
+        obj.m_DatabaseDataGen = itr->second.m_DatabaseDataGen;
+
+        g_ExportObjectsAsFull = false;
+
         if (itr->second.m_ActiveObject)
         {
           StormReflEncodeJson(*itr->second.m_ActiveObject.get(), obj.m_ActiveObject);
@@ -919,6 +1107,8 @@ public:
           StormReflEncodeJson(*itr->second.m_DatabaseObject.get(), obj.m_DatabaseObject);
           num_objects++;
         }
+
+        g_ExportObjectsAsFull = true;
 
         for (auto & message : itr->second.m_PendingMessages)
         {
@@ -934,6 +1124,22 @@ public:
         for (auto & req_sub : itr->second.m_RequestedSubscriptions)
         {
           obj.m_RequestedSubscriptions.emplace_back(req_sub);
+        }
+
+        for (auto & sub : itr->second.m_AggregateSubscriptions)
+        {
+          DDSExportedAggregateSubscription sub_info;
+          sub.Export(sub_info);
+          
+          obj.m_AggregateSubscriptions.emplace_back(std::move(sub_info));
+        }
+
+        for (auto & req_sub : itr->second.m_RequestedAggregateSubscriptions)
+        {
+          m_NodeState.m_SharedLocalCopyDatabase.GetSubscriptionInfo(req_sub);
+          obj.m_RequestedAggregateSubscriptions.emplace_back(std::move(req_sub));
+
+          m_NodeState.m_SharedLocalCopyDatabase.DestroySharedLocalCopySubscription(req_sub.m_SharedLocalCopyKey, req_sub.m_SubscriptionId);
         }
 
         m_NodeState.ExportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, itr->first }, obj.m_SharedSubscriptions);
@@ -973,6 +1179,17 @@ public:
       obj_data.m_PendingMessages = std::move(object.m_PendingMessages);
       obj_data.m_Subscriptions = std::move(object.m_Subscriptions);
       obj_data.m_RequestedSubscriptions = std::move(object.m_RequestedSubscriptions);
+      obj_data.m_RequestedAggregateSubscriptions = std::move(object.m_RequestedAggregateSubscriptions);
+
+      DDSDataObjectAddress obj_addr = { m_ObjectTypeId, object.m_Key };
+
+      for (auto & req_sub : obj_data.m_RequestedAggregateSubscriptions)
+      {
+        m_NodeState.m_SharedLocalCopyDatabase.CreateExistingSharedLocalCopySubscription(req_sub, obj_addr);
+      }
+
+      obj_data.m_ObjectDataGen = object.m_ObjectDataGen;
+      obj_data.m_DatabaseDataGen = object.m_DatabaseDataGen;
 
       if (object.m_DatabaseObject.size() > 0)
       {
@@ -1023,6 +1240,20 @@ public:
       {
         obj_data.m_State = kDeleted;
         auto result = m_Objects.emplace(std::make_pair(object.m_Key, std::move(obj_data)));
+      }
+
+      for (auto & sub : object.m_AggregateSubscriptions)
+      {
+        if (sub.m_DataSubscription)
+        {
+          obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub, obj_data.m_DatabaseDataGen, obj_data.m_DatabaseObject.get(),
+            &DDSDataObjectStore<DataType, DatabaseBackedType>::GetDatabaseDataAtPath);
+        }
+        else
+        {
+          obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub, obj_data.m_ObjectDataGen, obj_data.m_ActiveObject.get(),
+            &DDSDataObjectStore<DataType, DatabaseBackedType>::GetObjectDataAtPath);
+        }
       }
     }
   }

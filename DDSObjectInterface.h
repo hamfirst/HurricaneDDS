@@ -26,6 +26,12 @@ struct DDSSubscriptionTarget
 
 };
 
+template <typename DataType>
+struct DDSQueryTarget
+{
+
+};
+
 
 template <typename ... CallArgs>
 std::string DDSSerializeCallData(CallArgs && ... args)
@@ -190,6 +196,25 @@ public:
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
   }
 
+  template <typename ReturnObject>
+  void QueryDatabaseByKey(const char * collection, DDSKey key, void (ReturnObject::*return_func)(int ec, std::string data), ReturnObject * p_this)
+  {
+    QueryDatabaseByKeyInternal(collection, key, GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(),
+      StormReflGetMemberFunctionIndex(return_func), std::string());
+  }
+
+  template <typename ReturnObject, typename ReturnArg>
+  void QueryDatabaseByKey(const char * collection, DDSKey key, void (ReturnObject::*return_func)(ReturnArg return_arg, int ec, std::string data), ReturnObject * p_this, ReturnArg && return_arg)
+  {
+    QueryDatabaseByKeyInternal(collection, key, GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(),
+      StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
+  }
+
+  void DeleteFromDatabase(const char * collection, DDSKey key)
+  {
+
+  }
+
   template <typename TargetObject>
   void CreateTimer(std::chrono::system_clock::duration duration, DDSKey key, void (TargetObject::*return_func)())
   {
@@ -311,6 +336,9 @@ private:
 
   virtual void QueryDatabaseInternal(const char * collection, std::string && query,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) = 0;
+  virtual void QueryDatabaseByKeyInternal(const char * collection, DDSKey key,
+    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) = 0;
+  virtual void DeleteFromDatabaseInternal(const char * collection, DDSKey key) = 0;
 
   virtual void CreateTimerInternal(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg) = 0;
   virtual void CreateHttpRequestInternal(const DDSHttpRequest & request, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg) = 0;

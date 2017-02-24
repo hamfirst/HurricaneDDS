@@ -1,8 +1,12 @@
 #pragma once
 
+#include <memory>
+
 #include "DDSLog.h"
 #include "DDSObjectInterface.h"
 #include "DDSConnectionId.h"
+#include "DDSSharedLocalCopyData.h"
+#include "DDSSharedLocalCopyPtr.h"
 
 class DDSNodeState;
 class DDSDataObjectStoreBase;
@@ -31,7 +35,8 @@ public:
       (p_this->*return_func)(false);
       return;
     }
-
+    
+  auto func = []() { return std::make_unique<DDSSharedLocalCopyData<}
     UpdateDatabase(DatabaseType::Collection(), GetObjectTypeId(), StormReflEncodeJson(data), GetLocalKey(), GetObjectTypeId(), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), std::string());
   }
@@ -48,6 +53,54 @@ public:
 
     UpdateDatabase(DatabaseType::Collection(), GetObjectTypeId(), StormReflEncodeJson(data), GetLocalKey(), GetObjectTypeId(), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
+  }
+
+  template <typename TargetSubDataType>
+  static std::unique_ptr<DDSBaseSharedLocalCopyData> CreateSharedLocalCopyData()
+  {
+    return std::make_unique<typename DDSSharedLocalCopyData<TargetSubDataType>>();
+  }
+
+  template <typename TargetObject, typename TargetSubDataType, typename ReturnObject>
+  std::pair<DDSKey, DDSKey> CreateSharedLocalCopy(
+    const DDSSubscriptionTarget<TargetObject> & sub, 
+    const DDSSubscriptionTarget<TargetSubDataType> & target_data, DDSKey target_key, const char * path,
+    void (ReturnObject::*return_func)(std::string data, int version), void (ReturnObject::*err_func)() = nullptr)
+  {
+    return CreateSharedLocalCopyInternal(StormReflTypeInfo<TargetObject>::GetNameHash(), target_key, path,
+      GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()),
+      GetLocalKey(), StormReflGetMemberFunctionIndex(return_func), 
+      std::string(), StormReflGetMemberFunctionIndex(err_func),
+      &DDSNodeInterface::CreateSharedLocalCopyData<TargetSubDataType>);
+  }
+
+  template <typename TargetObject, typename TargetSubDataType, typename ReturnObject, typename ReturnArg>
+  std::pair<DDSKey, DDSKey> CreateSharedLocalCopy(
+    const DDSSubscriptionTarget<TargetObject> & sub,
+    const DDSSubscriptionTarget<TargetSubDataType> & target_data, DDSKey target_key, const char * path,
+    void (ReturnObject::*return_func)(ReturnArg return_arg, std::string data, int version), 
+    const ReturnArg & return_arg, void (ReturnObject::*err_func)() = nullptr)
+  {
+    return CreateSharedLocalCopyInternal(StormReflTypeInfo<TargetObject>::GetNameHash(), target_key, path,
+      GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()),
+      GetLocalKey(), StormReflGetMemberFunctionIndex(return_func),
+      StormReflEncodeJson(return_arg), err_func != nullptr ? StormReflGetMemberFunctionIndex(err_func) : -1, 
+      &DDSNodeInterface::CreateSharedLocalCopyData<TargetSubDataType>);
+  }
+
+  template <typename TargetObject, typename TargetSubDataType>
+  DDSSharedLocalCopyPtr<TargetSubDataType> GetSharedLocalCopyPtr(DDSKey target_key, const char * path, int version)
+  {
+    DDSSharedLocalCopyPtr<TargetSubDataType> ptr;
+
+    GetSharedLocalCopyPtr(ptr, StormReflTypeInfo<TargetObject>::GetNameHash(), 
+      target_key, path, version, &DDSNodeInterface::CreateSharedLocalCopyData<TargetSubDataType>);
+    return ptr;
+  }
+
+  void DestroySharedLocalCopy(std::pair<DDSKey, DDSKey> subscription_info)
+  {
+    DestroySharedLocalCopyInternal(subscription_info);
   }
 
   void DestroySelf() override;
@@ -77,8 +130,13 @@ private:
 
   void QueryDatabaseInternal(const char * collection, std::string && query,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override;
+  void QueryDatabaseByKeyInternal(const char * collection, DDSKey key,
+    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override;
+
   void UpdateDatabaseInternal(const char * collection, int data_object_type, std::string && data, DDSKey data_key,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg);
+
+  void DeleteFromDatabaseInternal(const char * collection, DDSKey key) override;
 
   void CreateTimerInternal(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg) override;
   void CreateHttpRequestInternal(const DDSHttpRequest & request, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg) override;
@@ -88,6 +146,15 @@ private:
 
   void DestroySubscriptionInternal(int return_object_type, DDSKey return_key, DDSKey subscription_id) override;
 
+  std::pair<DDSKey, DDSKey> CreateSharedLocalCopyInternal(
+    uint32_t target_object_type_name_hash, DDSKey target_key, const char * path, int return_object_type,
+    DDSKey return_key, int return_method_id, std::string && return_arg, int err_method_id,
+    std::unique_ptr<DDSBaseSharedLocalCopyData>(*CreateFunc)());
+
+  void DestroySharedLocalCopyInternal(std::pair<DDSKey, DDSKey> subscription_info);
+
+  void GetSharedLocalCopyPtr(DDSSharedLocalCopyPtrBase & ptr, uint32_t target_object_type_name_hash, 
+    DDSKey target_key, const char * path, int version, std::unique_ptr<DDSBaseSharedLocalCopyData>(*CreateFunc)());
 
 private:
 

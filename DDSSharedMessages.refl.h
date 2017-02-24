@@ -37,6 +37,26 @@ struct DDSExportedRequestedSubscription
   DDSKey m_SubscriptionId;
 };
 
+struct DDSExportedAggregateRequestedSubscription
+{
+  STORM_REFL;
+  DDSKey m_SharedLocalCopyKey;
+  DDSKey m_SubscriptionId;
+  
+  DDSKey m_Key;
+  int m_ObjectType;
+  std::string m_Path;
+
+  DDSKey m_ReturnKey;
+  int m_ReturnObjectType;
+  std::string m_ReturnArgs;
+  int m_ReturnMethod;
+  int m_ErrorMethod;
+  int m_DataGen;
+
+  bool m_DataSub;
+  bool m_DataValid;
+};
 
 struct DDSTargetedMessageBase
 {

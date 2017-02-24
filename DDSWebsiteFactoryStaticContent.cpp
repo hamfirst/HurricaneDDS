@@ -7,7 +7,7 @@
 DDSWebsiteFactoryStaticContent::DDSWebsiteFactoryStaticContent(DDSNodeState & node_state, 
   const StormSockets::StormSocketServerFrontendHttpSettings & settings, const DDSWebsiteFilesystemBuilder & fs) :
   DDSWebsiteFactoryBase(node_state, settings),
-  m_Filesystem(node_state.GetBackend(), fs)
+  m_Filesystem(node_state.m_Backend, fs)
 {
 
 }

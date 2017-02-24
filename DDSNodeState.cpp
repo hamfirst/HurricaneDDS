@@ -4,6 +4,7 @@
 #include "DDSNodeState.h"
 #include "DDSRoutingTable.h"
 #include "DDSServerMessage.h"
+#include "DDSSharedLocalCopy.h"
 #include "DDSEndpointFactoryBase.h"
 #include "DDSDatabaseConnectionPool.h"
 
@@ -33,6 +34,7 @@ DDSNodeState::DDSNodeState(
   m_CoordinatorConnection(*this, coordinator_settings),
   m_IncomingKeyspace(num_data_object_types),
   m_OutgoingKeyspace(*this, num_data_object_types),
+  m_SharedLocalCopyDatabase(*this),
   m_Database(std::make_unique<DDSDatabaseConnectionPool>(database_settings))
 {
   inet_pton(AF_INET, node_server_settings.ListenSettings.LocalInterface, &m_LocalInterface);
@@ -50,6 +52,8 @@ DDSNodeState::~DDSNodeState()
 
 void DDSNodeState::ProcessEvents()
 {
+  g_CurrentNode = this;
+
   BeginQueueingMessages();
   m_Database->TriggerCallbacks();
 
@@ -57,6 +61,17 @@ void DDSNodeState::ProcessEvents()
   m_NodeNetwork.ProcessEvents();
 
   m_OutgoingKeyspace.Update();
+
+  if (m_RoutingTable && m_RoutingTable->m_TableGeneration != m_LastRoutingTableAck)
+  {
+    if (m_IncomingKeyspace.IsComplete() && m_OutgoingKeyspace.IsComplete())
+    {
+      DDSCoordinatorRoutingTableAck msg{ m_RoutingTable->m_TableGeneration };
+      m_CoordinatorConnection.SendMessageToCoordinator(DDSGetServerMessage(msg));
+
+      m_LastRoutingTableAck = m_RoutingTable->m_TableGeneration;
+    }
+  }
 
   m_Resolver.Update();
   m_HttpClient.Update();
@@ -116,6 +131,11 @@ bool DDSNodeState::IsFullyShutdown()
   }
 
   if (m_TokenValidator.AreAllCallbacksComplete() == false)
+  {
+    return false;
+  }
+
+  if (m_NodeNetwork.HasPendingMessages())
   {
     return false;
   }
@@ -180,7 +200,7 @@ void DDSNodeState::GotNewRoutingTable(const DDSRoutingTable & routing_table)
   }
 }
 
-void DDSNodeState::GotMessageFromCoordinator(DDSServerToServerMessageType type, DDSCoordinatorProtocolMessageType coordinator_type, const char * data)
+bool DDSNodeState::GotMessageFromCoordinator(DDSServerToServerMessageType type, DDSCoordinatorProtocolMessageType coordinator_type, const char * data)
 {
   if (type == DDSServerToServerMessageType::kTargetedMessage)
   {
@@ -188,10 +208,11 @@ void DDSNodeState::GotMessageFromCoordinator(DDSServerToServerMessageType type, 
     if (StormReflParseJson(targeted_message, data) == false)
     {
       DDSLog::LogError("Invalid targeted message");
-      return;
+      return false;
     }
 
     SendTargetedMessage(DDSDataObjectAddress{ targeted_message.m_ObjectType, targeted_message.m_Key }, type, std::string(data));
+    return true;
   }
   else if (type == DDSServerToServerMessageType::kTargetedMessageResponder)
   {
@@ -199,10 +220,11 @@ void DDSNodeState::GotMessageFromCoordinator(DDSServerToServerMessageType type, 
     if (StormReflParseJson(targeted_message, data) == false)
     {
       DDSLog::LogError("Invalid targeted message");
-      return;
+      return false;
     }
 
     SendTargetedMessage(DDSDataObjectAddress{ targeted_message.m_ObjectType, targeted_message.m_Key }, type, std::string(data));
+    return true;
   }
   else if (type == DDSServerToServerMessageType::kResponderCall)
   {
@@ -210,11 +232,34 @@ void DDSNodeState::GotMessageFromCoordinator(DDSServerToServerMessageType type, 
     if (StormReflParseJson(responder_data, data) == false)
     {
       DDSLog::LogError("Invalid targeted message");
-      return;
+      return false;
     }
 
     SendTargetedMessage(DDSDataObjectAddress{ responder_data.m_ObjectType, responder_data.m_Key }, type, std::string(data));
+    return true;
   }
+
+  return false;
+}
+
+
+bool DDSNodeState::GotMessageFromCoordinator(DDSCoordinatorProtocolMessageType coordinator_type, const char * data)
+{
+  if (coordinator_type == DDSCoordinatorProtocolMessageType::kSyncAllClear)
+  {
+    DDSCoordinatorSyncAllClear msg;
+    if (StormReflParseJson(msg, data) == false)
+    {
+      DDSLog::LogError("Invalid coordinator message");
+      return false;
+    }
+
+    m_LastRoutingTableAllClear = msg.m_TableGen;
+    HandleAllClear();
+    return true;
+  }
+
+  return false;
 }
 
 void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMessageType type, const char * data)
@@ -338,7 +383,7 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
     response.m_Success = valid;
     response.m_TokenData = std::move(token_data);
 
-    m_NodeNetwork.SendMessageToServer(node_id, StormReflEncodeJson(response));
+    m_NodeNetwork.SendMessageToServer(node_id, DDSServerToServerMessageType::kValidateTokenResponse, StormReflEncodeJson(response));
   }
   else if (type == DDSServerToServerMessageType::kValidateTokenResponse)
   {
@@ -351,6 +396,119 @@ void DDSNodeState::GotMessageFromServer(DDSNodeId node_id, DDSServerToServerMess
 
     m_TokenValidator.MarkTokenComplete(token_info.m_RequestId, token_info.m_Success, std::move(token_info.m_TokenData));
   }
+  else if (type == DDSServerToServerMessageType::kCreateSharedLocalCopySubscription)
+  {
+    DDSCreateSharedLocalCopySubscription sub_info;
+    if (StormReflParseJson(sub_info, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    SendTargetedMessage(DDSDataObjectAddress{ sub_info.m_ObjectType, sub_info.m_Key }, type, std::string(data));
+  }
+  else if (type == DDSServerToServerMessageType::kDestroySharedLocalCopySubscription)
+  {
+    DDSDestroySharedLocalCopySubscription sub_info;
+    if (StormReflParseJson(sub_info, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    SendTargetedMessage(DDSDataObjectAddress{ sub_info.m_ObjectType, sub_info.m_Key }, type, std::string(data));
+  }
+  else if (type == DDSServerToServerMessageType::kSharedLocalCopyInit)
+  {
+    DDSSharedLocalCopyInit sub_info;
+    if (StormReflParseJson(sub_info, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    auto shared_copy = m_SharedLocalCopyDatabase.GetSharedLocalCopy(sub_info.m_SharedLocalCopyKey);
+    if (shared_copy == nullptr || sub_info.m_SubscriptionId != shared_copy->GetServerRequestId())
+    {
+      return;
+    }
+
+    shared_copy->HandleInitialSync(sub_info.m_Data, sub_info.m_DataGen);
+  }
+  else if (type == DDSServerToServerMessageType::kSharedLocalCopyHostDestroyed)
+  {
+    DDSSharedLocalCopyHostDestroyed sub_info;
+    if (StormReflParseJson(sub_info, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    auto shared_copy = m_SharedLocalCopyDatabase.GetSharedLocalCopy(sub_info.m_SharedLocalCopy);
+    if (shared_copy == nullptr || sub_info.m_SubscriptionId != shared_copy->GetServerRequestId())
+    {
+      return;
+    }
+
+    shared_copy->HandleErrorPacket();
+  }
+  else if (type == DDSServerToServerMessageType::kSharedLocalCopyChange)
+  {
+    DDSSharedLocalCopyChange sub_info;
+    if (StormReflParseJson(sub_info, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    auto shared_copy = m_SharedLocalCopyDatabase.GetSharedLocalCopy(sub_info.m_SharedLocalCopy);
+    if (shared_copy == nullptr || sub_info.m_SubscriptionId != shared_copy->GetServerRequestId())
+    {
+      return;
+    }
+
+    shared_copy->HandleChangePacket(sub_info.m_Change, sub_info.m_DataGen);
+  }
+  else if (type == DDSServerToServerMessageType::kSharedLocalCopyFastForward)
+  {
+    DDSSharedLocalCopyFastForward sub_info;
+    if (StormReflParseJson(sub_info, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    auto shared_copy = m_SharedLocalCopyDatabase.GetSharedLocalCopy(sub_info.m_SharedLocalCopy);
+    if (shared_copy == nullptr || sub_info.m_SubscriptionId != shared_copy->GetServerRequestId())
+    {
+      return;
+    }
+
+    shared_copy->HandleFastForward(sub_info);
+  }
+  else if (type == DDSServerToServerMessageType::kSharedLocalCopyAck)
+  {
+    DDSSharedLocalCopyAck sub_info;
+    if (StormReflParseJson(sub_info, data) == false)
+    {
+      DDSLog::LogError("Invalid targeted message");
+      return;
+    }
+
+    SendTargetedMessage(DDSDataObjectAddress{ sub_info.m_ObjectType, sub_info.m_Key }, type, std::string(data));
+  }
+  else if (type == DDSServerToServerMessageType::kSharedLocalCopyDatabaseDump)
+  {
+    DDSSharedLocalCopyDatabaseDump db_dump;
+
+    if (StormReflParseJson(db_dump, data) == false)
+    {
+      DDSLog::LogError("Invalid slc transfer message");
+      return;
+    }
+
+    m_SharedLocalCopyDatabase.Import(db_dump);
+  }
 }
 
 void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToServerMessageType type, std::string && message, bool force_process)
@@ -358,7 +516,14 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
   if (m_QueueMessageDepth && force_process == false)
   {
     DDSLog::LogVerbose("-- Queueing targeted message %s", StormReflGetEnumAsString(type));
-    m_QueuedTargetedMessages.emplace(std::make_tuple(addr, type, std::move(message)));
+
+    int priority = (int)DDSDataObjectPriority::kHigh;
+    if (addr.m_ObjectType < (int)m_DataObjectList.size())
+    {
+      priority = (int)m_DataObjectList[addr.m_ObjectType]->GetPriority();
+    }
+
+    m_QueuedTargetedMessages[priority].emplace(std::make_tuple(addr, type, std::move(message)));
     return;
   }
 
@@ -404,7 +569,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
     DDSNodeId node_id = GetNodeIdForKey(addr.m_ObjectKey);
     if (m_NodeNetwork.RequestNodeConnection(node_id))
     {
-      m_NodeNetwork.SendMessageToServer(node_id, DDSGetServerMessage(type, message.c_str()));
+      m_NodeNetwork.SendMessageToServer(node_id, type, std::move(message));
       return;
     }
   }
@@ -557,6 +722,19 @@ int DDSNodeState::GetTargetObjectIdForNameHash(uint32_t name_hash) const
   return -1;
 }
 
+bool DDSNodeState::IsDatabaseObjectType(uint32_t name_hash) const
+{
+  for (std::size_t index = 0; index < m_DataObjectList.size(); index++)
+  {
+    if (m_DataObjectList[index]->GetDatabaseClassNameHash() == name_hash)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 DDSDataObjectStoreBase & DDSNodeState::GetDataObjectStore(int object_type_id)
 {
   return *m_DataObjectList[object_type_id].get();
@@ -679,7 +857,7 @@ void DDSNodeState::CreateTokenValidatorRequest(uint64_t token, int type, DDSDefe
     request.m_RequestId = request_id;
     request.m_Token = (uint32_t)token;
     request.m_Type = type;
-    m_NodeNetwork.SendMessageToServer(node_id, StormReflEncodeJson(request));
+    m_NodeNetwork.SendMessageToServer(node_id, DDSServerToServerMessageType::kValidateTokenRequest, StormReflEncodeJson(request));
   }
 }
 
@@ -705,6 +883,23 @@ bool DDSNodeState::ValidateToken(uint64_t token, int type, std::string & out_tok
 void DDSNodeState::QueryObjectData(int object_type_id, DDSKey key, const char * collection)
 {
   m_Database->QueryDatabaseByKey(key, collection, [this, object_type_id, key](const char * data, int ec) { HandleQueryByKey(object_type_id, key, data, ec); });
+}
+
+void DDSNodeState::QueryObjectData(const char * collection, DDSKey key, DDSResponderCallData && responder_call)
+{
+  DDSDataObjectAddress address{ responder_call.m_ObjectType, responder_call.m_Key };
+
+  auto callback = [=](const char * data, int ec) mutable {
+
+    std::string sb;
+    StormReflJsonEncodeString(data, sb);
+
+    responder_call.m_MethodArgs = std::string("[") + StormReflEncodeJson(ec) + "," + sb + "]";
+    std::string responder_str = StormReflEncodeJson(responder_call);
+    SendTargetedMessage(address, DDSServerToServerMessageType::kResponderCall, std::move(responder_str));
+  };
+
+  m_Database->QueryDatabaseByKey(key, collection, std::move(callback));
 }
 
 void DDSNodeState::QueryObjectData(const char * collection, const char * query, DDSResponderCallData && responder_call)
@@ -808,6 +1003,11 @@ void DDSNodeState::DeleteObjectData(int object_type_id, DDSKey key, const char *
   }
 }
 
+void DDSNodeState::DeleteObjectData(const char * collection, DDSKey key)
+{
+  m_Database->QueryDatabaseDelete(key, collection, {});
+}
+
 void DDSNodeState::BeginQueueingMessages()
 {
   m_QueueMessageDepth++;
@@ -820,12 +1020,36 @@ void DDSNodeState::EndQueueingMessages()
   {
     m_QueueMessageDepth++;
 
-    while (m_QueuedTargetedMessages.size())
+    while (true)
     {
-      auto & message = m_QueuedTargetedMessages.front();
-      SendTargetedMessage(std::get<0>(message), std::get<1>(message), std::move(std::get<2>(message)), true);
-      m_QueuedTargetedMessages.pop();
+      bool got_message = false;
+
+      while (m_QueuedTargetedMessages[0].size())
+      {
+        auto & message = m_QueuedTargetedMessages[0].front();
+        SendTargetedMessage(std::get<0>(message), std::get<1>(message), std::move(std::get<2>(message)), true);
+        m_QueuedTargetedMessages[0].pop();
+      }
+
+      for (int index = 1; index < (int)DDSDataObjectPriority::kCount; index++)
+      {
+        if (m_QueuedTargetedMessages[index].size())
+        {
+          auto & message = m_QueuedTargetedMessages[index].front();
+          SendTargetedMessage(std::get<0>(message), std::get<1>(message), std::move(std::get<2>(message)), true);
+          m_QueuedTargetedMessages[index].pop();
+          got_message = true;
+          break;
+        }
+      }
+
+      if (got_message == false)
+      {
+        break;
+      }
     }
+
+
 
     m_QueueMessageDepth--;
   }
@@ -864,29 +1088,26 @@ void DDSNodeState::ProcessPendingExportedObjects()
   }
 }
 
-DDSNetworkBackend & DDSNodeState::GetBackend()
+void DDSNodeState::HandleAllClear()
 {
-  return m_Backend;
+  DDSLog::LogInfo("- Got All Clear From Coordinator: %d", m_LastRoutingTableAllClear);
+
+  for (auto & elem : m_DataObjectList)
+  {
+    elem->HandleAllClear(m_LastRoutingTableAllClear);
+  }
+
+  m_SharedLocalCopyDatabase.HandleAllClear();
 }
 
-DDSNodeNetworkService & DDSNodeState::GetNodeNetwork()
+bool DDSNodeState::IsAllClear() const
 {
-  return m_NodeNetwork;
-}
+  if (m_RoutingTable)
+  {
+    return m_LastRoutingTableAllClear == m_RoutingTable->m_TableGeneration;
+  }
 
-DDSCoordinatorClientProtocol & DDSNodeState::GetCoordinatorConnection()
-{
-  return m_CoordinatorConnection;
-}
-
-DDSIncomingKeyspaceTransferManager & DDSNodeState::GetIncomingKeyspace()
-{
-  return m_IncomingKeyspace;
-}
-
-DDSOutgoingKeyspaceTransferManager & DDSNodeState::GetOutgoingKeyspace()
-{
-  return m_OutgoingKeyspace;
+  return false;
 }
 
 DDSNodeId DDSNodeState::GetLocalNodeId() const
@@ -902,26 +1123,6 @@ const DDSRoutingTable & DDSNodeState::GetRoutingTable() const
 DDSKeyRange DDSNodeState::GetLocalKeyRange() const
 {
   return *m_LocalKeyRange;
-}
-
-uint64_t DDSNodeState::GetClientSecret() const
-{
-  return m_ClientSecret;
-}
-
-uint64_t DDSNodeState::GetServerSecret() const
-{
-  return m_ServerSecret;
-}
-
-uint32_t DDSNodeState::GetLocalInterface() const
-{
-  return m_LocalInterface;
-}
-
-int DDSNodeState::GetLocalPort() const
-{
-  return m_LocalPort;
 }
 
 void DDSNodeState::GetConnectionFactoryPorts(std::vector<DDSNodePort> & endpoint_ports, std::vector<DDSNodePort> & website_ports) const
@@ -989,7 +1190,7 @@ void DDSNodeState::RecheckOutgoingTargetedMessages()
       {
         for (auto & message : itr_copy->second)
         {
-          m_NodeNetwork.SendMessageToServer(node_id, DDSGetServerMessage(message.first, message.second.c_str()));
+          m_NodeNetwork.SendMessageToServer(node_id, message.first, std::move(message.second));
         }
         m_PendingTargetedMessages.erase(itr_copy);
       }

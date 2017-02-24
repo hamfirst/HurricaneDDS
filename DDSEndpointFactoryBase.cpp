@@ -7,7 +7,7 @@
 
 DDSEndpointFactoryBase::DDSEndpointFactoryBase(DDSNodeState & node_state, const StormSockets::StormSocketServerFrontendWebsocketSettings & settings) :
   m_NodeState(node_state),
-  m_Frontend(std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(settings, node_state.GetBackend().m_Backend.get())),
+  m_Frontend(std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(settings, node_state.m_Backend.m_Backend.get())),
   m_Port(settings.ListenSettings.Port)
 {
 
@@ -21,12 +21,23 @@ DDSEndpointFactoryBase::~DDSEndpointFactoryBase()
 void DDSEndpointFactoryBase::ProcessEvents()
 {
   StormSockets::StormSocketEventInfo event;
+  bool got_connection = false;
+
   while (m_Frontend->GetEvent(event))
   {
     switch (event.Type)
     {
     case StormSockets::StormSocketEventType::ClientConnected:
       HandleConnect(event.ConnectionId);
+
+      if (got_connection == false)
+      {
+        got_connection = true;
+      }
+      else
+      {
+        break;
+      }
       break;
     case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
       HandleHandshakeComplete(event.ConnectionId, event.RemoteIP, event.RemotePort);

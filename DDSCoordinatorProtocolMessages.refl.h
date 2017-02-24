@@ -18,6 +18,8 @@ enum STORM_REFL_ENUM class DDSCoordinatorProtocolMessageType
   kHandshakeFinalize,
   kNodeInit,
   kRoutingTable,
+  kRoutingTableAck,
+  kSyncAllClear,
   kShutDown,
   kSharedObjectDelta,
   kCPUUsage,
@@ -26,7 +28,7 @@ enum STORM_REFL_ENUM class DDSCoordinatorProtocolMessageType
   kTargetedMessageResponder,
   kCreateSubscription,
   kDestroySubscription,
-  kSubscriptionDeleted
+  kSubscriptionDeleted,
 };
 
 struct DDSCoordinatorHandshakeRequest
@@ -72,6 +74,21 @@ struct DDSCoordinatorNodeInitialization
 
   std::vector<std::string> m_SharedObjects;
 };
+
+struct DDSCoordinatorRoutingTableAck
+{
+  STORM_REFL;
+  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kRoutingTableAck;
+  int m_TableGen;
+};
+
+struct DDSCoordinatorSyncAllClear
+{
+  STORM_REFL;
+  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kSyncAllClear;
+  int m_TableGen;
+};
+
 
 struct DDSCoordinatorNodeShutdown
 {
