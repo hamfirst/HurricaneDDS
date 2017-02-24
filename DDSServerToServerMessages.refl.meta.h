@@ -616,7 +616,7 @@ template <>
 struct StormReflTypeInfo<DDSExportedAggregateSubscription>
 {
   using MyBase = void;
-  static constexpr int fields_n = 6;
+  static constexpr int fields_n = 7;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
@@ -755,6 +755,28 @@ struct StormReflTypeInfo<DDSExportedAggregateSubscription>::field_data<5, Self> 
   match_const_t<Self, bool> & Get() { return self.m_DataSubscription; }
   std::add_const_t<std::remove_reference_t<bool>> & Get() const { return self.m_DataSubscription; }
   void SetDefault() { self.m_DataSubscription = StormReflTypeInfo<DDSExportedAggregateSubscription>::GetDefault().m_DataSubscription; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSExportedAggregateSubscription>::field_data_static<6>
+{
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_DataGen"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xFC528033; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
+  static constexpr auto GetFieldIndex() { return 6; }
+  static constexpr auto GetMemberPtr() { return &DDSExportedAggregateSubscription::m_DataGen; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSExportedAggregateSubscription>::field_data<6, Self> : public StormReflTypeInfo<DDSExportedAggregateSubscription>::field_data_static<6>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_DataGen; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_DataGen; }
+  void SetDefault() { self.m_DataGen = StormReflTypeInfo<DDSExportedAggregateSubscription>::GetDefault().m_DataGen; }
 };
 
 template <>

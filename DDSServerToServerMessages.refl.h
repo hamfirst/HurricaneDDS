@@ -103,6 +103,7 @@ struct DDSExportedAggregateSubscription
 
   bool m_HasChangesWaiting;
   bool m_DataSubscription;
+  int m_DataGen;
 };
 
 struct DDSExportedObject

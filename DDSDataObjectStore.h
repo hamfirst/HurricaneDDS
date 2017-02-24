@@ -58,8 +58,6 @@ class DDSDataObjectStore : public DDSDataObjectStoreBase
   struct ObjectData
   {
     ObjectState m_State;
-    int m_ObjectDataGen;
-    int m_DatabaseDataGen;
     std::unique_ptr<DataType> m_ActiveObject;
     std::unique_ptr<DatabaseBackedType> m_DatabaseObject;
     std::unique_ptr<CallbackData> m_CallbackData;
@@ -220,7 +218,7 @@ public:
   {
     DDSLog::LogInfo("- Loading Object");
 
-    auto insert_data = m_Objects.emplace(std::make_pair(key, ObjectData{ kLoading, 1, 1 }));
+    auto insert_data = m_Objects.emplace(std::make_pair(key, ObjectData{ kLoading }));
     m_NodeState.QueryObjectData(m_ObjectTypeId, key, m_Collection.c_str());
 
     return insert_data.first->second;
@@ -698,13 +696,13 @@ public:
           if (sub_msg.m_DataSubscription)
           {
             obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub_msg.m_DataPath, sub_msg.m_SharedLocalCopyKey,
-              obj_data.m_DatabaseDataGen, sub_msg.m_DataSubscription, obj_data.m_DatabaseObject.get(), 
+              sub_msg.m_DataSubscription, obj_data.m_DatabaseObject.get(), 
               &DDSDataObjectStore<DataType, DatabaseBackedType>::GetDatabaseDataAtPath);
           }
           else
           {
             obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub_msg.m_DataPath, sub_msg.m_SharedLocalCopyKey,
-              obj_data.m_ObjectDataGen, sub_msg.m_DataSubscription, obj_data.m_ActiveObject.get(), 
+              sub_msg.m_DataSubscription, obj_data.m_ActiveObject.get(), 
               &DDSDataObjectStore<DataType, DatabaseBackedType>::GetObjectDataAtPath);
           }
 
@@ -835,7 +833,6 @@ public:
 
       if (database_changed)
       {
-        obj_data.m_DatabaseDataGen++;
         for (auto & sub : obj_data.m_Subscriptions)
         {
           if (sub.m_IsDataSubscription && StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
@@ -848,7 +845,7 @@ public:
         {
           if (sub.IsDataSubscription() && StormDataMatchPathPartial(change.m_Path.data(), sub.GetDataPath().data()))
           {
-            sub.HandleChangePacket(change, obj_data.m_DatabaseDataGen);
+            sub.HandleChangePacket(change);
           }
         }
 
@@ -857,7 +854,6 @@ public:
       }
       else
       {
-        obj_data.m_ObjectDataGen++;
         for (auto & sub : obj_data.m_Subscriptions)
         {
           if (sub.m_IsDataSubscription == false && sub.m_State == kSubSentValid && StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
@@ -870,7 +866,7 @@ public:
         {
           if (sub.IsDataSubscription() == false && StormDataMatchPathPartial(change.m_Path.data(), sub.GetDataPath().data()))
           {
-            sub.HandleChangePacket(change, obj_data.m_ObjectDataGen);
+            sub.HandleChangePacket(change);
           }
         }
       }
@@ -1091,8 +1087,6 @@ public:
         }
 
         DDSExportedObject obj = { itr->first, state };
-        obj.m_ObjectDataGen = itr->second.m_ObjectDataGen;
-        obj.m_DatabaseDataGen = itr->second.m_DatabaseDataGen;
 
         g_ExportObjectsAsFull = false;
 
@@ -1188,9 +1182,6 @@ public:
         m_NodeState.m_SharedLocalCopyDatabase.CreateExistingSharedLocalCopySubscription(req_sub, obj_addr);
       }
 
-      obj_data.m_ObjectDataGen = object.m_ObjectDataGen;
-      obj_data.m_DatabaseDataGen = object.m_DatabaseDataGen;
-
       if (object.m_DatabaseObject.size() > 0)
       {
         obj_data.m_DatabaseObject = std::make_unique<DatabaseBackedType>();
@@ -1246,12 +1237,12 @@ public:
       {
         if (sub.m_DataSubscription)
         {
-          obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub, obj_data.m_DatabaseDataGen, obj_data.m_DatabaseObject.get(),
+          obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub, obj_data.m_DatabaseObject.get(),
             &DDSDataObjectStore<DataType, DatabaseBackedType>::GetDatabaseDataAtPath);
         }
         else
         {
-          obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub, obj_data.m_ObjectDataGen, obj_data.m_ActiveObject.get(),
+          obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub, obj_data.m_ActiveObject.get(),
             &DDSDataObjectStore<DataType, DatabaseBackedType>::GetObjectDataAtPath);
         }
       }

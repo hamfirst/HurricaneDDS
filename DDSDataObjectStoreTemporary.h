@@ -14,7 +14,6 @@ class DDSDataObjectStore<DataType, void> : public DDSDataObjectStoreBase
   struct ObjectData
   {
     bool m_Active;
-    int m_ObjectDataGen;
     std::unique_ptr<DataType> m_ActiveObject;
     std::unique_ptr<CallbackData> m_CallbackData;
     std::vector<DDSExportedMessage> m_PendingMessages;
@@ -66,7 +65,7 @@ public:
   ObjectData & CreateObject(DDSKey key)
   {
     DDSNodeInterface node_interface(m_NodeState, this, key);
-    auto itr = m_Objects.emplace(std::make_pair(key, ObjectData{ false, 1, std::make_unique<DataType>(node_interface) }));
+    auto itr = m_Objects.emplace(std::make_pair(key, ObjectData{ false, std::make_unique<DataType>(node_interface) }));
     auto & obj_data = itr.first->second;
 
     obj_data.m_ActiveObject = std::make_unique<DataType>(node_interface);
@@ -474,7 +473,7 @@ public:
         else
         {
           obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub_msg.m_DataPath, sub_msg.m_SharedLocalCopyKey,
-            obj_data.m_ObjectDataGen, sub_msg.m_DataSubscription, obj_data.m_ActiveObject.get(), 
+            sub_msg.m_DataSubscription, obj_data.m_ActiveObject.get(), 
             &DDSDataObjectStore<DataType, void>::GetObjectDataAtPath);
         }
 
@@ -571,7 +570,6 @@ public:
 
       auto & obj_data = itr->second;
 
-      obj_data.m_ObjectDataGen++;
       for (auto & sub : obj_data.m_Subscriptions)
       {
         if (sub.m_State == kSubSentValid && StormDataMatchPathPartial(change.m_Path.data(), sub.m_DataPath.data()))
@@ -584,7 +582,7 @@ public:
       {
         if (sub.IsDataSubscription() == false && StormDataMatchPathPartial(change.m_Path.data(), sub.GetDataPath().data()))
         {
-          sub.HandleChangePacket(change, obj_data.m_ObjectDataGen);
+          sub.HandleChangePacket(change);
         }
       }
     }
@@ -792,8 +790,6 @@ public:
         m_NodeState.m_SharedLocalCopyDatabase.DestroySharedLocalCopySubscription(req_sub.m_SharedLocalCopyKey, req_sub.m_SubscriptionId);
       }
 
-      obj.m_ObjectDataGen = itr->second.m_ObjectDataGen;
-
       m_NodeState.ExportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, itr->first }, obj.m_SharedSubscriptions);
 
       output.emplace_back(std::move(obj));
@@ -826,7 +822,7 @@ public:
     for (auto & object : object_list)
     {
       DDSNodeInterface node_interface(m_NodeState, this, object.m_Key);
-      ObjectData obj_data = { object.m_State == DDSExportedObjectState::kLoaded, 1, std::make_unique<DataType>(node_interface) };
+      ObjectData obj_data = { object.m_State == DDSExportedObjectState::kLoaded, std::make_unique<DataType>(node_interface) };
 
       if (StormReflParseJson(*obj_data.m_ActiveObject.get(), object.m_ActiveObject.c_str()) == false)
       {
@@ -849,8 +845,6 @@ public:
         m_NodeState.m_SharedLocalCopyDatabase.CreateExistingSharedLocalCopySubscription(req_sub, obj_addr);
       }
 
-      obj_data.m_ObjectDataGen = object.m_ObjectDataGen;
-
       m_NodeState.ImportSharedSubscriptions(DDSDataObjectAddress{ m_ObjectTypeId, object.m_Key }, object.m_SharedSubscriptions, routing_table_gen);
 
       DDS_CALL_FUNC(MoveObject, *obj_data.m_ActiveObject.get());
@@ -863,7 +857,7 @@ public:
         }
         else
         {
-          obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub, obj_data.m_ObjectDataGen, obj_data.m_ActiveObject.get(),
+          obj_data.m_AggregateSubscriptions.emplace_back(m_NodeState, sub, obj_data.m_ActiveObject.get(),
             &DDSDataObjectStore<DataType, void>::GetObjectDataAtPath);
         }
       }

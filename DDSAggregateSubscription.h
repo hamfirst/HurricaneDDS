@@ -15,9 +15,9 @@ class DDSAggregateSubscription
 {
 public:
   DDSAggregateSubscription(DDSNodeState & node_state, const std::string & data_path, DDSKey shared_local_object_key, 
-    int data_gen, bool data_subscription, void * object, bool (*GetDataAtPath)(void * obj, const char * path, std::string & data));
+    bool data_subscription, void * object, bool (*GetDataAtPath)(void * obj, const char * path, std::string & data));
 
-  DDSAggregateSubscription(DDSNodeState & node_state, DDSExportedAggregateSubscription & msg, int data_gen,
+  DDSAggregateSubscription(DDSNodeState & node_state, DDSExportedAggregateSubscription & msg,
     void * object, bool(*GetDataAtPath)(void * obj, const char * path, std::string & data));
 
   DDSAggregateSubscription(const DDSAggregateSubscription & rhs) = default;
@@ -34,7 +34,7 @@ public:
   DDSKey GetSharedLocalCopyKey() const;
   const std::string & GetDataPath() const;
 
-  void HandleChangePacket(const ReflectionChangeNotification & change_notification, int data_gen);
+  void HandleChangePacket(const ReflectionChangeNotification & change_notification);
   void HandleAck(DDSNodeId node_id, DDSKey server_request_id, int data_gen, int routing_table_gen);
   void HandleObjectDestroyed();
 
@@ -42,7 +42,7 @@ public:
   void ClearExpiredChanges();
 
   void Export(DDSExportedAggregateSubscription & msg);
-  void Import(DDSExportedAggregateSubscription & msg, int data_gen);
+  void Import(DDSExportedAggregateSubscription & msg);
 
 
 private:

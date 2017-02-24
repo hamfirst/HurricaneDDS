@@ -10,14 +10,13 @@
 
 
 DDSAggregateSubscription::DDSAggregateSubscription(
-  DDSNodeState & node_state, const std::string & data_path, DDSKey shared_local_object_key, 
-  int data_gen, bool data_subscription, 
+  DDSNodeState & node_state, const std::string & data_path, DDSKey shared_local_object_key, bool data_subscription, 
   void * object, bool(*GetDataAtPath)(void * obj, const char * path, std::string & data)) :
   m_NodeState(&node_state),
   m_Object(object),
   m_GetDataAtPath(GetDataAtPath),
   m_SharedLocalCopyKey(shared_local_object_key),
-  m_DataGen(data_gen),
+  m_DataGen(0),
   m_DataSubcription(data_subscription),
   m_DataPath(data_path)
 {
@@ -26,13 +25,13 @@ DDSAggregateSubscription::DDSAggregateSubscription(
 }
 
 DDSAggregateSubscription::DDSAggregateSubscription(
-  DDSNodeState & node_state, DDSExportedAggregateSubscription & msg, int data_gen,
+  DDSNodeState & node_state, DDSExportedAggregateSubscription & msg,
   void * object, bool(*GetDataAtPath)(void * obj, const char * path, std::string & data)) :
   m_NodeState(&node_state),
   m_Object(object),
   m_GetDataAtPath(GetDataAtPath)
 {
-  Import(msg, data_gen);
+  Import(msg);
 }
 
 void DDSAggregateSubscription::CreateSubscription(DDSNodeId node_id, DDSKey server_request_id, int data_gen)
@@ -114,9 +113,9 @@ const std::string & DDSAggregateSubscription::GetDataPath() const
   return m_DataPath;
 }
 
-void DDSAggregateSubscription::HandleChangePacket(const ReflectionChangeNotification & change_notification, int data_gen)
+void DDSAggregateSubscription::HandleChangePacket(const ReflectionChangeNotification & change_notification)
 {
-  m_DataGen = data_gen;
+  m_DataGen++;
   
   if (m_Active == false)
   {
@@ -143,12 +142,12 @@ void DDSAggregateSubscription::HandleChangePacket(const ReflectionChangeNotifica
 
     DDSSharedLocalCopyChange msg;
     msg.m_Change = change_packet;
-    msg.m_DataGen = data_gen;
+    msg.m_DataGen = m_DataGen;
     msg.m_SharedLocalCopy = m_SharedLocalCopyKey;
 
     DDSExportedAggregateSubscriptionChange change_record;
     change_record.m_Change = change_packet;
-    change_record.m_DataGen = data_gen;
+    change_record.m_DataGen = m_DataGen;
     change_record.m_WaitForAllClearGen = 0;
 
     for (auto & elem : m_SubscribedNodes)
@@ -254,9 +253,10 @@ void DDSAggregateSubscription::Export(DDSExportedAggregateSubscription & msg)
   msg.m_HasChangesWaiting = m_HasChangesWaiting;
   msg.m_DataSubscription = m_DataSubcription;
   msg.m_DataPath = m_DataPath;
+  msg.m_DataGen = m_DataGen;
 }
 
-void DDSAggregateSubscription::Import(DDSExportedAggregateSubscription & msg, int data_gen)
+void DDSAggregateSubscription::Import(DDSExportedAggregateSubscription & msg)
 {
   m_SharedLocalCopyKey = msg.m_SharedLocalCopyKey;
   m_Changes = std::move(msg.m_Changes);
@@ -264,4 +264,5 @@ void DDSAggregateSubscription::Import(DDSExportedAggregateSubscription & msg, in
   m_HasChangesWaiting = msg.m_HasChangesWaiting;
   m_DataSubcription = msg.m_DataSubscription;
   m_DataPath = msg.m_DataPath;
+  m_DataGen = msg.m_DataGen;
 }
