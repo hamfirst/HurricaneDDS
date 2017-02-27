@@ -108,7 +108,7 @@ public:
 
     SendMessageToObjectWithResponderReturnArg(GetObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()), key, StormReflGetMemberFunctionIndex(target_func),
       responder.m_Data.m_ObjectType, responder.m_Data.m_Key, responder.m_Data.m_ReturnMethodId, responder.m_Data.m_ErrorMethodId,
-      DDSSerializeCallData(std::forward<CallArgs>(args)...), responder.m_Data.m_ReturnArg);
+      DDSSerializeCallData(std::forward<CallArgs>(args)...), std::string(responder.m_Data.m_ReturnArg));
   }
 
   void CallWithForwardedResponderRaw(uint32_t type_name_hash, int method_id, DDSKey key, DDSResponderData & responder, std::string && call_args)

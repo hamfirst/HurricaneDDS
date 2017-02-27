@@ -36,13 +36,15 @@ public:
       return;
     }
 
-    UpdateDatabase(DatabaseType::Collection(), GetObjectTypeId(), StormReflEncodeJson(data), GetLocalKey(), GetObjectTypeId(), GetLocalKey(),
+    UpdateDatabaseInternal(DatabaseType::Collection(), GetObjectTypeId(), StormReflEncodeJson(data), GetLocalKey(), GetObjectTypeId(), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), std::string());
   }
 
-  template <typename DatabaseType, typename ReturnObject, typename ReturnArg>
-  void UpdateDatabase(const DatabaseType & data, void (ReturnObject::*return_func)(ReturnArg, bool), ReturnObject * p_this, ReturnArg && return_arg)
+  template <typename DatabaseType, typename ReturnObject, typename ReturnArg, typename FuncArg>
+  void UpdateDatabase(const DatabaseType & data, void (ReturnObject::*return_func)(FuncArg, bool), ReturnObject * p_this, ReturnArg && return_arg)
   {
+    static_assert(std::is_convertible<ReturnArg, FuncArg>::value, "Invalid call args for function");
+
     if (GetObjectTypeId() != GetDataObjectType(StormReflTypeInfo<DatabaseType>::GetNameHash()))
     {
       DDSLog::LogError("Attemping to modify database from an external object");
@@ -50,7 +52,7 @@ public:
       return;
     }
 
-    UpdateDatabase(DatabaseType::Collection(), GetObjectTypeId(), StormReflEncodeJson(data), GetLocalKey(), GetObjectTypeId(), GetLocalKey(),
+    UpdateDatabaseInternal(DatabaseType::Collection(), GetObjectTypeId(), StormReflEncodeJson(data), GetLocalKey(), GetObjectTypeId(), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
   }
 

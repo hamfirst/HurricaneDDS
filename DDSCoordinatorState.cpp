@@ -78,6 +78,14 @@ int DDSCoordinatorState::GetTargetObjectIdForNameHash(uint32_t name_hash) const
 {
   for (std::size_t index = 0; index < m_DatabaseObjectNameHashes.size(); index++)
   {
+    if (m_DataObjectNameHashes[index] == name_hash)
+    {
+      return (int)index;
+    }
+  }
+
+  for (std::size_t index = 0; index < m_DatabaseObjectNameHashes.size(); index++)
+  {
     if (m_DatabaseObjectNameHashes[index] == name_hash)
     {
       return (int)index;

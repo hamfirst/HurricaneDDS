@@ -763,10 +763,13 @@ public:
           DDSLog::LogError("Attempted to unlock and object that wasn't locked");
         }
 
+        BeginObjectModification(key);
         if (unlock.m_Data.size() > 0)
         {
           StormReflParseJson(*obj_data.m_DatabaseObject.get(), unlock.m_Data.c_str());
         }
+
+        EndObjectModification();
 
         obj_data.m_State = kActive;
         TryProcessAllMessages(key, obj_data);
