@@ -847,7 +847,7 @@ void DDSNodeState::CreateTokenValidatorRequest(uint64_t token, int type, DDSDefe
 
   if (IsNodeInRoutingTable(node_id, m_RoutingTable.value()) == false)
   {
-    m_TokenValidator.MarkTokenComplete(request_id, false, std::move(token_data));
+    m_TokenValidator.MarkTokenComplete(request_id, false, std::string());
     return;
   }
 
