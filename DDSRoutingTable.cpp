@@ -142,6 +142,27 @@ DDSRoutingTableNodeInfo GetNodeDataForNodeId(DDSNodeId node_id, const DDSRouting
   return{};
 }
 
+bool IsNodeInRoutingTable(DDSNodeId node_id, const DDSRoutingTable & routing_table)
+{
+  for (auto & node_data : routing_table.m_Table)
+  {
+    if (node_data.m_Id == node_id)
+    {
+      return true;
+    }
+  }
+
+  for (auto & node_data : routing_table.m_Defunct)
+  {
+    if (node_data.m_Id == node_id)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 DDSRoutingTableNodeInfo GetNodeDataForKey(DDSKey key, const DDSRoutingTable & routing_table, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & key_ranges)
 {
   auto node_id = GetNodeIdForKey(key, key_ranges);

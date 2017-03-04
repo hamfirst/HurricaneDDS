@@ -30,6 +30,11 @@ void DDSNodeNetworkService::SendMessageToServer(DDSNodeId node_id, DDSServerToSe
     return;
   }
 
+  if (IsNodeInRoutingTable(node_id, m_NodeState.GetRoutingTable()) == false)
+  {
+    return;
+  }
+
   bool sent = false;
 
   auto itr = m_NodeConnectionMap.find(node_id);

@@ -14,5 +14,7 @@ void GetKeyRanges(const DDSRoutingTable & routing_table, std::vector<std::pair<D
 DDSNodeId GetNodeIdForKey(DDSKey key, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & key_ranges);
 DDSRoutingTableNodeInfo GetNodeDataForNodeId(DDSNodeId node_id, const DDSRoutingTable & routing_table);
 
+bool IsNodeInRoutingTable(DDSNodeId node_id, const DDSRoutingTable & routing_table);
+
 DDSRoutingTableNodeInfo GetNodeDataForKey(DDSKey key,
   const DDSRoutingTable & routing_table, const std::vector<std::pair<DDSNodeId, DDSKeyRange>> & key_ranges);
