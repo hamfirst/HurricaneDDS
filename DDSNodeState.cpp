@@ -1259,3 +1259,24 @@ const void * DDSNodeState::GetSharedObjectPointer(int shared_object_type)
 {
   return m_SharedObjects[shared_object_type - m_DataObjectList.size()].get()->GetSharedObjectPointer();
 }
+
+std::string DDSNodeState::GetMemoryReport()
+{
+  std::string report = "Node\n";
+
+  report += "  Backend: " + m_Backend.GetMemoryReport() + "\n";
+  for (int index = 0; index < (int)DDSDataObjectPriority::kCount; index++)
+  {
+    report += "  Queue" + std::to_string(index) + " " + std::to_string(m_QueuedTargetedMessages[index].size()) + "\n";
+  }
+
+  report += m_Database->MemoryReport();
+  report += m_SharedLocalCopyDatabase.GetMemoryReport() + "\n";
+
+  for (auto & dos : m_DataObjectList)
+  {
+    report += dos->MemoryReport();
+  }
+
+  return report;
+}

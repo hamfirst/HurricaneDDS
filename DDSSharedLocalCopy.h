@@ -45,6 +45,8 @@ public:
 
   void FinalizeLoad();
 
+  std::string MemoryReport();
+
 private:
 
   struct SubscriptionData

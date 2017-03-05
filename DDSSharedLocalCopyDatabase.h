@@ -37,6 +37,7 @@ public:
   void GetSubscriptionInfo(DDSExportedAggregateRequestedSubscription & sub_info);
 
   void HandleAllClear();
+  std::string GetMemoryReport();
 
   static DDSKey GetSharedLocalCopyKey(DDSDataObjectAddress addr, DDSKey path_hash, bool is_data_sub);
 

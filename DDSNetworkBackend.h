@@ -15,6 +15,8 @@ public:
   DDSNetworkBackend(const StormSockets::StormSocketInitSettings & settings);
   ~DDSNetworkBackend();
 
+  std::string GetMemoryReport();
+
 private:
   friend class DDSCoordinatorNetworkService;
   friend class DDSCoordinatorClientProtocol;

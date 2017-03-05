@@ -290,6 +290,7 @@ void DDSSharedLocalCopy::FinalizeLoad()
   m_DataValid = true;
 }
 
+
 std::string DDSSharedLocalCopy::GetInitialSubscriptionResponse(const SubscriptionData & data)
 {
   std::string packet;
@@ -333,3 +334,8 @@ std::string DDSSharedLocalCopy::GetErrorResponse(const SubscriptionData & data)
   return packet;
 }
 
+std::string DDSSharedLocalCopy::MemoryReport()
+{
+  std::string report = "Subs: " + std::to_string(m_Subscriptions.size()) + " ";
+  return report + m_Data->MemoryReport();
+}

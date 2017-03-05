@@ -110,6 +110,8 @@ public:
 
   time_t GetNetworkTime() override;
 
+  std::string GetNodeMemoryReport();
+
 private:
 
   int GetObjectType(uint32_t object_type_name_hash) override;

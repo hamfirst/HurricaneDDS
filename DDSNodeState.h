@@ -258,6 +258,8 @@ private:
 
   const void * GetSharedObjectPointer(int shared_object_type);
 
+  std::string GetMemoryReport();
+
 private:
 
   bool m_IsReady = false;

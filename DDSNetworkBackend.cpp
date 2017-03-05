@@ -14,3 +14,14 @@ DDSNetworkBackend::~DDSNetworkBackend()
 {
 
 }
+
+std::string DDSNetworkBackend::GetMemoryReport()
+{
+  std::string report;
+  for (auto & val : m_Backend->GetMallocReport())
+  {
+    report += std::to_string(val) + " ";
+  }
+
+  return report;
+}

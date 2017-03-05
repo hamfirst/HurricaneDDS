@@ -42,6 +42,11 @@ void DDSBaseSharedLocalCopyData::DecRef(int version)
   CheckOldestVersion();
 }
 
+std::string DDSBaseSharedLocalCopyData::MemoryReport()
+{
+  return "Versions: " + std::to_string(m_Versions.size());
+}
+
 void DDSBaseSharedLocalCopyData::InstantiateVersion(Version & version, int data_gen)
 {
   if (version.m_Obj != nullptr)

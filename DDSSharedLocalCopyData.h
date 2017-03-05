@@ -19,7 +19,7 @@ public:
   void AddRef(int version);
   void DecRef(int version);
 
-
+  std::string MemoryReport();
 protected:
 
   friend class DDSSharedLocalCopy;

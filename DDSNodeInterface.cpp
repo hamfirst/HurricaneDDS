@@ -317,3 +317,8 @@ time_t DDSNodeInterface::GetNetworkTime()
 {
   return m_NodeState.GetNetworkTime();
 }
+
+std::string DDSNodeInterface::GetNodeMemoryReport()
+{
+  return m_NodeState.GetMemoryReport();
+}

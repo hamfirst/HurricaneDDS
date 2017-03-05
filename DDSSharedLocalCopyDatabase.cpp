@@ -189,11 +189,26 @@ void DDSSharedLocalCopyDatabase::HandleAllClear()
   }
 }
 
+std::string DDSSharedLocalCopyDatabase::GetMemoryReport()
+{
+  std::string report = "Shared Local Copy Database\n";
+  report += "  Objects: " + std::to_string(m_Database.size()) + "\n";
+
+  for (auto & elem : m_Database)
+  {
+    if (elem.second.m_Data)
+    {
+      report += "  " + std::to_string(elem.first) + ": " + elem.second.m_Data->MemoryReport() + "\n";
+    }
+  }
+
+  return report;
+}
+
 DDSKey DDSSharedLocalCopyDatabase::GetSharedLocalCopyKey(DDSDataObjectAddress addr, DDSKey path_hash, bool is_data_sub)
 {
   return addr.m_ObjectKey + crc64integer(addr.m_ObjectType) | path_hash + is_data_sub;
 }
-
 
 void DDSSharedLocalCopyDatabase::SpawnImportedSubscription(CopyInfo & copy, DDSKey shared_local_copy_key, std::unique_ptr<DDSBaseSharedLocalCopyData>(*CreateFunc)())
 {
