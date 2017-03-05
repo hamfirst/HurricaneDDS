@@ -326,3 +326,15 @@ void DDSDatabaseConnectionPool::TriggerCallbacks()
   }
 }
 
+std::string DDSDatabaseConnectionPool::MemoryReport()
+{
+  std::string report = "Database:\n";
+  for (int index = 0; index < m_NumThreads; index++)
+  {
+    report += "  Thread" + std::to_string(index);
+    report += ": " + std::to_string(m_Threads[index].m_PendingInputs.size());
+    report += "\n";
+  }
+
+  return report;
+}

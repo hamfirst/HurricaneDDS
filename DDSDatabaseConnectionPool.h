@@ -34,6 +34,9 @@ public:
 
   void TriggerCallbacks();
 
+  std::string MemoryReport();
+
+
   static const int kQueueSize = 1024;
 
 private:

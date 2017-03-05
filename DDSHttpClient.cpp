@@ -50,6 +50,8 @@ void DDSHttpClient::Update()
           break;
         }
       }
+
+      m_HttpClient->FreeIncomingHttpResponse(event_info.GetHttpResponseReader());
       break;
     case StormSockets::StormSocketEventType::Disconnected:
       for (auto & callback : m_PendingCallbacks)

@@ -1252,6 +1252,42 @@ public:
     }
   }
 
+  std::string MemoryReport()
+  {
+    std::string report = "Data Object - ";
+    report += StormReflTypeInfo<DataType>::GetName();
+    report += "\n";
+    report += "  Live Objects: " + std::to_string(m_Objects.size()) + "\n";
+    report += "  Changes: " + std::to_string(m_Changes.size()) + "\n";
+    report += "  Dead Objects: " + std::to_string(m_DeadObjects.size()) + "\n";
+    report += "  Promoted Objects: " + std::to_string(m_PromotedObjects.size()) + "\n";
+    report += "  Finalized Objects: " + std::to_string(m_FinalizedObjects.size()) + "\n\n";
+
+    std::size_t pending_messages = 0;
+    std::size_t subs = 0;
+    std::size_t req_subs = 0;
+    std::size_t agg_subs = 0;
+    std::size_t req_agg_subs = 0;
+    for (auto & elem : m_Objects)
+    {
+      auto & obj_data = elem.second;
+
+      pending_messages += obj_data.m_PendingMessages.size();
+      subs += obj_data.m_Subscriptions.size();
+      req_subs += obj_data.m_RequestedSubscriptions.size();
+      agg_subs += obj_data.m_AggregateSubscriptions.size();
+      req_agg_subs += obj_data.m_RequestedAggregateSubscriptions.size();
+    }
+
+    report += "  Pending Messages:" + std::to_string(pending_messages) + "\n";
+    report += "  Subscriptions:" + std::to_string(subs) + "\n";
+    report += "  Requested Subscriptions:" + std::to_string(req_subs) + "\n";
+    report += "  Aggregate Subscriptions:" + std::to_string(agg_subs) + "\n";
+    report += "  Requested Aggregate Subscriptions:" + std::to_string(req_agg_subs) + "\n";
+    return report;
+  }
+
+
 private:
 
   DDSNodeState & m_NodeState;
