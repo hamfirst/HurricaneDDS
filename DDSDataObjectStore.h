@@ -344,13 +344,17 @@ public:
     obj_data.m_State = kCreating;
     obj_data.m_ActiveObject = std::make_unique<DataType>(node_interface, *obj_data.m_DatabaseObject.get());
 
-    if (DDS_CALL_FUNC(BeginLoad, *obj_data.m_ActiveObject.get()) == false)
+    if (DDSHasFuncBeginLoad<DataType>::value)
     {
-      FinalizeObjectLoad(key);
+      BeginObjectModification(key);
+      DDS_CALL_FUNC(BeginLoad, *obj_data.m_ActiveObject.get());
+      EndObjectModification();
+
+      TryProcessAllMessages(key, obj_data);
     }
     else
     {
-      TryProcessAllMessages(key, obj_data);
+      FinalizeObjectLoad(key);
     }
   }
 

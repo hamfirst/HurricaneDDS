@@ -84,7 +84,13 @@ public:
     SetNotifyCallback(*obj_data.m_ActiveObject.get(), data_obj_callback, obj_data.m_CallbackData.get());
 
 
-    if (DDS_CALL_FUNC(BeginLoad, *obj_data.m_ActiveObject.get()) == false)
+    if (DDSHasFuncBeginLoad<DataType>::value)
+    {
+      BeginObjectModification(key);
+      DDS_CALL_FUNC(BeginLoad, *obj_data.m_ActiveObject.get());
+      EndObjectModification();
+    }
+    else
     {
       FinalizeObjectLoad(key);
     }
