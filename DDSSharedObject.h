@@ -280,6 +280,8 @@ public:
     DDSDataObjectAddress addr = { sub_data.m_ResponderObjectType, sub_data.m_ResponderKey };
     auto result = m_Subscriptions.emplace(std::make_pair(addr, std::vector<DDSExportedSubscription>{}));
 
+    m_SubscriptionAddrMap.emplace(sub_data.m_SubscriptionId, addr);
+
     std::vector<DDSExportedSubscription> & sub_list = result.first->second;
     sub_list.emplace_back(std::move(sub_data));
 
@@ -304,7 +306,13 @@ public:
 
   void DestroySubscription(DDSDataObjectAddress addr, DDSKey subscription_id) override
   {
-    auto itr = m_Subscriptions.find(addr);
+    auto addr_itr = m_SubscriptionAddrMap.find(subscription_id);
+    if (addr_itr == m_SubscriptionAddrMap.end())
+    {
+      return;
+    }
+
+    auto itr = m_Subscriptions.find(addr_itr->second);
     if (itr == m_Subscriptions.end())
     {
       return;
@@ -328,6 +336,11 @@ public:
       return;
     }
 
+    for (auto sub_itr = itr->second.begin(); sub_itr != itr->second.end(); ++sub_itr)
+    {
+      m_SubscriptionAddrMap.erase(sub_itr->m_SubscriptionId);
+    }
+
     exported_list.emplace_back(std::make_pair(m_SharedObjectType, std::move(itr->second)));
     m_Subscriptions.erase(itr);
   }
@@ -335,6 +348,11 @@ public:
   void ImportSubscriptions(DDSDataObjectAddress addr, std::vector<DDSExportedSubscription> && subs, DDSNodeSharedObjectResolver & resolver, int table_gen) override
   {
     m_Subscriptions.emplace(std::make_pair(addr, std::move(subs)));
+
+    for (auto & sub : subs)
+    {
+      m_SubscriptionAddrMap.emplace(sub.m_SubscriptionId, addr);
+    }
 
     auto change_lists = resolver.GetChangeList(table_gen, addr.m_ObjectKey);
 
@@ -364,5 +382,6 @@ private:
   std::unique_ptr<DataType> m_DataObject;
 
   std::map<DDSDataObjectAddress, std::vector<DDSExportedSubscription>> m_Subscriptions;
+  std::map<DDSKey, DDSDataObjectAddress> m_SubscriptionAddrMap;
   int m_SharedObjectType;
 };
