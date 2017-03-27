@@ -42,7 +42,6 @@ int DDSResolverBackend::RequestResolve(const char * addr, bool reverse_lookup, D
       return;
     }
 
-    elem->second->m_Complete = true;
 
     if (!ec)
     {
@@ -72,6 +71,7 @@ int DDSResolverBackend::RequestResolve(const char * addr, bool reverse_lookup, D
       elem->second->m_Result = ec.message();
     }
 
+    elem->second->m_Complete = true;
     m_OutputMap.erase(elem);
   };
 
