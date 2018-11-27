@@ -1,6 +1,6 @@
 #pragma once
 
-#include <asio\asio.hpp>
+#include <asio/asio.hpp>
 
 #include <map>
 
@@ -13,7 +13,7 @@ public:
   ~DDSResolverBackend();
 
   void Update();
-  int RequestResolve(const char * hostname, DDSResolverRequest * request);
+  int RequestResolve(const char * addr, bool reverse_lookup, DDSResolverRequest * request);
   void CancelResolve(int id);
 
 private:

@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-#include <hash\Hash64.h>
+#include <hash/Hash64.h>
 
 #include "DDSKey.h"
 
@@ -21,6 +21,11 @@ struct DDSDataObjectAddress
     if (m_ObjectKey < rhs.m_ObjectKey)
     {
       return true;
+    }
+
+    if (m_ObjectKey > rhs.m_ObjectKey)
+    {
+      return false;
     }
 
     return m_ObjectType < rhs.m_ObjectType;

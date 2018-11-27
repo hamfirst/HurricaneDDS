@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "DDSDataObjectStore.h"
+#include "DDSDataObjectStoreTemporary.h"
 #include "DDSDataObjectName.h"
 
 template <class DataType, class DatabaseBackedType>

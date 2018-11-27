@@ -1,6 +1,6 @@
 
 
-#include <StormSockets\StormSocketBackend.h>
+#include <StormSockets/StormSocketBackend.h>
 
 #include "DDSNetworkBackend.h"
 
@@ -13,4 +13,15 @@ DDSNetworkBackend::DDSNetworkBackend(const StormSockets::StormSocketInitSettings
 DDSNetworkBackend::~DDSNetworkBackend()
 {
 
+}
+
+std::string DDSNetworkBackend::GetMemoryReport()
+{
+  std::string report;
+  for (auto & val : m_Backend->GetMallocReport())
+  {
+    report += std::to_string(val) + " ";
+  }
+
+  return report;
 }

@@ -4,7 +4,59 @@
 
 #include "DDSKey.h"
 
-#include <StormRefl\StormRefl.h>
+#include <StormRefl/StormRefl.h>
+
+static const int kSubSentValid = 1;
+static const int kSubUnsent = 0;
+static const int kSubSentInvalid = -1;
+
+struct DDSExportedSubscription
+{
+  STORM_REFL;
+  std::string m_DataPath;
+  DDSKey m_SubscriptionId;
+
+  DDSKey m_ResponderKey;
+  int m_ResponderObjectType;
+  int m_ResponderMethodId;
+  int m_ErrorMethodId;
+  std::string m_ResponderArgs;
+
+  bool m_IsDataSubscription;
+  bool m_DeltaOnly;
+  bool m_ForceLoad;
+  int m_State;
+};
+
+struct DDSExportedRequestedSubscription
+{
+  STORM_REFL;
+  DDSKey m_Key;
+  int m_ObjectType;
+
+  DDSKey m_SubscriptionId;
+};
+
+struct DDSExportedAggregateRequestedSubscription
+{
+  STORM_REFL;
+  DDSKey m_SharedLocalCopyKey;
+  DDSKey m_SubscriptionId;
+  
+  DDSKey m_Key;
+  int m_ObjectType;
+  std::string m_Path;
+
+  DDSKey m_ReturnKey;
+  int m_ReturnObjectType;
+  std::string m_ReturnArgs;
+  int m_ReturnMethod;
+  int m_ErrorMethod;
+  int m_DataGen;
+
+  bool m_DataSub;
+  bool m_DataValid;
+};
 
 struct DDSTargetedMessageBase
 {
@@ -28,6 +80,7 @@ struct DDSTargetedMessageWithResponderBase
   int m_ResponderObjectType;
   DDSKey m_ResponderKey;
   int m_ResponderMethodId;
+  int m_ErrorMethodId;
 
   std::string m_ReturnArg;
 };
@@ -57,14 +110,12 @@ struct DDSCreateSubscriptionBase
   int m_ResponderObjectType;
   DDSKey m_ResponderKey;
   int m_ResponderMethodId;
+  int m_ErrorMethodId;
   std::string m_ReturnArg;
 
+  bool m_DataSubscription;
   bool m_DeltaOnly;
-};
-
-struct DDSCreateDataSubscriptionBase : public DDSCreateSubscriptionBase
-{
-  STORM_REFL;
+  bool m_ForceLoad;
 };
 
 struct DDSDestroySubscriptionBase
@@ -80,10 +131,23 @@ struct DDSSubscriptionDeletedBase
 {
   STORM_REFL;
 
-  int m_ResponderObjectType;
-  DDSKey m_ResponderKey;
-  int m_ResponderMethodId;
+  DDSKey m_Key;
+  int m_ObjectType;
   DDSKey m_SubscriptionId;
 };
 
+struct DDSValidateTokenRequestBase
+{
+  STORM_REFL;
+  uint64_t m_RequestId;
+  uint32_t m_Token;
+  int m_Type;
+};
 
+struct DDSValidateTokenResponseBase
+{
+  STORM_REFL;
+  uint64_t m_RequestId;
+  bool m_Success;
+  std::string m_TokenData;
+};

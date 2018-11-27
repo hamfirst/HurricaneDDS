@@ -2,7 +2,7 @@
 
 #include "DDSNodeId.h"
 
-#include <StormSockets\StormSocketConnectionId.h>
+#include <StormSockets/StormSocketConnectionId.h>
 
 class DDSNodeState;
 
@@ -29,7 +29,13 @@ public:
   bool HandleConnectionEstablished();
   bool HandleMessage(const char * msg, int length);
 
+
   void SendMessageToCoordinator(const std::string && data);
+  void SendCPUUsage();
+  time_t GetNetworkTime();
+
+  bool ShutDown();
+  void Disconnect();
 
 private:
 
@@ -51,12 +57,13 @@ private:
 
   State m_State;
 
-  StormSockets::StormSocketConnectionId m_ConnectionId;
+  StormSockets::StormSocketConnectionId m_ConnectionId = StormSockets::StormSocketConnectionId::InvalidConnectionId;
   uint64_t m_ExpectedChallengeResponse;
 
   std::string m_CoordinatorIpAddr;
   int m_CoordinatorPort;
 
+  time_t m_NetworkTime;
   std::vector<char> m_MessageBuffer;
 
   DDSNodeId m_NodeId;

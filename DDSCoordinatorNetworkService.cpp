@@ -1,24 +1,26 @@
 
 #include "DDSLog.h"
+#include "DDSCoordinatorState.h"
 #include "DDSCoordinatorNetworkService.h"
 #include "DDSCoordinatorServerProtocol.h"
 
-#include <StormSockets\StormSocketServerFrontendWebsocket.h>
+#include <StormSockets/StormSocketServerFrontendWebsocket.h>
 
 DDSCoordinatorNetworkService::DDSCoordinatorNetworkService(
   DDSNetworkBackend & backend,
   DDSCoordinatorState & coordinator_state,
   const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings) :
   m_CoordinatorState(coordinator_state),
-  m_Backend(backend),
-  m_ServerFrontend(std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(server_settings, m_Backend.m_Backend.get()))
+  m_Backend(backend)
 {
-
+  auto settings = server_settings;
+  settings.EventSemaphore = &m_Semaphore;
+  m_ServerFrontend = std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(settings, m_Backend.m_Backend.get());
 }
 
 void DDSCoordinatorNetworkService::WaitForEvent()
 {
-  m_ServerFrontend->WaitForEvent(100);
+  m_Semaphore.WaitOne(100);
 }
 
 void DDSCoordinatorNetworkService::ProcessEvents()
@@ -29,14 +31,20 @@ void DDSCoordinatorNetworkService::ProcessEvents()
     switch (event.Type)
     {
     case StormSockets::StormSocketEventType::ClientConnected:
-      DDSLog::LogVerbose("Got client connect from %d", event.ConnectionId);
+      DDSLog::LogVerbose("Got coordinator client connect from %d", event.ConnectionId.GetIndex());
       HandleConnect(event.ConnectionId, event.RemoteIP, event.RemotePort);
+      break;
+    case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
+      DDSLog::LogVerbose("Got coordinator client handshake complete from %d", event.ConnectionId.GetIndex());
       break;
     case StormSockets::StormSocketEventType::Data:
       HandleData(event.ConnectionId, event.GetWebsocketReader());
+      m_ServerFrontend->FreeIncomingPacket(event.GetWebsocketReader());
       break;
     case StormSockets::StormSocketEventType::Disconnected:
-      DDSLog::LogVerbose("Got client disconnect from %d", event.ConnectionId);
+      DDSLog::LogVerbose("Got coordinator client disconnect from %d", event.ConnectionId.GetIndex());
+
+      HandleDisconnect(event.ConnectionId);
       m_ServerFrontend->FinalizeConnection(event.ConnectionId);
       break;
     }
@@ -62,7 +70,7 @@ void DDSCoordinatorNetworkService::SendMessageToAllConnectedClients(const char *
   {
     if (itr.second->IsConnected())
     {
-      DDSLog::LogVerbose("Sending message to client %d", itr.first);
+      DDSLog::LogVerbose("Sending message to client %d", itr.first.GetIndex());
       m_Backend.m_Backend->SendPacketToConnectionBlocking(packet, itr.first);
     }
   }
@@ -98,4 +106,20 @@ void DDSCoordinatorNetworkService::HandleData(StormSockets::StormSocketConnectio
 
   std::unique_ptr<DDSCoordinatorServerProtocol> & protocol = m_ConnectionIdMap.at(connection_id);
   protocol->HandleMessage(m_RecvBuffer.data(), reader.GetDataLength());
+}
+
+void DDSCoordinatorNetworkService::HandleDisconnect(StormSockets::StormSocketConnectionId connection_id)
+{
+  auto itr = m_ConnectionIdMap.find(connection_id);
+  if (itr != m_ConnectionIdMap.end())
+  {
+    auto protocol = std::move(itr->second);
+    m_ConnectionIdMap.erase(itr);
+
+    if (protocol->IsConnected())
+    {
+      m_CoordinatorState.DestroyNode(protocol->GetNodeId());
+      m_CoordinatorState.SyncRoutingTable();
+    }
+  }
 }

@@ -7,20 +7,34 @@
 #include "DDSDataObjectStoreHelpers.h"
 #include "DDSSharedObjectBase.h"
 #include "DDSSharedObjectInterface.h"
+#include "DDSServerMessage.h"
 
 #include "DDSServerToServerMessages.refl.meta.h"
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
 
-#include <StormData\StormDataChangePacket.h>
+#include <StormRefl/StormReflJsonStd.h>
+#include <StormData/StormDataChangePacket.h>
+#include <StormData/StormDataParent.h>
 
 template <typename DataType>
 class DDSSharedObject : public DDSSharedObjectBase
 {
 public:
   DDSSharedObject(DDSCoordinatorState & coordinator_state, int shared_object_type) :
-    m_Coordinator(coordinator_state), m_DataObject(std::make_unique<DataType>(DDSSharedObjectInterface(coordinator_state, this))), m_SharedObjectType(shared_object_type)
+    m_Interface(coordinator_state, this),
+    m_Coordinator(coordinator_state), 
+    m_DataObject(std::make_unique<DataType>(m_Interface)),
+    m_SharedObjectType(shared_object_type)
   {
+    InitializeParentInfo(*m_DataObject.get());
 
+    auto data_obj_callback = [](void * user_ptr, const ReflectionChangeNotification & change)
+    {
+      DDSSharedObject<DataType> * store = (DDSSharedObject<DataType> *)user_ptr;
+      store->HandleDataObjectChange(change);
+    };
+
+    SetNotifyCallback(*m_DataObject.get(), data_obj_callback, this);
   }
 
   uint32_t GetObjectClassNameHash() override
@@ -33,16 +47,23 @@ public:
     return m_SharedObjectType;
   }
 
+  const void * GetSharedObjectPointer() override
+  {
+    return m_DataObject.get();
+  }
+
+  void HandleDataObjectChange(const ReflectionChangeNotification & change)
+  {
+    m_Changes.emplace_back(change);
+  }
+
   virtual void BeginObjectModification()
   {
-    ReflectionPushNotifyCallback([&](const ReflectionChangeNotification & change) { m_Changes.emplace_back(change); });
     m_Coordinator.BeginQueueingMessages();
   }
 
   virtual void EndObjectModification()
   {
-    ReflectionPopNotifyCallback();
-
     std::vector<ReflectionChangeNotification> changes = std::move(m_Changes);
 
     if (changes.size() > 0)
@@ -118,9 +139,12 @@ public:
         sub_data.m_ResponderKey = sub_msg.m_ResponderKey;
         sub_data.m_ResponderObjectType = sub_msg.m_ResponderObjectType;
         sub_data.m_ResponderMethodId = sub_msg.m_ResponderMethodId;
+        sub_data.m_ErrorMethodId = sub_msg.m_ErrorMethodId;
         sub_data.m_ResponderArgs = std::move(sub_msg.m_ReturnArg);
-        sub_data.m_IsDataSubscription = (message_type == DDSCoordinatorProtocolMessageType::kCreateDataSubscription);
+        sub_data.m_IsDataSubscription = sub_msg.m_DataSubscription;
+        sub_data.m_ForceLoad = sub_msg.m_ForceLoad;
         sub_data.m_DeltaOnly = sub_msg.m_DeltaOnly;
+        sub_data.m_State = kSubUnsent;
         m_Subscriptions.emplace_back(std::move(sub_data));
 
         DDSResponderCallData responder_call;
@@ -137,7 +161,7 @@ public:
         }
 
         m_Coordinator.SendTargetedMessage(DDSDataObjectAddress{ sub_msg.m_ResponderObjectType, sub_msg.m_ResponderKey },
-          DDSCoordinatorProtocolMessageType::kResponderCall, StormReflEncodeJson(responder_call));
+          DDSCoordinatorProtocolMessageType::kResponderCall, DDSGetServerMessage(responder_call));
       }
       break;
       case DDSCoordinatorProtocolMessageType::kDestroySubscription:
@@ -181,6 +205,7 @@ public:
 
 private:
 
+  DDSSharedObjectInterface m_Interface;
   DDSCoordinatorState & m_Coordinator;
 
   std::unique_ptr<DataType> m_DataObject;
@@ -198,7 +223,9 @@ class DDSSharedObjectCopy : public DDSSharedObjectCopyBase
 {
 public:
   DDSSharedObjectCopy(DDSNodeState & node_state, int shared_object_type_id) :
-    m_NodeState(node_state), m_SharedObjectType(shared_object_type_id)
+    m_NodeState(node_state),
+    m_DataObject(std::make_unique<DataType>(m_Interface)),
+    m_SharedObjectType(shared_object_type_id)
   {
 
   }
@@ -213,34 +240,37 @@ public:
     return m_SharedObjectType;
   }
 
+  const void * GetSharedObjectPointer() override
+  {
+    return m_DataObject.get();
+  }
+
   void ProcessDelta(const DDSCoordinatorSharedObjectDelta & delta) override
   {
-    for (auto & change : delta.m_Deltas)
+    for (auto & elem : delta.m_Deltas)
     {
       ReflectionChangeNotification change_notification;
-      change_notification.m_Type = change.m_Type;
-      change_notification.m_BaseObject = m_DataObject.get();
-      change_notification.m_Data = change.m_Data;
-      change_notification.m_SubIndex = change.m_Index;
-      change_notification.m_Path = change.m_Path;
+      change_notification.m_Type = elem.m_Type;
+      change_notification.m_Data = elem.m_Data;
+      change_notification.m_SubIndex = elem.m_Index;
+      change_notification.m_Path = elem.m_Path;
 
-      StormDataApplyChangePacket(*m_DataObject.get(), change.m_Type, change.m_Path.data(), change.m_Index, change.m_Data.data());
+      StormDataApplyChangePacket(*m_DataObject.get(), elem.m_Type, elem.m_Path.data(), elem.m_Index, elem.m_Data.data());
 
       for (auto & sub_data : m_Subscriptions)
       {
-        for (auto & sub : sub_data.second)
-        {
-          if (DDSCheckChangeSubscription(change_notification, sub))
-          {
-            DDSResponderCallData call_data;
-            if (DDSCreateSubscriptionResponse(*m_DataObject.get(), change_notification, sub, call_data))
-            {
-              DDSLog::LogError("Could not serialize subscription change");
-            }
+        ProcessDeltaElem(change_notification, sub_data.second, elem);
+      }
+    }
+  }
 
-            m_NodeState.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, StormReflEncodeJson(call_data));
-          }
-        }
+  void ProcessDeltaElem(ReflectionChangeNotification & change_notification, std::vector<DDSExportedSubscription> & subs, const DDSCoordinatorSharedObjectDeltaMessage & elem)
+  {
+    for (auto & sub : subs)
+    {
+      if (StormDataMatchPathPartial(elem.m_Path.data(), sub.m_DataPath.data()))
+      {
+        DDSSendChangeSubscription(change_notification, sub, m_DataObject.get(), m_NodeState);
       }
     }
   }
@@ -250,8 +280,12 @@ public:
     DDSDataObjectAddress addr = { sub_data.m_ResponderObjectType, sub_data.m_ResponderKey };
     auto result = m_Subscriptions.emplace(std::make_pair(addr, std::vector<DDSExportedSubscription>{}));
 
+    m_SubscriptionAddrMap.emplace(sub_data.m_SubscriptionId, addr);
+
     std::vector<DDSExportedSubscription> & sub_list = result.first->second;
     sub_list.emplace_back(std::move(sub_data));
+
+    auto & sub = sub_list.back();
 
     DDSResponderCallData responder_call;
     if (sub_data.m_IsDataSubscription)
@@ -260,7 +294,7 @@ public:
     }
     else
     {
-      if (DDSCreateInitialSubscriptionResponse(*m_DataObject.get(), sub_data, responder_call) == false)
+      if (DDSCreateInitialSubscriptionResponse(*m_DataObject.get(), sub, responder_call) == false)
       {
         DDSLog::LogError("Could not create initial subscription response");
       }
@@ -272,7 +306,13 @@ public:
 
   void DestroySubscription(DDSDataObjectAddress addr, DDSKey subscription_id) override
   {
-    auto itr = m_Subscriptions.find(addr);
+    auto addr_itr = m_SubscriptionAddrMap.find(subscription_id);
+    if (addr_itr == m_SubscriptionAddrMap.end())
+    {
+      return;
+    }
+
+    auto itr = m_Subscriptions.find(addr_itr->second);
     if (itr == m_Subscriptions.end())
     {
       return;
@@ -296,21 +336,52 @@ public:
       return;
     }
 
+    for (auto sub_itr = itr->second.begin(); sub_itr != itr->second.end(); ++sub_itr)
+    {
+      m_SubscriptionAddrMap.erase(sub_itr->m_SubscriptionId);
+    }
+
     exported_list.emplace_back(std::make_pair(m_SharedObjectType, std::move(itr->second)));
     m_Subscriptions.erase(itr);
   }
 
-  void ImportSubscriptions(DDSDataObjectAddress addr, std::vector<DDSExportedSubscription> && subs) override
+  void ImportSubscriptions(DDSDataObjectAddress addr, std::vector<DDSExportedSubscription> && subs, DDSNodeSharedObjectResolver & resolver, int table_gen) override
   {
-    m_Subscriptions.emplace(std::make_pair(addr, subs));
+    m_Subscriptions.emplace(std::make_pair(addr, std::move(subs)));
+
+    for (auto & sub : subs)
+    {
+      m_SubscriptionAddrMap.emplace(sub.m_SubscriptionId, addr);
+    }
+
+    auto change_lists = resolver.GetChangeList(table_gen, addr.m_ObjectKey);
+
+    for (auto change_list : change_lists)
+    {
+      for (auto delta_list : *change_list)
+      {
+        for (auto elem : delta_list.m_Deltas)
+        {
+          ReflectionChangeNotification change_notification;
+          change_notification.m_Type = elem.m_Type;
+          change_notification.m_Data = elem.m_Data;
+          change_notification.m_SubIndex = elem.m_Index;
+          change_notification.m_Path = elem.m_Path;
+
+          ProcessDeltaElem(change_notification, subs, elem);
+        }
+      }
+    }
   }
 
 private:
 
+  DDSSharedObjectCopyInterface m_Interface;
   DDSNodeState & m_NodeState;
 
   std::unique_ptr<DataType> m_DataObject;
 
   std::map<DDSDataObjectAddress, std::vector<DDSExportedSubscription>> m_Subscriptions;
+  std::map<DDSKey, DDSDataObjectAddress> m_SubscriptionAddrMap;
   int m_SharedObjectType;
 };

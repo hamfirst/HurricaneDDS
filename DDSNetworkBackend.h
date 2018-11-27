@@ -1,6 +1,6 @@
 #pragma once
 
-#include <StormSockets\StormSocketServerTypes.h>
+#include <StormSockets/StormSocketServerTypes.h>
 
 #include <memory>
 
@@ -15,6 +15,8 @@ public:
   DDSNetworkBackend(const StormSockets::StormSocketInitSettings & settings);
   ~DDSNetworkBackend();
 
+  std::string GetMemoryReport();
+
 private:
   friend class DDSCoordinatorNetworkService;
   friend class DDSCoordinatorClientProtocol;
@@ -22,7 +24,11 @@ private:
   friend class DDSServerToServerSender;
   friend class DDSServerToServerReceiver;
   friend class DDSEndpointFactoryBase;
+  friend class DDSWebsiteFactoryBase;
+  friend class DDSWebsiteFilesystem;
   friend class DDSHttpClient;
+  friend class DDSLoadBalancer;
+  friend class DDSLoadBalancerNetworkService;
 
   std::unique_ptr<StormSockets::StormSocketBackend> m_Backend;
 };

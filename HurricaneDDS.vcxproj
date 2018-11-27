@@ -28,26 +28,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -119,6 +119,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_WINDOWS;_WIN32_WINNT=0x0A00;USE_MBED</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)External</AdditionalIncludeDirectories>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +138,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_WINDOWS;_WIN32_WINNT=0x0A00;USE_MBED</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)External</AdditionalIncludeDirectories>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,8 +148,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DDSAggregateSubscription.h" />
+    <ClInclude Include="DDSCall.h" />
     <ClInclude Include="DDSChallenge.h" />
+    <ClInclude Include="DDSConnectionFactoryBase.h" />
     <ClInclude Include="DDSConnectionId.h" />
+    <ClInclude Include="DDSConnectionInterface.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSCoordinatorClientProtocol.h">
       <SubType>
       </SubType>
@@ -172,6 +181,18 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSCPUUsage.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseBootstrap.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSDatabaseConnection.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSDatabaseConnectionPool.h">
       <SubType>
       </SubType>
@@ -190,6 +211,7 @@
     </ClInclude>
     <ClInclude Include="DDSDataObjectStoreBase.h" />
     <ClInclude Include="DDSDataObjectStoreHelpers.h" />
+    <ClInclude Include="DDSDataObjectStoreTemporary.h" />
     <ClInclude Include="DDSDataObjectTypeList.h" />
     <ClInclude Include="DDSDeferredCallback.h" />
     <ClInclude Include="DDSDeferredCallbackSystem.h">
@@ -210,7 +232,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="DDSHttpUtil.h">
+    <ClInclude Include="DDSHttpRequest.h">
       <SubType>
       </SubType>
     </ClInclude>
@@ -222,8 +244,23 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="DDSInterface.h" />
     <ClInclude Include="DDSKey.h" />
+    <ClInclude Include="DDSLoadBalancer.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSLoadBalancerMessages.refl.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSLoadBalancerMessages.refl.meta.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSLoadBalancerNetworkService.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSLog.h">
       <SubType>
       </SubType>
@@ -241,10 +278,15 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSNodeSharedObjectResolver.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSNodeState.h">
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSObjectInterface.h" />
     <ClInclude Include="DDSOutgoingKeyspaceTransfer.h">
       <SubType>
       </SubType>
@@ -305,6 +347,19 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopy.h" />
+    <ClInclude Include="DDSSharedLocalCopyData.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopyDatabase.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSSharedLocalCopyPtr.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSSharedMessages.refl.h">
       <SubType>
       </SubType>
@@ -317,13 +372,60 @@
     <ClInclude Include="DDSSharedObjectBase.h" />
     <ClInclude Include="DDSSharedObjectInterface.h" />
     <ClInclude Include="DDSSharedObjectList.h" />
+    <ClInclude Include="DDSShutdown.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSThrottle.refl.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSThrottle.refl.meta.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSTimerSystem.h">
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="DDSTokenBroker.h" />
+    <ClInclude Include="DDSTokenValidator.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="DDSVersion.h" />
+    <ClInclude Include="DDSWebsiteFactory.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFactoryBase.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFactoryList.h" />
+    <ClInclude Include="DDSWebsiteFactoryStaticContent.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFilesystem.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteFilesystemBuilder.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="DDSWebsiteInterface.h">
+      <SubType>
+      </SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DDSAggregateSubscription.cpp" />
+    <ClCompile Include="DDSConnectionInterface.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSCoordinatorClientProtocol.cpp">
       <SubType>
       </SubType>
@@ -337,6 +439,18 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSCoordinatorState.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSCPUUsage.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSDatabaseBootstrap.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSDatabaseConnection.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -361,7 +475,7 @@
       <SubType>
       </SubType>
     </ClCompile>
-    <ClCompile Include="DDSHttpUtil.cpp">
+    <ClCompile Include="DDSHttpRequest.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -374,6 +488,14 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSKey.cpp" />
+    <ClCompile Include="DDSLoadBalancer.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSLoadBalancerNetworkService.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSLog.cpp">
       <SubType>
       </SubType>
@@ -387,6 +509,10 @@
       </SubType>
     </ClCompile>
     <ClCompile Include="DDSNodeNetworkService.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSNodeSharedObjectResolver.cpp">
       <SubType>
       </SubType>
     </ClCompile>
@@ -430,12 +556,55 @@
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopy.cpp" />
+    <ClCompile Include="DDSSharedLocalCopyData.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopyDatabase.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSSharedLocalCopyPtr.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSSharedObjectInterface.cpp" />
+    <ClCompile Include="DDSShutdown.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSThrottle.refl.cpp" />
     <ClCompile Include="DDSTimerSystem.cpp">
       <SubType>
       </SubType>
     </ClCompile>
+    <ClCompile Include="DDSTokenBroker.cpp" />
+    <ClCompile Include="DDSTokenValidator.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
     <ClCompile Include="DDSVersion.cpp" />
+    <ClCompile Include="DDSWebsiteFactoryBase.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFactoryStaticContent.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFilesystem.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteFilesystemBuilder.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
+    <ClCompile Include="DDSWebsiteInterface.cpp">
+      <SubType>
+      </SubType>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(SolutionDir)StormRefl\StormRefl.targets" />

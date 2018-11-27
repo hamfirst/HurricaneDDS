@@ -5,18 +5,15 @@
 #include <vector>
 #include <queue>
 
-#include <optional\optional.hpp>
-#include <gsl\gsl_util.h>
+#include <optional/optional.hpp>
+#include <gsl/gsl_util.h>
 
-#include <hash\Hash.h>
-#include <StormSockets\StormMessageQueue.h>
-#include <StormSockets\StormSemaphore.h>
+#include <hash/Hash.h>
+#include <StormSockets/StormMessageQueue.h>
+#include <StormSockets/StormSemaphore.h>
 
-extern "C"
-{
-#include <mongoc\mongoc.h>
-#include <libbson\bson.h>
-}
+#include <mongoc/mongoc.h>
+#include <libbson/bson.h>
 
 #include "DDSDatabaseConnectionPool.h"
 
@@ -49,7 +46,6 @@ struct DatabaseConnectionThread
   std::queue<DatabaseQueryInfo> m_PendingInputs;
 };
 
-
 void DDSDatabaseConnectionPool::QueueResult(int thread_index, const DatabaseQueryResult & result)
 {
   while (m_Threads[thread_index].m_OutputQueue.Enqueue(result) == false)
@@ -66,7 +62,7 @@ void DDSDatabaseConnectionPool::DatabaseThread(int thread_index)
 {
   auto & thread_data = m_Threads[thread_index];
 
-  auto client = mongoc_client_new("mongodb://localhost:27017"); 
+  auto client = mongoc_client_new(m_DatabaseUrl.data());
   auto destroy_client = gsl::finally([&]() { mongoc_client_destroy(client); });
 
   auto database = mongoc_client_get_database(client, m_DatabaseName.data());
@@ -214,7 +210,7 @@ void DDSDatabaseConnectionPool::DatabaseThread(int thread_index)
           BSON_APPEND_OID(bson, "_id", &oid);
 
           bson_error_t delete_error;
-          if (mongoc_collection_delete(collection, MONGOC_DELETE_NONE, bson, nullptr, &delete_error) == false)
+          if (mongoc_collection_remove(collection, MONGOC_REMOVE_SINGLE_REMOVE, bson, nullptr, &delete_error) == false)
           {
             DatabaseQueryResult result = { query.m_Callback, delete_error.code };
             QueueResult(thread_index, result);
@@ -235,6 +231,7 @@ DDSDatabaseConnectionPool::DDSDatabaseConnectionPool(const DDSDatabaseSettings &
   m_Initialized = true;
   m_NumThreads = settings.NumThreads;
   m_DatabaseName = settings.DatabaseName;
+  m_DatabaseUrl = std::string("mongodb://") + settings.DatabaseHostName + ":" + std::to_string(settings.DatabasePort);
 
   m_Threads = std::make_unique<DatabaseConnectionThread[]>(settings.NumThreads);
   for (int index = 0; index < settings.NumThreads; index++)
@@ -310,12 +307,15 @@ void DDSDatabaseConnectionPool::TriggerCallbacks()
     DatabaseQueryResult result;
     while (m_Threads[index].m_OutputQueue.TryDequeue(result))
     {
-      result.m_Callback(result.m_ResultData.data(), result.m_ErrorCode);
+      if (result.m_Callback)
+      {
+        result.m_Callback(result.m_ResultData.data(), result.m_ErrorCode);
+      }
     }
 
     while(m_Threads[index].m_PendingInputs.size())
     {
-      auto & query = m_Threads[index].m_PendingInputs.back();
+      auto & query = m_Threads[index].m_PendingInputs.front();
       if (m_Threads[index].m_InputQueue.Enqueue(query) == false)
       {
         break;
@@ -326,3 +326,15 @@ void DDSDatabaseConnectionPool::TriggerCallbacks()
   }
 }
 
+std::string DDSDatabaseConnectionPool::MemoryReport()
+{
+  std::string report = "Database:\n";
+  for (int index = 0; index < m_NumThreads; index++)
+  {
+    report += "  Thread" + std::to_string(index);
+    report += ": " + std::to_string(m_Threads[index].m_PendingInputs.size());
+    report += "\n";
+  }
+
+  return report;
+}

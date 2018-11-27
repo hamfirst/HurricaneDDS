@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include <StormSockets\StormSocketServerTypes.h>
+#include <StormSockets/StormSocketServerTypes.h>
 
 #include "DDSNodeId.h"
 #include "DDSNetworkBackend.h"
@@ -39,8 +39,12 @@ protected:
 
   void HandleConnect(StormSockets::StormSocketConnectionId connection_id, uint32_t addr, uint16_t port);
   void HandleData(StormSockets::StormSocketConnectionId connection_id, StormSockets::StormWebsocketMessageReader & reader);
+  void HandleDisconnect(StormSockets::StormSocketConnectionId connection_id);
 
 private:
+
+  StormSockets::StormSemaphore m_Semaphore;
+
   DDSCoordinatorState & m_CoordinatorState;
   DDSNetworkBackend & m_Backend;
 

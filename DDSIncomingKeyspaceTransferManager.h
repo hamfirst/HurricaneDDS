@@ -5,6 +5,7 @@
 #include "DDSIncomingKeyspaceTransfer.h"
 #include "DDSDataObjectAddress.h"
 
+
 class DDSIncomingKeyspaceTransferManager
 {
 public:
@@ -14,10 +15,10 @@ public:
   void InitializeUnsyncedKeyspace(int table_gen, DDSKeyRange key_range);
 
   void ProcessNewRoutingTable(const DDSRoutingTable & new_routing_table, const DDSRoutingTable & old_routing_table, DDSKeyRange new_key_range, DDSNodeId local_node_id);
-  void SetKeyRangeComplete(int table_gen, int object_type, DDSKeyRange key_range);
+  bool SetKeyRangeComplete(int table_gen, int object_type, DDSKeyRange key_range);
 
-  bool IsCompleteForKey(DDSDataObjectAddress addr) const;
-  bool IsCompleteForKeyRange(DDSKeyRange key_range) const;
+  bool IsReadyForOutgoingKeyspaceTransfer(int table_gen) const;
+  bool IsComplete() const;
 
 private:
 

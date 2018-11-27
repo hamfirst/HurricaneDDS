@@ -4,41 +4,25 @@
 
 #include "DDSServerToServerMessages.refl.meta.h"
 
-#include <StormRefl\StormReflJsonStd.h>
-#include <StormRefl\StormReflMetaCallJson.h>
-#include <StormData\StormDataPath.h>
-#include <StormData\StormDataChangePacket.h>
-#include <StormData\StormDataChangeNotifier.h>
+#include <StormRefl/StormReflJsonStd.h>
+#include <StormRefl/StormReflMetaCallJson.h>
+#include <StormData/StormDataPath.h>
+#include <StormData/StormDataChangePacket.h>
+#include <StormData/StormDataChangeNotifier.h>
 
-#define DDS_DECLARE_HAS_FUNC(FuncName) \
-template <typename T> class DDSHasFunc##FuncName \
-{  \
-  public :template <typename C> static char test(decltype(&C::FuncName)); template <typename C> static long test(...);  static const bool value = sizeof(test<T>(0)) == sizeof(char); \
-}; \
-
-#define DDS_DECLARE_CALL_FUNC(FuncName) \
-template <bool Enable> struct DDSCallFunc##FuncName \
-{ \
-  template <typename T, typename ... Args> static bool Call(T & t, Args && ... args) { t.FuncName(std::forward<Args>(args)...); return true; } \
-}; \
-template <> struct DDSCallFunc##FuncName<false> \
-{ \
-  template <typename T, typename ... Args> static bool Call(T & t, Args && ... args) { return false; } \
-}; \
-
-#define DDS_DECLARE_CALL(FuncName) \
-  DDS_DECLARE_HAS_FUNC(FuncName) \
-  DDS_DECLARE_CALL_FUNC(FuncName) \
-
-#define DDS_CALL_FUNC(FuncName, Inst, ...) \
-DDSCallFunc##FuncName<DDSHasFunc##FuncName<std::decay_t<decltype(Inst)>>::value>::Call(Inst, __VA_ARGS__)
+inline bool DDSRequiresAnyObject(DDSServerToServerMessageType type)
+{
+  return type != DDSServerToServerMessageType::kCreateSubscription &&
+         type != DDSServerToServerMessageType::kDestroySubscription;
+}
 
 inline bool DDSRequiresFullObject(DDSServerToServerMessageType type)
 {
-  return type != DDSServerToServerMessageType::kCreateDataSubscription;
+  return type != DDSServerToServerMessageType::kCreateSubscription &&
+         type != DDSServerToServerMessageType::kDestroySubscription;
 }
 
-inline bool DDSRequiresFullObject(const std::vector<DDSExportedMessage> & pending_messages)
+inline bool DDSRequiresFullObject(const std::vector<DDSExportedMessage> & pending_messages, const std::vector<DDSExportedSubscription> & subs)
 {
   bool requires_full_object = false;
   for (auto & msg : pending_messages)
@@ -50,15 +34,28 @@ inline bool DDSRequiresFullObject(const std::vector<DDSExportedMessage> & pendin
     }
   }
 
+  if (requires_full_object == false)
+  {
+    for (auto & sub : subs)
+    {
+      if (sub.m_IsDataSubscription == false && sub.m_ForceLoad)
+      {
+        requires_full_object = true;
+        break;
+      }
+    }
+  }
+
   return requires_full_object;
 }
 
 inline bool DDSRequiresActiveObject(DDSServerToServerMessageType type)
 {
-  return DDSRequiresFullObject(type) && type != DDSServerToServerMessageType::kResponderCall;
+  return DDSRequiresFullObject(type) &&
+    type != DDSServerToServerMessageType::kResponderCall; // This allows the object to call or subscribe to other objects when loading
 }
 
-inline bool DDSRequiresActiveObject(const std::vector<DDSExportedMessage> & pending_messages)
+inline bool DDSRequiresActiveObject(const std::vector<DDSExportedMessage> & pending_messages, const std::vector<DDSExportedSubscription> & subs)
 {
   bool requires_active_object = false;
   for (auto & msg : pending_messages)
@@ -67,6 +64,18 @@ inline bool DDSRequiresActiveObject(const std::vector<DDSExportedMessage> & pend
     {
       requires_active_object = true;
       break;
+    }
+  }
+
+  if (requires_active_object == false)
+  {
+    for (auto & sub : subs)
+    {
+      if (sub.m_IsDataSubscription == false && sub.m_ForceLoad)
+      {
+        requires_active_object = true;
+        break;
+      }
     }
   }
 
@@ -113,7 +122,7 @@ struct DDSMessageCallerWithResponder
       return StormReflCallCheck(deserializer, c, func, responder, arg);
     }
 
-    return StormReflCallCheck(deserializer, c, func);
+    return StormReflCallCheck(deserializer, c, func, responder);
   }
 };
 
@@ -151,7 +160,7 @@ struct DDSMessageCaller<FuncIndex, true>
 };
 
 template <class DataType>
-bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargetedMessage & message)
+bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTargetedMessage & message)
 {
   const char * str = message.m_MethodArgs.c_str();
   StormReflJsonAdvanceWhiteSpace(str);
@@ -191,7 +200,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargeted
     }
   };
 
-  DDSResponder responder = { iface, { 0, -1, -1 } };
+  DDSResponder responder = CreateEmptyResponder(iface);
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -204,11 +213,17 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargeted
   };
 
   StormReflVisitFuncByIndex(dt, func_visitor, message.m_MethodId);
+
+  if (parsed == false)
+  {
+    return false;
+  }
+
   return parsed;
 }
 
 template <class DataType>
-bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargetedMessageWithResponder & message)
+bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSTargetedMessageWithResponder & message)
 {
   const char * str = message.m_MethodArgs.c_str();
   StormReflJsonAdvanceWhiteSpace(str);
@@ -248,7 +263,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargeted
     }
   };
 
-  DDSResponder responder = { iface, { message.m_ResponderKey, message.m_ResponderObjectType, message.m_ResponderMethodId } };
+  DDSResponder responder = { iface, { message.m_ResponderKey, message.m_ResponderObjectType, message.m_ResponderMethodId, message.m_ErrorMethodId, message.m_ReturnArg } };
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -261,11 +276,17 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSTargeted
   };
 
   StormReflVisitFuncByIndex(dt, func_visitor, message.m_MethodId);
+
+  if (parsed == false)
+  {
+    return false;
+  }
+
   return parsed;
 }
 
 template <class DataType>
-bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSResponderCallData & message)
+bool DDSDataObjectHandleMessage(DataType & dt, DDSObjectInterface & iface, DDSResponderCallData & message)
 {
   const char * str = message.m_MethodArgs.c_str();
   StormReflJsonAdvanceWhiteSpace(str);
@@ -305,7 +326,7 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSResponde
     }
   };
 
-  DDSResponder responder = { iface, { 0, -1, -1 } };
+  DDSResponder responder = CreateEmptyResponder(iface);
 
   bool parsed = false;
   auto func_visitor = [&](auto f)
@@ -318,12 +339,28 @@ bool DDSDataObjectHandleMessage(DataType & dt, DDSInterface & iface, DDSResponde
   };
 
   StormReflVisitFuncByIndex(dt, func_visitor, message.m_MethodId);
+
+  if (parsed == false)
+  {
+    return false;
+  }
+
   return parsed;
 }
 
-inline bool DDSCheckChangeSubscription(const ReflectionChangeNotification & change_notification, const DDSExportedSubscription & sub)
+template <typename SubscriptionObj, typename NodeState>
+inline bool DDSSendChangeSubscription(const ReflectionChangeNotification & change_notification, const DDSExportedSubscription & sub, SubscriptionObj * base_obj, NodeState & node_state)
 {
-  return change_notification.m_Path.compare(0, sub.m_DataPath.length(), sub.m_DataPath) == 0;
+  DDSLog::LogVerbose("Sending subscription response from object %s", typeid(SubscriptionObj).name());
+
+  DDSResponderCallData call_data;
+  if (DDSCreateSubscriptionResponse(*base_obj, change_notification, sub, call_data) == false)
+  {
+    DDSLog::LogError("Could not serialize subscription change");
+  }
+
+  node_state.SendTargetedMessage(DDSDataObjectAddress{ call_data.m_ObjectType, call_data.m_Key }, DDSResponderCallData::Type, StormReflEncodeJson(call_data));
+  return true;
 }
 
 template <class DataType>
@@ -334,12 +371,19 @@ bool DDSCreateSubscriptionResponse(DataType & data_type, const ReflectionChangeN
   responder_data.m_MethodId = sub.m_ResponderMethodId;
   responder_data.m_ResponderArgs = sub.m_ResponderArgs;
 
+  if (sub.m_State != kSubSentValid)
+  {
+    DDSLog::LogError("Didn't sent initial subscription response");
+  }
+
   if (sub.m_DeltaOnly)
   {
     ReflectionChangeNotification notification_copy = change_notification;
     notification_copy.m_Path = notification_copy.m_Path.substr(sub.m_DataPath.size());
 
-    responder_data.m_MethodArgs = StormDataCreateChangePacket(notification_copy);
+    responder_data.m_MethodArgs = "[";
+    responder_data.m_MethodArgs += StormReflEncodeJson(StormDataCreateChangePacket(notification_copy));
+    responder_data.m_MethodArgs += "]";
   }
   else
   {
@@ -355,19 +399,23 @@ bool DDSCreateSubscriptionResponse(DataType & data_type, const ReflectionChangeN
       return false;
     }
 
-    responder_data.m_MethodArgs = data;
+    responder_data.m_MethodArgs = "[";
+    responder_data.m_MethodArgs += StormReflEncodeJson(data);
+    responder_data.m_MethodArgs += "]";
   }
 
   return true;
 }
 
 template <class DataType>
-bool DDSCreateInitialSubscriptionResponse(DataType & data_type, const DDSExportedSubscription & sub, DDSResponderCallData & responder_data)
+bool DDSCreateInitialSubscriptionResponse(DataType & data_type, DDSExportedSubscription & sub, DDSResponderCallData & responder_data)
 {
   responder_data.m_Key = sub.m_ResponderKey;
   responder_data.m_ObjectType = sub.m_ResponderObjectType;
   responder_data.m_MethodId = sub.m_ResponderMethodId;
   responder_data.m_ResponderArgs = sub.m_ResponderArgs;
+
+  DDSLog::LogVerbose("Sending initial subscription response from object %s", typeid(DataType).name());
 
   std::string data;
   auto visitor = [&](auto & f, const char * str)
@@ -378,25 +426,56 @@ bool DDSCreateInitialSubscriptionResponse(DataType & data_type, const DDSExporte
 
   if (StormDataVisitPath(data_type, visitor, sub.m_DataPath.c_str()) == false)
   {
-    return false;
+    sub.m_State = kSubSentInvalid;
+    if (sub.m_ErrorMethodId != -1)
+    {
+      responder_data.m_MethodArgs = "[]";
+      responder_data.m_MethodId = sub.m_ErrorMethodId;
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   }
 
+  sub.m_State = kSubSentValid;
+
+  responder_data.m_MethodArgs = "[";
   if (sub.m_DeltaOnly)
   {
-    responder_data.m_MethodArgs = StormDataCreateChangePacket(ReflectionNotifyChangeType::kSet, ReflectionChangeNotification::kInvalidSubIndex, "", data);
+    responder_data.m_MethodArgs += 
+      StormReflEncodeJson(StormDataCreateChangePacket(ReflectionNotifyChangeType::kSet, ReflectionChangeNotification::kInvalidSubIndex, "", data));
   }
   else
   {
-    responder_data.m_MethodArgs = data;
+    responder_data.m_MethodArgs += StormReflEncodeJson(data);
+  }
+  responder_data.m_MethodArgs += "]";
+
+  return true;
+}
+
+inline bool DDSCreateErrorSubscriptionResponse(DDSExportedSubscription & sub, DDSResponderCallData & responder_data)
+{
+  sub.m_State = kSubSentInvalid;
+
+  if (sub.m_ErrorMethodId == -1)
+  {
+    return false;
   }
 
+  responder_data.m_Key = sub.m_ResponderKey;
+  responder_data.m_ObjectType = sub.m_ResponderObjectType;
+  responder_data.m_MethodId = sub.m_ErrorMethodId;
+  responder_data.m_MethodArgs = "[]";
+  responder_data.m_ResponderArgs = sub.m_ResponderArgs;
   return true;
 }
 
 inline void DDSCreateDeletedSubscriptionResponse(const DDSExportedSubscription & sub, DDSSubscriptionDeleted & responder_data)
 {
-  responder_data.m_ResponderKey = sub.m_ResponderKey;
-  responder_data.m_ResponderObjectType = sub.m_ResponderObjectType;
-  responder_data.m_ResponderMethodId = sub.m_ResponderMethodId;
+  responder_data.m_Key = sub.m_ResponderKey;
+  responder_data.m_ObjectType = sub.m_ResponderObjectType;
   responder_data.m_SubscriptionId = sub.m_SubscriptionId;
 }

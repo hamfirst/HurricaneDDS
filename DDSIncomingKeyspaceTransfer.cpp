@@ -1,8 +1,13 @@
 
 #include "DDSIncomingKeyspaceTransfer.h"
+#include "DDSLog.h"
 
 DDSIncomingKeyspaceTransfer::DDSIncomingKeyspaceTransfer(int num_object_types, int table_gen, DDSKeyRange key_range) :
-  m_Complete(false), m_NumObjectTypes(num_object_types), m_TableGen(table_gen), m_UnsyncedKeys(std::make_unique<std::vector<DDSKeyRange>[]>(num_object_types))
+  m_Complete(false), 
+  m_NumObjectTypes(num_object_types), 
+  m_TableGen(table_gen), 
+  m_UnsyncedKeys(std::make_unique<std::vector<DDSKeyRange>[]>(num_object_types)),
+  m_FullKeyRange(key_range)
 {
   for (int index = 0; index < m_NumObjectTypes; index++)
   {
@@ -10,8 +15,12 @@ DDSIncomingKeyspaceTransfer::DDSIncomingKeyspaceTransfer(int num_object_types, i
   }
 }
 
-DDSIncomingKeyspaceTransfer::DDSIncomingKeyspaceTransfer(int num_object_types, int table_gen, const std::vector<DDSKeyRange> & key_ranges) :
-  m_Complete(false), m_NumObjectTypes(num_object_types), m_TableGen(table_gen), m_UnsyncedKeys(std::make_unique<std::vector<DDSKeyRange>[]>(num_object_types))
+DDSIncomingKeyspaceTransfer::DDSIncomingKeyspaceTransfer(int num_object_types, int table_gen, const std::vector<DDSKeyRange> & key_ranges, DDSKeyRange full_key_range) :
+  m_Complete(false), 
+  m_NumObjectTypes(num_object_types), 
+  m_TableGen(table_gen), 
+  m_UnsyncedKeys(std::make_unique<std::vector<DDSKeyRange>[]>(num_object_types)),
+  m_FullKeyRange(full_key_range)
 {
   for (int index = 0; index < m_NumObjectTypes; index++)
   {
@@ -25,35 +34,6 @@ DDSIncomingKeyspaceTransfer::DDSIncomingKeyspaceTransfer(int num_object_types, i
 bool DDSIncomingKeyspaceTransfer::IsComplete() const
 {
   return m_Complete;
-}
-
-bool DDSIncomingKeyspaceTransfer::IsCompleteForKey(DDSDataObjectAddress addr) const
-{
-  for (auto key_range : m_UnsyncedKeys[addr.m_ObjectKey])
-  {
-    if (KeyInKeyRange(addr.m_ObjectKey, key_range))
-    {
-      return true;
-    }
-  }
-
-  return true;
-}
-
-bool DDSIncomingKeyspaceTransfer::IsCompleteForKeyRange(DDSKeyRange key_range) const
-{
-  for (int index = 0; index < m_NumObjectTypes; index++)
-  {
-    for (auto src_key_range : m_UnsyncedKeys[index])
-    {
-      if (KeyRangeOverlapsKeyRange(key_range, src_key_range))
-      {
-        return false;
-      }
-    }
-  }
-
-  return true;
 }
 
 int DDSIncomingKeyspaceTransfer::GetTableGeneration() const
@@ -98,4 +78,3 @@ void DDSIncomingKeyspaceTransfer::SetKeyRangeComplete(int object_type_id, DDSKey
     m_Complete = true;
   }
 }
-

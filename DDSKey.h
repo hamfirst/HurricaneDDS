@@ -1,6 +1,8 @@
 #pragma once
 
-using DDSKey = unsigned long long;
+#include <cstdint>
+
+using DDSKey = uint64_t;
 
 struct DDSKeyRange
 {
@@ -12,6 +14,7 @@ static const DDSKey kMinKey = 0x0000000000000000;
 static const DDSKey kMaxKey = 0xFFFFFFFFFFFFFFFF;
 
 DDSKey GetKeyRangeSize(DDSKeyRange range);
+DDSKey GetRandomKeyInRange(DDSKeyRange range);
 bool InvertKeyRange(DDSKeyRange range, DDSKeyRange & out);
 bool KeyInKeyRange(DDSKey key, DDSKeyRange range);
 bool KeyRangeEntirelyInKeyRange(DDSKeyRange outer, DDSKeyRange inner);

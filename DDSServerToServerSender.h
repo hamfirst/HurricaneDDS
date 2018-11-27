@@ -3,9 +3,10 @@
 #include <vector>
 #include <string>
 
-#include <StormSockets\StormSocketConnectionId.h>
+#include <StormSockets/StormSocketConnectionId.h>
 
 #include "DDSNodeId.h"
+#include "DDSServerToServerMessages.refl.h"
 
 class DDSNodeState;
 class DDSNodeNetworkService;
@@ -26,7 +27,7 @@ public:
   bool IsConnected() const;
   DDSNodeId GetTargetNodeId() const;
 
-  void SendMessageToServer(const std::string & message);
+  void SendMessageToServer(DDSServerToServerMessageType type, const std::string & message);
 
 private:
 

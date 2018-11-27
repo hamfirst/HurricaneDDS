@@ -2,7 +2,7 @@
 
 #include "DDSNodeId.h"
 
-#include <StormSockets\StormSocketConnectionId.h>
+#include <StormSockets/StormSocketConnectionId.h>
 
 class DDSCoordinatorState;
 
@@ -14,7 +14,8 @@ public:
 
   bool HandleMessage(const char * msg, int length);
 
-  bool CheckNodeId(DDSNodeId node_id);
+  bool CheckNodeId(DDSNodeId node_id) const;
+  DDSNodeId GetNodeId() const;
 
 private:
 

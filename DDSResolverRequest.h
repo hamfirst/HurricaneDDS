@@ -4,8 +4,8 @@
 
 struct DDSResolverRequest
 {
-  bool m_Complete;
-  bool m_Success;
+  volatile bool m_Complete;
+  volatile bool m_Success;
   std::string m_Result;
 };
 

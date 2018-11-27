@@ -3,7 +3,7 @@
 
 bool DDSTimerSystem::CompleteCallback(const std::chrono::system_clock::time_point & callback_data, const std::function<void()> & callback)
 {
-  if (std::chrono::system_clock::now() <= callback_data)
+  if (std::chrono::system_clock::now() >= callback_data)
   {
     callback();
     return true;

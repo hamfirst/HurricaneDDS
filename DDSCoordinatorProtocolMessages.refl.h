@@ -5,10 +5,10 @@
 #include "DDSNodeId.h"
 #include "DDSSharedMessages.refl.h"
 
-#include <StormRefl\StormRefl.h>
-#include <StormRefl\StormReflJsonStd.h>
+#include <StormRefl/StormRefl.h>
+#include <StormRefl/StormReflJsonStd.h>
 
-#include <StormData\StormDataChangeType.refl.h>
+#include <StormData/StormDataChangeType.refl.h>
 
 enum STORM_REFL_ENUM class DDSCoordinatorProtocolMessageType
 {
@@ -18,14 +18,17 @@ enum STORM_REFL_ENUM class DDSCoordinatorProtocolMessageType
   kHandshakeFinalize,
   kNodeInit,
   kRoutingTable,
+  kRoutingTableAck,
+  kSyncAllClear,
+  kShutDown,
   kSharedObjectDelta,
+  kCPUUsage,
   kResponderCall,
   kTargetedMessage,
   kTargetedMessageResponder,
   kCreateSubscription,
-  kCreateDataSubscription,
   kDestroySubscription,
-  kSubscriptionDeleted
+  kSubscriptionDeleted,
 };
 
 struct DDSCoordinatorHandshakeRequest
@@ -52,7 +55,10 @@ struct DDSCoordinatorHandshakeFinalize
 
   uint64_t m_ChallengeResponse;
   uint32_t m_PublicIp;
-  uint16_t m_PublicPort;
+  uint16_t m_NodePort;
+
+  std::vector<DDSNodePort> m_EndpointPorts;
+  std::vector<DDSNodePort> m_WebsitePorts;
 };
 
 struct DDSCoordinatorNodeInitialization
@@ -64,8 +70,37 @@ struct DDSCoordinatorNodeInitialization
   uint64_t m_ClientSecret;
   uint64_t m_ServerSecret;
   bool m_InitialNode;
+  int64_t m_NetworkTime;
 
   std::vector<std::string> m_SharedObjects;
+};
+
+struct DDSCoordinatorRoutingTableAck
+{
+  STORM_REFL;
+  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kRoutingTableAck;
+  int m_TableGen;
+};
+
+struct DDSCoordinatorSyncAllClear
+{
+  STORM_REFL;
+  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kSyncAllClear;
+  int m_TableGen;
+};
+
+
+struct DDSCoordinatorNodeShutdown
+{
+  STORM_REFL;
+  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kShutDown;
+};
+
+struct DDSCoordinatorNodeCPUUsage
+{
+  STORM_REFL;
+  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kCPUUsage;
+  float m_Usage;
 };
 
 struct DDSCoordinatorSharedObjectDeltaMessage
@@ -108,12 +143,6 @@ struct DDSCoordinatorCreateSubscription : public DDSCreateSubscriptionBase
 {
   STORM_REFL;
   static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kCreateSubscription;
-};
-
-struct DDSCoordinatorCreateDataSubscription : public DDSCreateDataSubscriptionBase
-{
-  STORM_REFL;
-  static const DDSCoordinatorProtocolMessageType Type = DDSCoordinatorProtocolMessageType::kCreateDataSubscription;
 };
 
 struct DDSCoordinatorDestroySubscription : public DDSDestroySubscriptionBase

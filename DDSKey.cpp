@@ -1,9 +1,29 @@
 
 #include "DDSKey.h"
+#include "DDSRandom.h"
 
 DDSKey GetKeyRangeSize(DDSKeyRange range)
 {
-  return (range.m_Max >= range.m_Min ? (range.m_Max - range.m_Min) : (kMaxKey - range.m_Max + range.m_Min)) + 1;
+  return (range.m_Max >= range.m_Min ? (range.m_Max - range.m_Min) : (kMaxKey - range.m_Min + range.m_Max)) + 1;
+}
+
+DDSKey GetRandomKeyInRange(DDSKeyRange range)
+{
+  if (range.m_Max + 1 == range.m_Min)
+  {
+    return DDSGetRandomNumber64();
+  }
+
+  DDSKey size = GetKeyRangeSize(range);
+
+  if (size <= 1)
+  {
+    return range.m_Min;
+  }
+
+  DDSKey val = DDSGetRandomNumberRange64(0, size - 1);
+
+  return range.m_Min + val;
 }
 
 bool InvertKeyRange(DDSKeyRange range, DDSKeyRange & out)
@@ -19,7 +39,7 @@ bool InvertKeyRange(DDSKeyRange range, DDSKeyRange & out)
 
 bool KeyInKeyRange(DDSKey key, DDSKeyRange range)
 {
-  return range.m_Max >= range.m_Min ? (key <= range.m_Max && key >= range.m_Min) : (key <= range.m_Min || key >= range.m_Max);
+  return range.m_Max >= range.m_Min ? (key >= range.m_Min && key <= range.m_Max) : (key >= range.m_Min || key <= range.m_Max);
 }
 
 bool KeyRangeEntirelyInKeyRange(DDSKeyRange outer, DDSKeyRange inner)
@@ -144,7 +164,7 @@ int GetKeyRangeDifference(DDSKeyRange a, DDSKeyRange b, DDSKeyRange & out1, DDSK
       return 0;
     }
 
-    out1 = DDSKeyRange{ b.m_Min + 1, a.m_Max };
+    out1 = DDSKeyRange{ b.m_Max + 1, a.m_Max };
     return 1;
   }
 

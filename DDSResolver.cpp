@@ -17,7 +17,7 @@ void DDSResolver::Update()
 {
   m_Backend->Update();
 
-  DDSDeferredCallbackSystem<const char *, std::unique_ptr<DDSResolverRequest>, const DDSResolverRequest &>::Update();
+  DDSDeferredCallbackSystem<std::pair<const char *, bool>, std::unique_ptr<DDSResolverRequest>, const DDSResolverRequest &>::Update();
 }
 
 bool DDSResolver::CompleteCallback(const std::unique_ptr<DDSResolverRequest> & callback_data, const std::function<void(const DDSResolverRequest &)> & callback)
@@ -31,10 +31,10 @@ bool DDSResolver::CompleteCallback(const std::unique_ptr<DDSResolverRequest> & c
   return false;
 }
 
-std::unique_ptr<DDSResolverRequest> DDSResolver::GetCallbackData(const char * creation_data)
+std::unique_ptr<DDSResolverRequest> DDSResolver::GetCallbackData(std::pair<const char *, bool> creation_data)
 {
   std::unique_ptr<DDSResolverRequest> request = std::make_unique<DDSResolverRequest>();
-  m_Backend->RequestResolve(creation_data, request.get());
+  m_Backend->RequestResolve(creation_data.first, creation_data.second, request.get());
 
   return std::move(request);
 }

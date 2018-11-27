@@ -3,9 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include <StormSockets\StormSocketServerTypes.h>
+#include <StormSockets/StormSocketServerTypes.h>
 
 #include "DDSDeferredCallbackSystem.h"
+#include "DDSHttpRequest.h"
 
 class DDSNetworkBackend;
 
@@ -17,7 +18,8 @@ namespace StormSockets
 struct DDSHttpClientData
 {
   StormSockets::StormSocketConnectionId m_ConnectionId;
-  std::vector<char> m_OutputData;
+  std::vector<char> m_OutputHeaders;
+  std::vector<char> m_OutputBody;
   bool m_Success = false;
   bool m_Complete = false;
 
@@ -29,7 +31,7 @@ struct DDSHttpClientData
 
 class DDSNodeState;
 
-class DDSHttpClient : public DDSDeferredCallbackSystem<const char *, DDSHttpClientData, bool, const std::string &>
+class DDSHttpClient : public DDSDeferredCallbackSystem<const DDSHttpRequest &, DDSHttpClientData, bool, const std::string &, const std::string &>
 {
 public:
   DDSHttpClient(const StormSockets::StormSocketClientFrontendHttpSettings & settings, DDSNetworkBackend & backend);
@@ -39,8 +41,8 @@ public:
 
 private:
 
-  bool CompleteCallback(const DDSHttpClientData & callback_data, const std::function<void(bool, const std::string &)> & callback) override;
-  DDSHttpClientData GetCallbackData(const char * url) override;
+  bool CompleteCallback(const DDSHttpClientData & callback_data, const std::function<void(bool, const std::string &, const std::string &)> & callback) override;
+  DDSHttpClientData GetCallbackData(const DDSHttpRequest & request) override;
 
   std::unique_ptr<StormSockets::StormSocketClientFrontendHttp> m_HttpClient;
 };

@@ -3,16 +3,16 @@
 #include "DDSNodeNetworkService.h"
 #include "DDSNodeState.h"
 
-#include <StormSockets\StormSocketClientFrontendWebsocket.h>
-#include <StormSockets\StormSocketServerFrontendWebsocket.h>
+#include <StormSockets/StormSocketClientFrontendWebsocket.h>
+#include <StormSockets/StormSocketServerFrontendWebsocket.h>
 
 
 DDSNodeNetworkService::DDSNodeNetworkService(DDSNodeState & node_state,
                                              const StormSockets::StormSocketServerFrontendWebsocketSettings & server_settings,
                                              const StormSockets::StormSocketClientFrontendWebsocketSettings & client_settings) :
   m_NodeState(node_state),
-  m_ClientFrontend(std::make_unique<StormSockets::StormSocketClientFrontendWebsocket>(client_settings, node_state.GetBackend().m_Backend.get())),
-  m_ServerFrontend(std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(server_settings, node_state.GetBackend().m_Backend.get()))
+  m_ClientFrontend(std::make_unique<StormSockets::StormSocketClientFrontendWebsocket>(client_settings, node_state.m_Backend.m_Backend.get())),
+  m_ServerFrontend(std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(server_settings, node_state.m_Backend.m_Backend.get()))
 {
 
 }
@@ -22,8 +22,19 @@ DDSNodeNetworkService::~DDSNodeNetworkService()
 
 }
 
-void DDSNodeNetworkService::SendMessageToServer(DDSNodeId node_id, std::string && data)
+void DDSNodeNetworkService::SendMessageToServer(DDSNodeId node_id, DDSServerToServerMessageType type, std::string && data)
 {
+  if (node_id == m_NodeState.m_LocalNodeId.value())
+  {
+    m_NodeState.GotMessageFromServer(node_id, type, data.c_str());
+    return;
+  }
+
+  if (IsNodeInRoutingTable(node_id, m_NodeState.GetRoutingTable()) == false)
+  {
+    return;
+  }
+
   bool sent = false;
 
   auto itr = m_NodeConnectionMap.find(node_id);
@@ -36,7 +47,7 @@ void DDSNodeNetworkService::SendMessageToServer(DDSNodeId node_id, std::string &
     auto & sender = m_Senders.at(itr->second);
     if (sender.IsConnected())
     {
-      sender.SendMessageToServer(data);
+      sender.SendMessageToServer(type, data);
       sent = true;
     }
   }
@@ -46,13 +57,37 @@ void DDSNodeNetworkService::SendMessageToServer(DDSNodeId node_id, std::string &
     auto pending_itr = m_PendingMessages.find(node_id);
     if (pending_itr == m_PendingMessages.end())
     {
-      m_PendingMessages.emplace(node_id, std::vector<std::string>{data});
+      m_PendingMessages.emplace(node_id, std::vector<std::pair<DDSServerToServerMessageType, std::string>>{ {type, std::move(data)} });
     }
     else
     {
-      pending_itr->second.emplace_back(data);
+      pending_itr->second.emplace_back(std::make_pair(type, std::move(data)));
     }
   }
+}
+
+void DDSNodeNetworkService::SendMessageToServer(DDSNodeId node_id, DDSServerToServerMessageType type, const std::string & data)
+{
+  if (node_id == m_NodeState.m_LocalNodeId.value())
+  {
+    m_NodeState.GotMessageFromServer(node_id, type, data.c_str());
+    return;
+  }
+
+  auto itr = m_NodeConnectionMap.find(node_id);
+  if (itr == m_NodeConnectionMap.end())
+  {
+    DDSLog::LogError("Sending message to server when not in the network");
+    return;
+  }
+
+  auto & sender = m_Senders.at(itr->second);
+  if (sender.IsConnected() == false)
+  {
+    DDSLog::LogError("Sending message to server when not connected");
+  }
+
+  sender.SendMessageToServer(type, data);
 }
 
 bool DDSNodeNetworkService::RequestNodeConnection(DDSNodeId node_id)
@@ -74,6 +109,11 @@ bool DDSNodeNetworkService::RequestNodeConnection(DDSNodeId node_id)
   return false;
 }
 
+bool DDSNodeNetworkService::HasPendingMessages() const
+{
+  return m_PendingMessages.size() > 0;
+}
+
 void DDSNodeNetworkService::NodeConnectionReady(DDSNodeId id, DDSServerToServerSender & sender)
 {
   auto pending_itr = m_PendingMessages.find(id);
@@ -81,36 +121,32 @@ void DDSNodeNetworkService::NodeConnectionReady(DDSNodeId id, DDSServerToServerS
   {
     for (auto & str : pending_itr->second)
     {
-      sender.SendMessageToServer(str);
+      sender.SendMessageToServer(str.first, str.second);
     }
   }
 }
 
 void DDSNodeNetworkService::CreateNodeConnection(DDSNodeId id)
 {
-  for (auto & node_data : m_NodeState.GetRoutingTable().m_Table)
+  auto node_data = GetNodeDataForNodeId(id, m_NodeState.GetRoutingTable());
+
+  char ip_addr[128];
+  snprintf(ip_addr, sizeof(ip_addr), "%d.%d.%d.%d",
+    (node_data->m_Addr >> 24) & 0xFF,
+    (node_data->m_Addr >> 16) & 0xFF,
+    (node_data->m_Addr >> 8) & 0xFF,
+    (node_data->m_Addr >> 0) & 0xFF);
+
+  DDSLog::LogInfo("Creating connection to %s:%d", ip_addr, node_data->m_Port);
+
+  auto connection_id = m_ClientFrontend->RequestConnect(ip_addr, node_data->m_Port, StormSockets::StormSocketClientFrontendWebsocketRequestData{});
+  if (connection_id == StormSockets::StormSocketConnectionId::InvalidConnectionId)
   {
-    if (node_data.m_Id == id)
-    {
-      char ip_addr[128];
-      snprintf(ip_addr, sizeof(ip_addr), "%d.%d.%d.%d",
-        (node_data.m_Addr >> 24) & 0xFF,
-        (node_data.m_Addr >> 16) & 0xFF,
-        (node_data.m_Addr >> 8) & 0xFF,
-        (node_data.m_Addr >> 0) & 0xFF);
-
-      DDSLog::LogInfo("Creating connection to %s:%d", ip_addr, node_data.m_Port);
-
-      auto connection_id = m_ClientFrontend->RequestConnect(ip_addr, node_data.m_Port, StormSockets::StormSocketClientFrontendWebsocketRequestData{});
-      if (connection_id == StormSockets::StormSocketConnectionId::InvalidConnectionId)
-      {
-        return;
-      }
-
-      m_NodeConnectionMap.emplace(std::make_pair(id, connection_id));
-      m_Senders.emplace(std::make_pair(connection_id, DDSServerToServerSender(m_NodeState, connection_id, id)));
-    }
+    return;
   }
+
+  m_NodeConnectionMap.emplace(std::make_pair(id, connection_id));
+  m_Senders.emplace(std::make_pair(connection_id, DDSServerToServerSender(m_NodeState, connection_id, id)));
 }
 
 void DDSNodeNetworkService::ProcessEvents()
@@ -137,6 +173,7 @@ void DDSNodeNetworkService::ProcessEvents()
       {
         auto & sender = m_Senders.at(event.ConnectionId);
         sender.HandleIncomingMessage(event.GetWebsocketReader());
+        m_ClientFrontend->FreeIncomingPacket(event.GetWebsocketReader());
       }
       break;
       case StormSockets::StormSocketEventType::Disconnected:
@@ -162,10 +199,13 @@ void DDSNodeNetworkService::ProcessEvents()
         m_Receievers.emplace(std::make_pair(event.ConnectionId, DDSServerToServerReceiver(m_NodeState, event.ConnectionId)));
       }
       break;
+      case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
+      break;
       case StormSockets::StormSocketEventType::Data:
       {
         auto & receiver = m_Receievers.at(event.ConnectionId);
         receiver.HandleIncomingMessage(event.GetWebsocketReader());
+        m_ServerFrontend->FreeIncomingPacket(event.GetWebsocketReader());
       }
       break;
       case StormSockets::StormSocketEventType::Disconnected:

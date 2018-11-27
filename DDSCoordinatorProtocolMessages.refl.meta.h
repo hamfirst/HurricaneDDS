@@ -1,18 +1,18 @@
 #pragma once
 
-#include <StormRefl\StormReflMetaInfoBase.h>
+#include <StormRefl/StormReflMetaInfoBase.h>
 
 #include "DDSCoordinatorProtocolMessages.refl.h"
 #include "DDSSharedMessages.refl.meta.h"
-#include "StormData\StormDataChangeType.refl.meta.h"
+#include "StormData/StormDataChangeType.refl.meta.h"
 
 
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>
 {
-  static constexpr int elems_n = 14;
+  static constexpr int elems_n = 17;
   static constexpr auto GetName() { return "DDSCoordinatorProtocolMessageType"; }
-  static constexpr auto GetNameHash() { return 0xD880A841; }
+  static constexpr auto GetNameHash() { return 0xDA65B046; }
   template <int N> struct elems { };
 };
 
@@ -20,7 +20,7 @@ template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<0>
 {
   static constexpr auto GetName() { return "kUnknown"; }
-  static constexpr auto GetNameHash() { return 0x3821395E; }
+  static constexpr auto GetNameHash() { return 0x175422A1; }
   static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kUnknown; }
 };
 
@@ -28,7 +28,7 @@ template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<1>
 {
   static constexpr auto GetName() { return "kHandshakeRequest"; }
-  static constexpr auto GetNameHash() { return 0x2D003D50; }
+  static constexpr auto GetNameHash() { return 0x88B9BC9A; }
   static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kHandshakeRequest; }
 };
 
@@ -36,7 +36,7 @@ template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<2>
 {
   static constexpr auto GetName() { return "kHandshakeResponse"; }
-  static constexpr auto GetNameHash() { return 0x6B81B797; }
+  static constexpr auto GetNameHash() { return 0x4EA2D147; }
   static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kHandshakeResponse; }
 };
 
@@ -44,7 +44,7 @@ template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<3>
 {
   static constexpr auto GetName() { return "kHandshakeFinalize"; }
-  static constexpr auto GetNameHash() { return 0xA8E749CB; }
+  static constexpr auto GetNameHash() { return 0x550329B7; }
   static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kHandshakeFinalize; }
 };
 
@@ -52,7 +52,7 @@ template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<4>
 {
   static constexpr auto GetName() { return "kNodeInit"; }
-  static constexpr auto GetNameHash() { return 0xC5B8CE24; }
+  static constexpr auto GetNameHash() { return 0xFC63C623; }
   static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kNodeInit; }
 };
 
@@ -60,94 +60,119 @@ template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<5>
 {
   static constexpr auto GetName() { return "kRoutingTable"; }
-  static constexpr auto GetNameHash() { return 0x32EF9EFC; }
+  static constexpr auto GetNameHash() { return 0xB81BBD82; }
   static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kRoutingTable; }
 };
 
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<6>
 {
-  static constexpr auto GetName() { return "kSharedObjectDelta"; }
-  static constexpr auto GetNameHash() { return 0x91EF90EE; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kSharedObjectDelta; }
+  static constexpr auto GetName() { return "kRoutingTableAck"; }
+  static constexpr auto GetNameHash() { return 0x2316681E; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kRoutingTableAck; }
 };
 
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<7>
 {
-  static constexpr auto GetName() { return "kResponderCall"; }
-  static constexpr auto GetNameHash() { return 0x5055B576; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kResponderCall; }
+  static constexpr auto GetName() { return "kSyncAllClear"; }
+  static constexpr auto GetNameHash() { return 0xB6414C8B; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kSyncAllClear; }
 };
 
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<8>
 {
-  static constexpr auto GetName() { return "kTargetedMessage"; }
-  static constexpr auto GetNameHash() { return 0x3440F0A6; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kTargetedMessage; }
+  static constexpr auto GetName() { return "kShutDown"; }
+  static constexpr auto GetNameHash() { return 0x91FBC714; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kShutDown; }
 };
 
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<9>
 {
-  static constexpr auto GetName() { return "kTargetedMessageResponder"; }
-  static constexpr auto GetNameHash() { return 0x2460C571; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kTargetedMessageResponder; }
+  static constexpr auto GetName() { return "kSharedObjectDelta"; }
+  static constexpr auto GetNameHash() { return 0x9C3DB581; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kSharedObjectDelta; }
 };
 
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<10>
 {
-  static constexpr auto GetName() { return "kCreateSubscription"; }
-  static constexpr auto GetNameHash() { return 0x6587A6A6; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kCreateSubscription; }
+  static constexpr auto GetName() { return "kCPUUsage"; }
+  static constexpr auto GetNameHash() { return 0x37B33843; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kCPUUsage; }
 };
 
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<11>
 {
-  static constexpr auto GetName() { return "kCreateDataSubscription"; }
-  static constexpr auto GetNameHash() { return 0x1B0ACF16; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kCreateDataSubscription; }
+  static constexpr auto GetName() { return "kResponderCall"; }
+  static constexpr auto GetNameHash() { return 0xF561031B; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kResponderCall; }
 };
 
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<12>
 {
-  static constexpr auto GetName() { return "kDestroySubscription"; }
-  static constexpr auto GetNameHash() { return 0xF053A8EC; }
-  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kDestroySubscription; }
+  static constexpr auto GetName() { return "kTargetedMessage"; }
+  static constexpr auto GetNameHash() { return 0x646CED86; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kTargetedMessage; }
 };
 
 template <>
 struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<13>
 {
+  static constexpr auto GetName() { return "kTargetedMessageResponder"; }
+  static constexpr auto GetNameHash() { return 0x0F29BAFC; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kTargetedMessageResponder; }
+};
+
+template <>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<14>
+{
+  static constexpr auto GetName() { return "kCreateSubscription"; }
+  static constexpr auto GetNameHash() { return 0x6310D904; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kCreateSubscription; }
+};
+
+template <>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<15>
+{
+  static constexpr auto GetName() { return "kDestroySubscription"; }
+  static constexpr auto GetNameHash() { return 0x005B8D36; }
+  static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kDestroySubscription; }
+};
+
+template <>
+struct StormReflEnumInfo<DDSCoordinatorProtocolMessageType>::elems<16>
+{
   static constexpr auto GetName() { return "kSubscriptionDeleted"; }
-  static constexpr auto GetNameHash() { return 0xA823DCCA; }
+  static constexpr auto GetNameHash() { return 0xFA6CC738; }
   static constexpr auto GetValue() { return DDSCoordinatorProtocolMessageType::kSubscriptionDeleted; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeRequest>
 {
+  using MyBase = void;
   static constexpr int fields_n = 2;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSCoordinatorHandshakeRequest"; }
-  static constexpr auto GetNameHash() { return 0x3D311590; }
+  static constexpr auto GetNameHash() { return 0x5A58FB22; }
   static DDSCoordinatorHandshakeRequest & GetDefault() { static DDSCoordinatorHandshakeRequest def; return def; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeRequest>::field_data_static<0>
 {
-  using member_type = unsigned long long;
+  using member_type = uint64_t; // unsigned long long
   static constexpr auto GetName() { return "m_Challenge"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xAAD47102; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x0B29A84A; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeRequest::m_Challenge; }
 };
@@ -157,19 +182,19 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeRequest>::field_data<0, Self> : 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_Challenge; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_Challenge; }
+  match_const_t<Self, uint64_t> & Get() { return self.m_Challenge; }
+  std::add_const_t<std::remove_reference_t<uint64_t>> & Get() const { return self.m_Challenge; }
   void SetDefault() { self.m_Challenge = StormReflTypeInfo<DDSCoordinatorHandshakeRequest>::GetDefault().m_Challenge; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeRequest>::field_data_static<1>
 {
-  using member_type = int;
+  using member_type = int; // int
   static constexpr auto GetName() { return "m_Version"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xB7B5D57D; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2AEEA616; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeRequest::m_Version; }
 };
@@ -187,23 +212,24 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeRequest>::field_data<1, Self> : 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeResponse>
 {
+  using MyBase = void;
   static constexpr int fields_n = 2;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSCoordinatorHandshakeResponse"; }
-  static constexpr auto GetNameHash() { return 0x5E242E45; }
+  static constexpr auto GetNameHash() { return 0x8BCA0BBE; }
   static DDSCoordinatorHandshakeResponse & GetDefault() { static DDSCoordinatorHandshakeResponse def; return def; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeResponse>::field_data_static<0>
 {
-  using member_type = unsigned long long;
+  using member_type = uint64_t; // unsigned long long
   static constexpr auto GetName() { return "m_ChallengeResponse"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xC11383A6; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x5C674F6E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeResponse::m_ChallengeResponse; }
 };
@@ -213,19 +239,19 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeResponse>::field_data<0, Self> :
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_ChallengeResponse; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_ChallengeResponse; }
+  match_const_t<Self, uint64_t> & Get() { return self.m_ChallengeResponse; }
+  std::add_const_t<std::remove_reference_t<uint64_t>> & Get() const { return self.m_ChallengeResponse; }
   void SetDefault() { self.m_ChallengeResponse = StormReflTypeInfo<DDSCoordinatorHandshakeResponse>::GetDefault().m_ChallengeResponse; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeResponse>::field_data_static<1>
 {
-  using member_type = unsigned long long;
+  using member_type = uint64_t; // unsigned long long
   static constexpr auto GetName() { return "m_ChallengeRequest"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xB57853AE; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xFACEC5C3; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeResponse::m_ChallengeRequest; }
 };
@@ -235,31 +261,32 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeResponse>::field_data<1, Self> :
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_ChallengeRequest; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_ChallengeRequest; }
+  match_const_t<Self, uint64_t> & Get() { return self.m_ChallengeRequest; }
+  std::add_const_t<std::remove_reference_t<uint64_t>> & Get() const { return self.m_ChallengeRequest; }
   void SetDefault() { self.m_ChallengeRequest = StormReflTypeInfo<DDSCoordinatorHandshakeResponse>::GetDefault().m_ChallengeRequest; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>
 {
-  static constexpr int fields_n = 3;
+  using MyBase = void;
+  static constexpr int fields_n = 5;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSCoordinatorHandshakeFinalize"; }
-  static constexpr auto GetNameHash() { return 0x9D42D019; }
+  static constexpr auto GetNameHash() { return 0x906BF34E; }
   static DDSCoordinatorHandshakeFinalize & GetDefault() { static DDSCoordinatorHandshakeFinalize def; return def; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data_static<0>
 {
-  using member_type = unsigned long long;
+  using member_type = uint64_t; // unsigned long long
   static constexpr auto GetName() { return "m_ChallengeResponse"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xC11383A6; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x5C674F6E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeFinalize::m_ChallengeResponse; }
 };
@@ -269,19 +296,19 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data<0, Self> :
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_ChallengeResponse; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_ChallengeResponse; }
+  match_const_t<Self, uint64_t> & Get() { return self.m_ChallengeResponse; }
+  std::add_const_t<std::remove_reference_t<uint64_t>> & Get() const { return self.m_ChallengeResponse; }
   void SetDefault() { self.m_ChallengeResponse = StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::GetDefault().m_ChallengeResponse; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data_static<1>
 {
-  using member_type = unsigned int;
+  using member_type = uint32_t; // unsigned int
   static constexpr auto GetName() { return "m_PublicIp"; }
   static constexpr auto GetType() { return "unsigned int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x58C48A0A; }
-  static constexpr unsigned GetTypeNameHash() { return 0xB306EEF4; }
+  static constexpr unsigned GetFieldNameHash() { return 0xE5F119C6; }
+  static constexpr unsigned GetTypeNameHash() { return 0x562EF932; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeFinalize::m_PublicIp; }
 };
@@ -291,21 +318,21 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data<1, Self> :
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned int> & Get() { return self.m_PublicIp; }
-  std::add_const_t<std::remove_reference_t<unsigned int>> & Get() const { return self.m_PublicIp; }
+  match_const_t<Self, uint32_t> & Get() { return self.m_PublicIp; }
+  std::add_const_t<std::remove_reference_t<uint32_t>> & Get() const { return self.m_PublicIp; }
   void SetDefault() { self.m_PublicIp = StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::GetDefault().m_PublicIp; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data_static<2>
 {
-  using member_type = unsigned short;
-  static constexpr auto GetName() { return "m_PublicPort"; }
+  using member_type = uint16_t; // unsigned short
+  static constexpr auto GetName() { return "m_NodePort"; }
   static constexpr auto GetType() { return "unsigned short"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xFBB22218; }
-  static constexpr unsigned GetTypeNameHash() { return 0xFB128F18; }
+  static constexpr unsigned GetFieldNameHash() { return 0x2BC11D5D; }
+  static constexpr unsigned GetTypeNameHash() { return 0x3DE16827; }
   static constexpr auto GetFieldIndex() { return 2; }
-  static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeFinalize::m_PublicPort; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeFinalize::m_NodePort; }
 };
 
 template <typename Self>
@@ -313,31 +340,76 @@ struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data<2, Self> :
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned short> & Get() { return self.m_PublicPort; }
-  std::add_const_t<std::remove_reference_t<unsigned short>> & Get() const { return self.m_PublicPort; }
-  void SetDefault() { self.m_PublicPort = StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::GetDefault().m_PublicPort; }
+  match_const_t<Self, uint16_t> & Get() { return self.m_NodePort; }
+  std::add_const_t<std::remove_reference_t<uint16_t>> & Get() const { return self.m_NodePort; }
+  void SetDefault() { self.m_NodePort = StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::GetDefault().m_NodePort; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data_static<3>
+{
+  using member_type = std::vector<DDSNodePort>; // std::vector<unsigned short, std::allocator<unsigned short> >
+  static constexpr auto GetName() { return "m_EndpointPorts"; }
+  static constexpr auto GetType() { return "std::vector<unsigned short, std::allocator<unsigned short> >"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xE6C133B1; }
+  static constexpr unsigned GetTypeNameHash() { return 0x072FC70B; }
+  static constexpr auto GetFieldIndex() { return 3; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeFinalize::m_EndpointPorts; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data<3, Self> : public StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data_static<3>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, std::vector<DDSNodePort>> & Get() { return self.m_EndpointPorts; }
+  std::add_const_t<std::remove_reference_t<std::vector<DDSNodePort>>> & Get() const { return self.m_EndpointPorts; }
+  void SetDefault() { self.m_EndpointPorts = StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::GetDefault().m_EndpointPorts; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data_static<4>
+{
+  using member_type = std::vector<DDSNodePort>; // std::vector<unsigned short, std::allocator<unsigned short> >
+  static constexpr auto GetName() { return "m_WebsitePorts"; }
+  static constexpr auto GetType() { return "std::vector<unsigned short, std::allocator<unsigned short> >"; }
+  static constexpr unsigned GetFieldNameHash() { return 0xB0FC1FC0; }
+  static constexpr unsigned GetTypeNameHash() { return 0x072FC70B; }
+  static constexpr auto GetFieldIndex() { return 4; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorHandshakeFinalize::m_WebsitePorts; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data<4, Self> : public StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::field_data_static<4>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, std::vector<DDSNodePort>> & Get() { return self.m_WebsitePorts; }
+  std::add_const_t<std::remove_reference_t<std::vector<DDSNodePort>>> & Get() const { return self.m_WebsitePorts; }
+  void SetDefault() { self.m_WebsitePorts = StormReflTypeInfo<DDSCoordinatorHandshakeFinalize>::GetDefault().m_WebsitePorts; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>
 {
-  static constexpr int fields_n = 5;
+  using MyBase = void;
+  static constexpr int fields_n = 6;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSCoordinatorNodeInitialization"; }
-  static constexpr auto GetNameHash() { return 0xEA3D5885; }
+  static constexpr auto GetNameHash() { return 0xAF7CF566; }
   static DDSCoordinatorNodeInitialization & GetDefault() { static DDSCoordinatorNodeInitialization def; return def; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<0>
 {
-  using member_type = unsigned int;
+  using member_type = DDSNodeId; // unsigned int
   static constexpr auto GetName() { return "m_NodeId"; }
   static constexpr auto GetType() { return "unsigned int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xF341CF68; }
-  static constexpr unsigned GetTypeNameHash() { return 0xB306EEF4; }
+  static constexpr unsigned GetFieldNameHash() { return 0x445D404F; }
+  static constexpr unsigned GetTypeNameHash() { return 0x562EF932; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeInitialization::m_NodeId; }
 };
@@ -347,19 +419,19 @@ struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<0, Self> 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned int> & Get() { return self.m_NodeId; }
-  std::add_const_t<std::remove_reference_t<unsigned int>> & Get() const { return self.m_NodeId; }
+  match_const_t<Self, DDSNodeId> & Get() { return self.m_NodeId; }
+  std::add_const_t<std::remove_reference_t<DDSNodeId>> & Get() const { return self.m_NodeId; }
   void SetDefault() { self.m_NodeId = StormReflTypeInfo<DDSCoordinatorNodeInitialization>::GetDefault().m_NodeId; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<1>
 {
-  using member_type = unsigned long long;
+  using member_type = uint64_t; // unsigned long long
   static constexpr auto GetName() { return "m_ClientSecret"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x4B40A040; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD5D9E49E; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeInitialization::m_ClientSecret; }
 };
@@ -369,19 +441,19 @@ struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<1, Self> 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_ClientSecret; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_ClientSecret; }
+  match_const_t<Self, uint64_t> & Get() { return self.m_ClientSecret; }
+  std::add_const_t<std::remove_reference_t<uint64_t>> & Get() const { return self.m_ClientSecret; }
   void SetDefault() { self.m_ClientSecret = StormReflTypeInfo<DDSCoordinatorNodeInitialization>::GetDefault().m_ClientSecret; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<2>
 {
-  using member_type = unsigned long long;
+  using member_type = uint64_t; // unsigned long long
   static constexpr auto GetName() { return "m_ServerSecret"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x7C920E5B; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0xD6351A20; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeInitialization::m_ServerSecret; }
 };
@@ -391,19 +463,19 @@ struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<2, Self> 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_ServerSecret; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_ServerSecret; }
+  match_const_t<Self, uint64_t> & Get() { return self.m_ServerSecret; }
+  std::add_const_t<std::remove_reference_t<uint64_t>> & Get() const { return self.m_ServerSecret; }
   void SetDefault() { self.m_ServerSecret = StormReflTypeInfo<DDSCoordinatorNodeInitialization>::GetDefault().m_ServerSecret; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<3>
 {
-  using member_type = bool;
+  using member_type = bool; // bool
   static constexpr auto GetName() { return "m_InitialNode"; }
   static constexpr auto GetType() { return "bool"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xB5C864BF; }
-  static constexpr unsigned GetTypeNameHash() { return 0xA1B914E5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x37F85501; }
+  static constexpr unsigned GetTypeNameHash() { return 0x55813692; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeInitialization::m_InitialNode; }
 };
@@ -421,13 +493,13 @@ struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<3, Self> 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<4>
 {
-  using member_type = std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >;
-  static constexpr auto GetName() { return "m_SharedObjects"; }
-  static constexpr auto GetType() { return "std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xF6FB05AB; }
-  static constexpr unsigned GetTypeNameHash() { return 0x89A3A511; }
+  using member_type = int64_t; // long long
+  static constexpr auto GetName() { return "m_NetworkTime"; }
+  static constexpr auto GetType() { return "long long"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x8B7AF0AF; }
+  static constexpr unsigned GetTypeNameHash() { return 0x40FF8523; }
   static constexpr auto GetFieldIndex() { return 4; }
-  static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeInitialization::m_SharedObjects; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeInitialization::m_NetworkTime; }
 };
 
 template <typename Self>
@@ -435,31 +507,172 @@ struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<4, Self> 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >> & Get() { return self.m_SharedObjects; }
-  std::add_const_t<std::remove_reference_t<std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >>> & Get() const { return self.m_SharedObjects; }
+  match_const_t<Self, int64_t> & Get() { return self.m_NetworkTime; }
+  std::add_const_t<std::remove_reference_t<int64_t>> & Get() const { return self.m_NetworkTime; }
+  void SetDefault() { self.m_NetworkTime = StormReflTypeInfo<DDSCoordinatorNodeInitialization>::GetDefault().m_NetworkTime; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<5>
+{
+  using member_type = std::vector<std::string>; // std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >
+  static constexpr auto GetName() { return "m_SharedObjects"; }
+  static constexpr auto GetType() { return "std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > >"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x431A56CC; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4F698566; }
+  static constexpr auto GetFieldIndex() { return 5; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeInitialization::m_SharedObjects; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data<5, Self> : public StormReflTypeInfo<DDSCoordinatorNodeInitialization>::field_data_static<5>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, std::vector<std::string>> & Get() { return self.m_SharedObjects; }
+  std::add_const_t<std::remove_reference_t<std::vector<std::string>>> & Get() const { return self.m_SharedObjects; }
   void SetDefault() { self.m_SharedObjects = StormReflTypeInfo<DDSCoordinatorNodeInitialization>::GetDefault().m_SharedObjects; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorRoutingTableAck>
+{
+  using MyBase = void;
+  static constexpr int fields_n = 1;
+  template <int N> struct field_data_static {};
+  template <int N, typename Self> struct field_data {};
+  template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
+  static constexpr auto GetName() { return "DDSCoordinatorRoutingTableAck"; }
+  static constexpr auto GetNameHash() { return 0xCFD42D38; }
+  static DDSCoordinatorRoutingTableAck & GetDefault() { static DDSCoordinatorRoutingTableAck def; return def; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorRoutingTableAck>::field_data_static<0>
+{
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_TableGen"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x4486A8A8; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
+  static constexpr auto GetFieldIndex() { return 0; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorRoutingTableAck::m_TableGen; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCoordinatorRoutingTableAck>::field_data<0, Self> : public StormReflTypeInfo<DDSCoordinatorRoutingTableAck>::field_data_static<0>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_TableGen; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_TableGen; }
+  void SetDefault() { self.m_TableGen = StormReflTypeInfo<DDSCoordinatorRoutingTableAck>::GetDefault().m_TableGen; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorSyncAllClear>
+{
+  using MyBase = void;
+  static constexpr int fields_n = 1;
+  template <int N> struct field_data_static {};
+  template <int N, typename Self> struct field_data {};
+  template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
+  static constexpr auto GetName() { return "DDSCoordinatorSyncAllClear"; }
+  static constexpr auto GetNameHash() { return 0x23C52751; }
+  static DDSCoordinatorSyncAllClear & GetDefault() { static DDSCoordinatorSyncAllClear def; return def; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorSyncAllClear>::field_data_static<0>
+{
+  using member_type = int; // int
+  static constexpr auto GetName() { return "m_TableGen"; }
+  static constexpr auto GetType() { return "int"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x4486A8A8; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
+  static constexpr auto GetFieldIndex() { return 0; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorSyncAllClear::m_TableGen; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCoordinatorSyncAllClear>::field_data<0, Self> : public StormReflTypeInfo<DDSCoordinatorSyncAllClear>::field_data_static<0>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, int> & Get() { return self.m_TableGen; }
+  std::add_const_t<std::remove_reference_t<int>> & Get() const { return self.m_TableGen; }
+  void SetDefault() { self.m_TableGen = StormReflTypeInfo<DDSCoordinatorSyncAllClear>::GetDefault().m_TableGen; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorNodeShutdown>
+{
+  using MyBase = void;
+  static constexpr int fields_n = 0;
+  template <int N> struct field_data_static {};
+  template <int N, typename Self> struct field_data {};
+  template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
+  static constexpr auto GetName() { return "DDSCoordinatorNodeShutdown"; }
+  static constexpr auto GetNameHash() { return 0xAEBA4DA9; }
+  static DDSCoordinatorNodeShutdown & GetDefault() { static DDSCoordinatorNodeShutdown def; return def; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorNodeCPUUsage>
+{
+  using MyBase = void;
+  static constexpr int fields_n = 1;
+  template <int N> struct field_data_static {};
+  template <int N, typename Self> struct field_data {};
+  template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
+  static constexpr auto GetName() { return "DDSCoordinatorNodeCPUUsage"; }
+  static constexpr auto GetNameHash() { return 0xA8C01DC0; }
+  static DDSCoordinatorNodeCPUUsage & GetDefault() { static DDSCoordinatorNodeCPUUsage def; return def; }
+};
+
+template <>
+struct StormReflTypeInfo<DDSCoordinatorNodeCPUUsage>::field_data_static<0>
+{
+  using member_type = float; // float
+  static constexpr auto GetName() { return "m_Usage"; }
+  static constexpr auto GetType() { return "float"; }
+  static constexpr unsigned GetFieldNameHash() { return 0x5DDDCE10; }
+  static constexpr unsigned GetTypeNameHash() { return 0xC9A55E95; }
+  static constexpr auto GetFieldIndex() { return 0; }
+  static constexpr auto GetMemberPtr() { return &DDSCoordinatorNodeCPUUsage::m_Usage; }
+};
+
+template <typename Self>
+struct StormReflTypeInfo<DDSCoordinatorNodeCPUUsage>::field_data<0, Self> : public StormReflTypeInfo<DDSCoordinatorNodeCPUUsage>::field_data_static<0>
+{
+  Self & self;
+  field_data(Self & self) : self(self) {}
+  match_const_t<Self, float> & Get() { return self.m_Usage; }
+  std::add_const_t<std::remove_reference_t<float>> & Get() const { return self.m_Usage; }
+  void SetDefault() { self.m_Usage = StormReflTypeInfo<DDSCoordinatorNodeCPUUsage>::GetDefault().m_Usage; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>
 {
+  using MyBase = void;
   static constexpr int fields_n = 4;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSCoordinatorSharedObjectDeltaMessage"; }
-  static constexpr auto GetNameHash() { return 0xCB12480F; }
+  static constexpr auto GetNameHash() { return 0x19D32AB3; }
   static DDSCoordinatorSharedObjectDeltaMessage & GetDefault() { static DDSCoordinatorSharedObjectDeltaMessage def; return def; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::field_data_static<0>
 {
-  using member_type = ReflectionNotifyChangeType;
+  using member_type = ReflectionNotifyChangeType; // ReflectionNotifyChangeType
   static constexpr auto GetName() { return "m_Type"; }
   static constexpr auto GetType() { return "ReflectionNotifyChangeType"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x70F58FB9; }
-  static constexpr unsigned GetTypeNameHash() { return 0x93A22823; }
+  static constexpr unsigned GetFieldNameHash() { return 0xB243C236; }
+  static constexpr unsigned GetTypeNameHash() { return 0xD4869875; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorSharedObjectDeltaMessage::m_Type; }
 };
@@ -477,11 +690,11 @@ struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::field_data<0, 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::field_data_static<1>
 {
-  using member_type = std::basic_string<char, std::char_traits<char>, std::allocator<char> >;
+  using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_Path"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x7E0D518E; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0x35C91E10; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorSharedObjectDeltaMessage::m_Path; }
 };
@@ -491,19 +704,19 @@ struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::field_data<1, 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, std::basic_string<char, std::char_traits<char>, std::allocator<char> >> & Get() { return self.m_Path; }
-  std::add_const_t<std::remove_reference_t<std::basic_string<char, std::char_traits<char>, std::allocator<char> >>> & Get() const { return self.m_Path; }
+  match_const_t<Self, std::string> & Get() { return self.m_Path; }
+  std::add_const_t<std::remove_reference_t<std::string>> & Get() const { return self.m_Path; }
   void SetDefault() { self.m_Path = StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::GetDefault().m_Path; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::field_data_static<2>
 {
-  using member_type = unsigned long long;
+  using member_type = uint64_t; // unsigned long long
   static constexpr auto GetName() { return "m_Index"; }
   static constexpr auto GetType() { return "unsigned long long"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x333B1BA6; }
-  static constexpr unsigned GetTypeNameHash() { return 0x639DDCF5; }
+  static constexpr unsigned GetFieldNameHash() { return 0x0D45F761; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorSharedObjectDeltaMessage::m_Index; }
 };
@@ -513,19 +726,19 @@ struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::field_data<2, 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, unsigned long long> & Get() { return self.m_Index; }
-  std::add_const_t<std::remove_reference_t<unsigned long long>> & Get() const { return self.m_Index; }
+  match_const_t<Self, uint64_t> & Get() { return self.m_Index; }
+  std::add_const_t<std::remove_reference_t<uint64_t>> & Get() const { return self.m_Index; }
   void SetDefault() { self.m_Index = StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::GetDefault().m_Index; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::field_data_static<3>
 {
-  using member_type = std::basic_string<char, std::char_traits<char>, std::allocator<char> >;
+  using member_type = std::string; // std::basic_string<char, std::char_traits<char>, std::allocator<char> >
   static constexpr auto GetName() { return "m_Data"; }
   static constexpr auto GetType() { return "std::basic_string<char, std::char_traits<char>, std::allocator<char> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0xDCF873D6; }
-  static constexpr unsigned GetTypeNameHash() { return 0x7F29EA9F; }
+  static constexpr unsigned GetFieldNameHash() { return 0x936E667C; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4E9D252D; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorSharedObjectDeltaMessage::m_Data; }
 };
@@ -535,31 +748,32 @@ struct StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::field_data<3, 
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, std::basic_string<char, std::char_traits<char>, std::allocator<char> >> & Get() { return self.m_Data; }
-  std::add_const_t<std::remove_reference_t<std::basic_string<char, std::char_traits<char>, std::allocator<char> >>> & Get() const { return self.m_Data; }
+  match_const_t<Self, std::string> & Get() { return self.m_Data; }
+  std::add_const_t<std::remove_reference_t<std::string>> & Get() const { return self.m_Data; }
   void SetDefault() { self.m_Data = StormReflTypeInfo<DDSCoordinatorSharedObjectDeltaMessage>::GetDefault().m_Data; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDelta>
 {
+  using MyBase = void;
   static constexpr int fields_n = 2;
   template <int N> struct field_data_static {};
   template <int N, typename Self> struct field_data {};
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSCoordinatorSharedObjectDelta"; }
-  static constexpr auto GetNameHash() { return 0xA44A093C; }
+  static constexpr auto GetNameHash() { return 0x59556F78; }
   static DDSCoordinatorSharedObjectDelta & GetDefault() { static DDSCoordinatorSharedObjectDelta def; return def; }
 };
 
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDelta>::field_data_static<0>
 {
-  using member_type = int;
+  using member_type = int; // int
   static constexpr auto GetName() { return "m_SharedObjectType"; }
   static constexpr auto GetType() { return "int"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x87CF2170; }
-  static constexpr unsigned GetTypeNameHash() { return 0x0E63B618; }
+  static constexpr unsigned GetFieldNameHash() { return 0x02559DA4; }
+  static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorSharedObjectDelta::m_SharedObjectType; }
 };
@@ -577,11 +791,11 @@ struct StormReflTypeInfo<DDSCoordinatorSharedObjectDelta>::field_data<0, Self> :
 template <>
 struct StormReflTypeInfo<DDSCoordinatorSharedObjectDelta>::field_data_static<1>
 {
-  using member_type = std::vector<DDSCoordinatorSharedObjectDeltaMessage, std::allocator<DDSCoordinatorSharedObjectDeltaMessage> >;
+  using member_type = std::vector<DDSCoordinatorSharedObjectDeltaMessage>; // std::vector<DDSCoordinatorSharedObjectDeltaMessage, std::allocator<DDSCoordinatorSharedObjectDeltaMessage> >
   static constexpr auto GetName() { return "m_Deltas"; }
   static constexpr auto GetType() { return "std::vector<DDSCoordinatorSharedObjectDeltaMessage, std::allocator<DDSCoordinatorSharedObjectDeltaMessage> >"; }
-  static constexpr unsigned GetFieldNameHash() { return 0x776270B2; }
-  static constexpr unsigned GetTypeNameHash() { return 0xB773D52D; }
+  static constexpr unsigned GetFieldNameHash() { return 0xA9A8B14D; }
+  static constexpr unsigned GetTypeNameHash() { return 0x56B4C346; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSCoordinatorSharedObjectDelta::m_Deltas; }
 };
@@ -591,8 +805,8 @@ struct StormReflTypeInfo<DDSCoordinatorSharedObjectDelta>::field_data<1, Self> :
 {
   Self & self;
   field_data(Self & self) : self(self) {}
-  match_const_t<Self, std::vector<DDSCoordinatorSharedObjectDeltaMessage, std::allocator<DDSCoordinatorSharedObjectDeltaMessage> >> & Get() { return self.m_Deltas; }
-  std::add_const_t<std::remove_reference_t<std::vector<DDSCoordinatorSharedObjectDeltaMessage, std::allocator<DDSCoordinatorSharedObjectDeltaMessage> >>> & Get() const { return self.m_Deltas; }
+  match_const_t<Self, std::vector<DDSCoordinatorSharedObjectDeltaMessage>> & Get() { return self.m_Deltas; }
+  std::add_const_t<std::remove_reference_t<std::vector<DDSCoordinatorSharedObjectDeltaMessage>>> & Get() const { return self.m_Deltas; }
   void SetDefault() { self.m_Deltas = StormReflTypeInfo<DDSCoordinatorSharedObjectDelta>::GetDefault().m_Deltas; }
 };
 
@@ -608,7 +822,7 @@ struct StormReflTypeInfo<DDSCoordinatorResponderCallData>
   };
   template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
   static constexpr auto GetName() { return "DDSCoordinatorResponderCallData"; }
-  static constexpr auto GetNameHash() { return 0x5DB4F5CF; }
+  static constexpr auto GetNameHash() { return 0xFCC6B416; }
   static DDSCoordinatorResponderCallData & GetDefault() { static DDSCoordinatorResponderCallData def; return def; }
 };
 
@@ -624,7 +838,7 @@ struct StormReflTypeInfo<DDSCoordinatorTargetedMessage>
   };
   template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
   static constexpr auto GetName() { return "DDSCoordinatorTargetedMessage"; }
-  static constexpr auto GetNameHash() { return 0xDF126A5C; }
+  static constexpr auto GetNameHash() { return 0x88AEA8A0; }
   static DDSCoordinatorTargetedMessage & GetDefault() { static DDSCoordinatorTargetedMessage def; return def; }
 };
 
@@ -640,7 +854,7 @@ struct StormReflTypeInfo<DDSCoordinatorTargetedMessageWithResponder>
   };
   template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
   static constexpr auto GetName() { return "DDSCoordinatorTargetedMessageWithResponder"; }
-  static constexpr auto GetNameHash() { return 0x0FA24459; }
+  static constexpr auto GetNameHash() { return 0x4243BC82; }
   static DDSCoordinatorTargetedMessageWithResponder & GetDefault() { static DDSCoordinatorTargetedMessageWithResponder def; return def; }
 };
 
@@ -656,24 +870,8 @@ struct StormReflTypeInfo<DDSCoordinatorCreateSubscription>
   };
   template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
   static constexpr auto GetName() { return "DDSCoordinatorCreateSubscription"; }
-  static constexpr auto GetNameHash() { return 0xEC6128DF; }
+  static constexpr auto GetNameHash() { return 0xA7B4FB66; }
   static DDSCoordinatorCreateSubscription & GetDefault() { static DDSCoordinatorCreateSubscription def; return def; }
-};
-
-template <>
-struct StormReflTypeInfo<DDSCoordinatorCreateDataSubscription>
-{
-  using MyBase = DDSCreateDataSubscriptionBase;
-  static constexpr int fields_n = 0 + StormReflTypeInfo<MyBase>::fields_n;
-  template <int N> struct field_data_static : public StormReflTypeInfo<MyBase>::field_data_static<N> {};
-  template <int N, typename Self> struct field_data : public StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>
-  {
-    field_data(Self & self) : StormReflTypeInfo<MyBase>::field_data<N, match_const_t<Self, MyBase>>(self) {}
-  };
-  template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
-  static constexpr auto GetName() { return "DDSCoordinatorCreateDataSubscription"; }
-  static constexpr auto GetNameHash() { return 0x641666E1; }
-  static DDSCoordinatorCreateDataSubscription & GetDefault() { static DDSCoordinatorCreateDataSubscription def; return def; }
 };
 
 template <>
@@ -688,7 +886,7 @@ struct StormReflTypeInfo<DDSCoordinatorDestroySubscription>
   };
   template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
   static constexpr auto GetName() { return "DDSCoordinatorDestroySubscription"; }
-  static constexpr auto GetNameHash() { return 0xFADAE045; }
+  static constexpr auto GetNameHash() { return 0xA3232960; }
   static DDSCoordinatorDestroySubscription & GetDefault() { static DDSCoordinatorDestroySubscription def; return def; }
 };
 
@@ -704,7 +902,7 @@ struct StormReflTypeInfo<DDSCoordinatorSubscriptionDeleted>
   };
   template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
   static constexpr auto GetName() { return "DDSCoordinatorSubscriptionDeleted"; }
-  static constexpr auto GetNameHash() { return 0xA2AA9463; }
+  static constexpr auto GetNameHash() { return 0x5914636E; }
   static DDSCoordinatorSubscriptionDeleted & GetDefault() { static DDSCoordinatorSubscriptionDeleted def; return def; }
 };
 
@@ -712,7 +910,7 @@ namespace StormReflFileInfo
 {
   struct DDSCoordinatorProtocolMessages
   {
-    static const int types_n = 13;
+    static const int types_n = 16;
     template <int i> struct type_info { using type = void; };
   };
 
@@ -743,53 +941,71 @@ namespace StormReflFileInfo
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<4>
   {
-    using type = ::DDSCoordinatorSharedObjectDeltaMessage;
+    using type = ::DDSCoordinatorRoutingTableAck;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<5>
   {
-    using type = ::DDSCoordinatorSharedObjectDelta;
+    using type = ::DDSCoordinatorSyncAllClear;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<6>
   {
-    using type = ::DDSCoordinatorResponderCallData;
+    using type = ::DDSCoordinatorNodeShutdown;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<7>
   {
-    using type = ::DDSCoordinatorTargetedMessage;
+    using type = ::DDSCoordinatorNodeCPUUsage;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<8>
   {
-    using type = ::DDSCoordinatorTargetedMessageWithResponder;
+    using type = ::DDSCoordinatorSharedObjectDeltaMessage;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<9>
   {
-    using type = ::DDSCoordinatorCreateSubscription;
+    using type = ::DDSCoordinatorSharedObjectDelta;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<10>
   {
-    using type = ::DDSCoordinatorCreateDataSubscription;
+    using type = ::DDSCoordinatorResponderCallData;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<11>
   {
-    using type = ::DDSCoordinatorDestroySubscription;
+    using type = ::DDSCoordinatorTargetedMessage;
   };
 
   template <>
   struct DDSCoordinatorProtocolMessages::type_info<12>
+  {
+    using type = ::DDSCoordinatorTargetedMessageWithResponder;
+  };
+
+  template <>
+  struct DDSCoordinatorProtocolMessages::type_info<13>
+  {
+    using type = ::DDSCoordinatorCreateSubscription;
+  };
+
+  template <>
+  struct DDSCoordinatorProtocolMessages::type_info<14>
+  {
+    using type = ::DDSCoordinatorDestroySubscription;
+  };
+
+  template <>
+  struct DDSCoordinatorProtocolMessages::type_info<15>
   {
     using type = ::DDSCoordinatorSubscriptionDeleted;
   };
