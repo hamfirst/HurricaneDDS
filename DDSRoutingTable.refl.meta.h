@@ -226,11 +226,11 @@ struct StormReflTypeInfo<DDSNodeElement>
 template <>
 struct StormReflTypeInfo<DDSNodeElement>::field_data_static<0 + StormReflTypeInfo<DDSNodeElementBase>::fields_n>
 {
-  using member_type = DDSKey; // unsigned long long
+  using member_type = DDSKey; // unsigned long
   static constexpr auto GetName() { return "m_CentralKey"; }
-  static constexpr auto GetType() { return "unsigned long long"; }
+  static constexpr auto GetType() { return "unsigned long"; }
   static constexpr unsigned GetFieldNameHash() { return 0x46853245; }
-  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4F6404D1; }
   static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 0 + StormReflTypeInfo<DDSNodeElementBase>::fields_n; }
   static constexpr auto GetMemberPtr() { return &DDSNodeElement::m_CentralKey; }

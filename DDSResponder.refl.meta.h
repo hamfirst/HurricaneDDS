@@ -51,11 +51,11 @@ struct StormReflTypeInfo<DDSResponderData>
 template <>
 struct StormReflTypeInfo<DDSResponderData>::field_data_static<0>
 {
-  using member_type = DDSKey; // unsigned long long
+  using member_type = DDSKey; // unsigned long
   static constexpr auto GetName() { return "m_Key"; }
-  static constexpr auto GetType() { return "unsigned long long"; }
+  static constexpr auto GetType() { return "unsigned long"; }
   static constexpr unsigned GetFieldNameHash() { return 0x79726F4E; }
-  static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
+  static constexpr unsigned GetTypeNameHash() { return 0x4F6404D1; }
   static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSResponderData::m_Key; }

@@ -1,7 +1,4 @@
 
-#include <gsl/gsl_util>
-
-
 #include <mongoc/mongoc.h>
 #include <libbson/bson.h>
 

@@ -6,8 +6,6 @@
 #include <queue>
 #include <optional>
 
-#include <gsl/gsl_util>
-
 #include <hash/Hash.h>
 #include <StormSockets/StormMessageQueue.h>
 #include <StormSockets/StormSemaphore.h>

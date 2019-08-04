@@ -126,11 +126,11 @@ struct StormReflTypeInfo<DDSThrottle>::field_data<2, Self> : public StormReflTyp
 template <>
 struct StormReflTypeInfo<DDSThrottle>::field_data_static<3>
 {
-  using member_type = time_t; // long long
+  using member_type = time_t; // long
   static constexpr auto GetName() { return "m_CreditStart"; }
-  static constexpr auto GetType() { return "long long"; }
+  static constexpr auto GetType() { return "long"; }
   static constexpr unsigned GetFieldNameHash() { return 0xE100B249; }
-  static constexpr unsigned GetTypeNameHash() { return 0x40FF8523; }
+  static constexpr unsigned GetTypeNameHash() { return 0x3B97A968; }
   static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSThrottle::m_CreditStart; }
