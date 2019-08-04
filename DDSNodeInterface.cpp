@@ -67,8 +67,16 @@ const void * DDSNodeInterface::GetSharedObjectPointer(uint32_t object_type_name_
   return m_NodeState.GetSharedObjectPointer(type_id);
 }
 
+void * DDSNodeInterface::GetLocalObjectPointer(int target_object_type, DDSKey target_key)
+{
+  return m_NodeState.GetLocalObject(target_object_type, target_key);
+}
+
+
 void DDSNodeInterface::SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message)
 {
+  assert(target_method_id != -1);
+
   DDSTargetedMessage packet;
   packet.m_Key = target_key;
   packet.m_ObjectType = target_object_type;
@@ -81,6 +89,8 @@ void DDSNodeInterface::SendMessageToObject(int target_object_type, DDSKey target
 void DDSNodeInterface::SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
   int responder_object_type, DDSKey responder_key, int responder_method_id, int err_method_id, std::string && message, std::string && return_arg)
 {
+  assert(target_method_id != -1);
+
   DDSTargetedMessageWithResponder packet;
   packet.m_Key = target_key;
   packet.m_ObjectType = target_object_type;
@@ -97,6 +107,8 @@ void DDSNodeInterface::SendMessageToObjectWithResponderReturnArg(int target_obje
 
 void DDSNodeInterface::SendMessageToSharedObject(int target_object_type, int target_method_id, std::string && message)
 {
+  assert(target_method_id != -1);
+
   DDSTargetedMessage packet;
   packet.m_Key = 0;
   packet.m_ObjectType = target_object_type;
@@ -109,6 +121,8 @@ void DDSNodeInterface::SendMessageToSharedObject(int target_object_type, int tar
 void DDSNodeInterface::SendMessageToSharedObjectWithResponderReturnArg(int target_object_type, int target_method_id,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg)
 {
+  assert(target_method_id != -1);
+
   DDSTargetedMessageWithResponder packet;
   packet.m_Key = 0;
   packet.m_ObjectType = target_object_type;
@@ -130,6 +144,8 @@ void DDSNodeInterface::SendResponderCall(const DDSResponderCallBase & call_data)
 void DDSNodeInterface::InsertIntoDatabaseWithResponderReturnArg(const char * collection, int data_object_type, std::string && data, DDSKey data_key,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
+  assert(responder_method_id != -1);
+
   DDSResponderCallData call_data;
   call_data.m_Key = responder_key;
   call_data.m_ObjectType = responder_object_type;
@@ -143,6 +159,8 @@ void DDSNodeInterface::InsertIntoDatabaseWithResponderReturnArg(const char * col
 void DDSNodeInterface::QueryDatabaseInternal(const char * collection, std::string && query,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
+  assert(responder_method_id != -1);
+
   DDSResponderCallData call_data;
   call_data.m_Key = responder_key;
   call_data.m_ObjectType = responder_object_type;
@@ -153,9 +171,26 @@ void DDSNodeInterface::QueryDatabaseInternal(const char * collection, std::strin
   m_NodeState.QueryObjectData(collection, query.c_str(), std::move(call_data));
 }
 
+void DDSNodeInterface::QueryDatabaseMultipleInternal(const char * collection, std::string && query,
+  int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
+{
+  assert(responder_method_id != -1);
+
+  DDSResponderCallData call_data;
+  call_data.m_Key = responder_key;
+  call_data.m_ObjectType = responder_object_type;
+  call_data.m_MethodId = responder_method_id;
+  call_data.m_MethodArgs = "[]";
+  call_data.m_ResponderArgs = return_arg;
+
+  m_NodeState.QueryObjectDataMultiple(collection, query.c_str(), std::move(call_data));
+}
+
 void DDSNodeInterface::QueryDatabaseByKeyInternal(const char * collection, DDSKey key,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
+  assert(responder_method_id != -1);
+
   DDSResponderCallData call_data;
   call_data.m_Key = responder_key;
   call_data.m_ObjectType = responder_object_type;
@@ -169,6 +204,8 @@ void DDSNodeInterface::QueryDatabaseByKeyInternal(const char * collection, DDSKe
 void DDSNodeInterface::UpdateDatabaseInternal(const char * collection, int data_object_type, std::string && data, DDSKey data_key,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
+  assert(responder_method_id != -1);
+
   DDSResponderCallData call_data;
   call_data.m_Key = responder_key;
   call_data.m_ObjectType = responder_object_type;
@@ -186,6 +223,8 @@ void DDSNodeInterface::DeleteFromDatabaseInternal(const char * collection, DDSKe
 
 void DDSNodeInterface::CreateTimerInternal(std::chrono::system_clock::duration duration, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
 {
+  assert(target_method_id != -1);
+
   DDSResponderCallData call_data;
   call_data.m_Key = key;
   call_data.m_ObjectType = data_object_type;
@@ -193,11 +232,13 @@ void DDSNodeInterface::CreateTimerInternal(std::chrono::system_clock::duration d
   call_data.m_MethodArgs = "[]";
   call_data.m_ResponderArgs = return_arg;
 
-  m_NodeState.CreateTimer(duration, std::move(call_data));
+  return m_NodeState.CreateTimer(duration, std::move(call_data));
 }
 
 void DDSNodeInterface::CreateHttpRequestInternal(const DDSHttpRequest & request, DDSKey key, int data_object_type, int target_method_id, std::string && return_arg)
 {
+  assert(target_method_id != -1);
+
   DDSResponderCallData call_data;
   call_data.m_Key = key;
   call_data.m_ObjectType = data_object_type;
@@ -211,6 +252,8 @@ void DDSNodeInterface::CreateHttpRequestInternal(const DDSHttpRequest & request,
 DDSKey DDSNodeInterface::CreateSubscriptionInternal(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
   DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg, int err_method_id, bool force_load, bool data_sub)
 {
+  assert(return_method_id != -1);
+
   DDSKey subscription_id = DDSGetRandomNumber64();
 
   DDSCreateSubscription sub_data;
@@ -313,7 +356,20 @@ DDSRoutingTableNodeInfo DDSNodeInterface::GetNodeInfo(DDSKey key)
   return m_NodeState.GetNodeInfo(key);
 }
 
-time_t DDSNodeInterface::GetNetworkTime()
+std::string DDSNodeInterface::QueryDatabaseSingleton(const char * collection_name)
+{
+  //This shouldn't be used from a node, only from the coordinator
+  assert(false);
+  return "";
+}
+
+void DDSNodeInterface::UpsertDatabaseSingleton(const char * collection_name, const char * document)
+{
+  //This shouldn't be used from a node, only from the coordinator
+  assert(false);
+}
+
+time_t DDSNodeInterface::GetNetworkTime() const
 {
   return m_NodeState.GetNetworkTime();
 }

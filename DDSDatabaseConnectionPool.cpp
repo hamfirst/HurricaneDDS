@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <optional>
 
-#include <optional/optional.hpp>
-#include <gsl/gsl_util.h>
+#include <gsl/gsl_util>
 
 #include <hash/Hash.h>
 #include <StormSockets/StormMessageQueue.h>
@@ -139,6 +139,46 @@ void DDSDatabaseConnectionPool::DatabaseThread(int thread_index)
           {
             QueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 1 });
           }
+        }
+        break;
+
+      case DDSDatabaseOperation::kCustomQueryMultiple:
+        {
+          auto * bson = bson_new();
+          auto bson_auto_destroy = gsl::finally([&]() { bson_destroy(bson); });
+
+          bson_error_t parse_error;
+
+          if (bson_init_from_json(bson, query.m_Data.c_str(), -1, &parse_error) == false)
+          {
+            DatabaseQueryResult result = { query.m_Callback, parse_error.code };
+            QueueResult(thread_index, result);
+            break;
+          }
+
+          auto cursor = mongoc_collection_find(collection, MONGOC_QUERY_NONE, 0, 1, 0, bson, nullptr, nullptr);
+          auto cursor_destroy = gsl::finally([&]() { mongoc_cursor_destroy(cursor); });
+
+          DatabaseQueryResult result = { query.m_Callback };
+
+          std::string result_str = "[";
+
+          const bson_t * doc;
+          while (mongoc_cursor_next(cursor, &doc))
+          {
+            char * str = bson_as_json(doc, NULL);
+            auto str_destroy = gsl::finally([&]() { bson_free(str); });
+
+            if(result_str.size() > 1)
+            {
+              result_str += ',';
+            }
+
+            result_str += str;
+          }
+
+          result_str += ']';
+          QueueResult(thread_index, DatabaseQueryResult{ query.m_Callback, 0, std::move(result_str) });
         }
         break;
       case DDSDatabaseOperation::kInsert:
@@ -283,6 +323,11 @@ void DDSDatabaseConnectionPool::QueryDatabaseByKey(DDSKey key, const char * coll
 void DDSDatabaseConnectionPool::QueryDatabaseCustom(const char * query, const char * collection, std::function<void(const char *, int)> && result_callback)
 {
   QueryDatabase(crc32(query), collection, DDSDatabaseOperation::kCustomQuery, query, std::move(result_callback));
+}
+
+void DDSDatabaseConnectionPool::QueryDatabaseCustomMultiple(const char * query, const char * collection, std::function<void(const char *, int)> && result_callback)
+{
+  QueryDatabase(crc32(query), collection, DDSDatabaseOperation::kCustomQueryMultiple, query, std::move(result_callback));
 }
 
 void DDSDatabaseConnectionPool::QueryDatabaseInsert(DDSKey key, const char * collection, const char * document, std::function<void(const char *, int)> && result_callback)

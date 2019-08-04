@@ -20,7 +20,10 @@ public:
 
   DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) override;
 
-  time_t GetNetworkTime() override;
+  std::string QueryDatabaseSingleton(const char * collection_name) override;
+  void UpsertDatabaseSingleton(const char * collection_name, const char * document) override;
+
+  time_t GetNetworkTime() const override;
 private:
 
   int GetObjectType(uint32_t object_type_name_hash) override;
@@ -28,6 +31,7 @@ private:
   int GetSharedObjectType(uint32_t object_type_name_hash) override;
 
   const void * GetSharedObjectPointer(uint32_t object_type_name_hash) override;
+  void * GetLocalObjectPointer(int target_object_type, DDSKey target_key) override;
 
   void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message) override;
   void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
@@ -42,6 +46,8 @@ private:
 
   void QueryDatabaseInternal(const char * collection, std::string && query,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override;
+  void QueryDatabaseMultipleInternal(const char * collection, std::string && query,
+      int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override;
   void QueryDatabaseByKeyInternal(const char * collection, DDSKey key,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override;
   void DeleteFromDatabaseInternal(const char * collection, DDSKey key) override;
@@ -68,9 +74,12 @@ public:
 
   void DestroySelf() override { NotImplemented(); }
 
-  DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) override { NotImplemented(); return{}; };
+  DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) override { NotImplemented(); return std::nullopt; };
 
-  time_t GetNetworkTime() override { NotImplemented(); return{}; };
+  std::string QueryDatabaseSingleton(const char * collection_name) override { NotImplemented(); return ""; }
+  void UpsertDatabaseSingleton(const char * collection_name, const char * document) override { NotImplemented(); };
+
+  time_t GetNetworkTime() const override { NotImplemented(); return{}; };
 
 private:
 
@@ -81,6 +90,7 @@ private:
   int GetSharedObjectType(uint32_t object_type_name_hash) override { NotImplemented(); return 0; };
 
   const void * GetSharedObjectPointer(uint32_t object_type_name_hash) override { NotImplemented(); return nullptr; };
+  void * GetLocalObjectPointer(int target_object_type, DDSKey target_key) override { NotImplemented(); return nullptr; };
 
   void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message) override { NotImplemented(); };
   void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
@@ -94,6 +104,8 @@ private:
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override { NotImplemented(); };
 
   void QueryDatabaseInternal(const char * collection, std::string && query,
+    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override { NotImplemented(); };
+  void QueryDatabaseMultipleInternal(const char * collection, std::string && query,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override { NotImplemented(); };
   void QueryDatabaseByKeyInternal(const char * collection, DDSKey key,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) override { NotImplemented(); };

@@ -2,6 +2,7 @@
 #include "DDSIncomingKeyspaceTransferManager.h"
 #include "DDSLog.h"
 
+#include <cassert>
 
 DDSIncomingKeyspaceTransferManager::DDSIncomingKeyspaceTransferManager(int num_object_types) :
   m_Initialized(false), m_NumObjectTypes(num_object_types)

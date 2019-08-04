@@ -8,6 +8,8 @@
 
 #include <StormRefl/StormReflJsonStd.h>
 
+#include <cassert>
+
 DDSSharedObjectInterface::DDSSharedObjectInterface(DDSCoordinatorState & coordinator_state, DDSSharedObjectBase * data_store) :
   m_CoordinatorState(coordinator_state), m_DataStore(data_store)
 {
@@ -50,8 +52,15 @@ const void * DDSSharedObjectInterface::GetSharedObjectPointer(uint32_t object_ty
   return m_CoordinatorState.GetSharedObjectPointer(type_id);
 }
 
+void * DDSSharedObjectInterface::GetLocalObjectPointer(int target_object_type, DDSKey target_key)
+{
+  return m_CoordinatorState.GetLocalObject(target_object_type, target_key);
+}
+
 void DDSSharedObjectInterface::SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message)
 {
+  assert(target_method_id != -1);
+
   DDSCoordinatorTargetedMessage packet;
   packet.m_Key = target_key;
   packet.m_ObjectType = target_object_type;
@@ -64,6 +73,8 @@ void DDSSharedObjectInterface::SendMessageToObject(int target_object_type, DDSKe
 void DDSSharedObjectInterface::SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
   int responder_object_type, DDSKey responder_key, int responder_method_id, int err_method_id, std::string && message, std::string && return_arg)
 {
+  assert(target_method_id != -1);
+
   DDSCoordinatorTargetedMessageWithResponder packet;
   packet.m_Key = target_key;
   packet.m_ObjectType = target_object_type;
@@ -80,6 +91,8 @@ void DDSSharedObjectInterface::SendMessageToObjectWithResponderReturnArg(int tar
 
 void DDSSharedObjectInterface::SendMessageToSharedObject(int target_object_type, int target_method_id, std::string && message)
 {
+  assert(target_method_id != -1);
+
   DDSCoordinatorTargetedMessage packet;
   packet.m_Key = 0;
   packet.m_ObjectType = target_object_type;
@@ -92,6 +105,8 @@ void DDSSharedObjectInterface::SendMessageToSharedObject(int target_object_type,
 void DDSSharedObjectInterface::SendMessageToSharedObjectWithResponderReturnArg(int target_object_type, int target_method_id,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && message, std::string && return_arg)
 {
+  assert(target_method_id != -1);
+
   DDSCoordinatorTargetedMessageWithResponder packet;
   packet.m_Key = 0;
   packet.m_ObjectType = target_object_type;
@@ -114,6 +129,7 @@ void DDSSharedObjectInterface::SendResponderCall(const DDSResponderCallBase & ca
 void DDSSharedObjectInterface::InsertIntoDatabaseWithResponderReturnArg(const char * collection, int data_object_type, std::string && data, DDSKey data_key,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
+  assert(responder_method_id != -1);
   DDSCoordinatorResponderCallData call_data;
   call_data.m_Key = responder_key;
   call_data.m_ObjectType = responder_object_type;
@@ -126,6 +142,7 @@ void DDSSharedObjectInterface::InsertIntoDatabaseWithResponderReturnArg(const ch
 void DDSSharedObjectInterface::QueryDatabaseInternal(const char * collection, std::string && query,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
+  assert(responder_method_id != -1);
   DDSCoordinatorResponderCallData call_data;
   call_data.m_Key = responder_key;
   call_data.m_ObjectType = responder_object_type;
@@ -135,9 +152,24 @@ void DDSSharedObjectInterface::QueryDatabaseInternal(const char * collection, st
   m_CoordinatorState.QueryObjectData(collection, query.c_str(), std::move(call_data));
 }
 
+
+void DDSSharedObjectInterface::QueryDatabaseMultipleInternal(const char * collection, std::string && query,
+  int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
+{
+  assert(responder_method_id != -1);
+  DDSCoordinatorResponderCallData call_data;
+  call_data.m_Key = responder_key;
+  call_data.m_ObjectType = responder_object_type;
+  call_data.m_MethodId = responder_method_id;
+  call_data.m_ResponderArgs = return_arg;
+
+  m_CoordinatorState.QueryObjectDataMultiple(collection, query.c_str(), std::move(call_data));
+}
+
 void DDSSharedObjectInterface::QueryDatabaseByKeyInternal(const char * collection, DDSKey key,
   int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg)
 {
+  assert(responder_method_id != -1);
   DDSCoordinatorResponderCallData call_data;
   call_data.m_Key = responder_key;
   call_data.m_ObjectType = responder_object_type;
@@ -177,6 +209,8 @@ void DDSSharedObjectInterface::CreateHttpRequestInternal(const DDSHttpRequest & 
 DDSKey DDSSharedObjectInterface::CreateSubscriptionInternal(int target_object_type, DDSKey target_key, const char * path, int return_object_type,
   DDSKey return_key, int return_method_id, bool delta_only, std::string && return_arg, int err_method_id, bool force_load, bool data_sub)
 {
+  assert(return_method_id != -1);
+
   DDSKey subscription_id = DDSGetRandomNumber64();
 
   DDSCoordinatorCreateSubscription sub_data;
@@ -222,7 +256,17 @@ DDSRoutingTableNodeInfo DDSSharedObjectInterface::GetNodeInfo(DDSKey key)
   return m_CoordinatorState.GetNodeInfo(key);
 }
 
-time_t DDSSharedObjectInterface::GetNetworkTime()
+std::string DDSSharedObjectInterface::QueryDatabaseSingleton(const char * collection_name)
+{
+  return m_CoordinatorState.QueryDatabaseSingleton(collection_name);
+}
+
+void DDSSharedObjectInterface::UpsertDatabaseSingleton(const char * collection_name, const char * document)
+{
+  return m_CoordinatorState.UpsertDatabaseSingleton(collection_name, document);
+}
+
+time_t DDSSharedObjectInterface::GetNetworkTime() const
 {
   return m_CoordinatorState.GetNetworkTime();
 }

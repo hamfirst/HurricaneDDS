@@ -145,6 +145,28 @@ public:
     return true;
   }
 
+  void Update(DDSKeyRange active_range)
+  {
+    if constexpr (DDS_HAS_FUNC(DataType, Update))
+    {
+      for(auto & elem : m_Objects)
+      {
+        if(KeyInKeyRange(elem.first, active_range))
+        {
+          BeginObjectModification(elem.first);
+          auto & obj_data = elem.second;
+
+          if (obj_data.m_ActiveObject.get() != nullptr)
+          {
+            DDS_CALL_FUNC(Update, *obj_data.m_ActiveObject.get());
+          }
+
+          EndObjectModification();
+        }
+      }
+    }
+  }
+
   virtual void * GetDataObjectForKey(DDSKey key)
   {
     auto itr = m_Objects.find(key);
@@ -428,11 +450,6 @@ public:
           found_sub = true;
           break;
         }
-      }
-
-      if (found_sub == false)
-      {
-        DDSLog::LogError("Could not find subscription to destroy");
       }
     }
     break;

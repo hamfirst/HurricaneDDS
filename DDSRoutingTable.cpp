@@ -4,6 +4,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <functional>
 
 
 std::string GetNodeAddrAsString(DDSNodeAddr addr)
@@ -127,7 +128,7 @@ DDSRoutingTableNodeInfo GetNodeDataForNodeId(DDSNodeId node_id, const DDSRouting
   {
     if (node_data.m_Id == node_id)
     {
-      return node_data;
+      return DDSRoutingTableNodeInfo(std::cref(node_data));
     }
   }
 
@@ -135,11 +136,11 @@ DDSRoutingTableNodeInfo GetNodeDataForNodeId(DDSNodeId node_id, const DDSRouting
   {
     if (node_data.m_Id == node_id)
     {
-      return node_data;
+      return DDSRoutingTableNodeInfo(std::cref(node_data));
     }
   }
 
-  return{};
+  return std::nullopt;
 }
 
 bool IsNodeInRoutingTable(DDSNodeId node_id, const DDSRoutingTable & routing_table)
@@ -170,9 +171,9 @@ DDSRoutingTableNodeInfo GetNodeDataForKey(DDSKey key, const DDSRoutingTable & ro
   {
     if (node.m_Id == node_id)
     {
-      return node;
+      return DDSRoutingTableNodeInfo(std::cref(node));
     }
   }
 
-  return{};
+  return std::nullopt;
 }

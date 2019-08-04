@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <optional>
 
-#include <optional/optional.hpp>
-#include <gsl/gsl_util.h>
+#include <gsl/gsl_util>
 
 #include <hash/Hash.h>
 #include <StormSockets/StormMessageQueue.h>

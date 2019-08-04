@@ -3,6 +3,7 @@
 #include <StormRefl/StormRefl.h>
 
 #include <vector>
+#include <string>
 
 #include "DDSNodeId.h"
 #include "DDSKey.h"

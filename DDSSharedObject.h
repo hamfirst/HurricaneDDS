@@ -8,6 +8,7 @@
 #include "DDSSharedObjectBase.h"
 #include "DDSSharedObjectInterface.h"
 #include "DDSServerMessage.h"
+#include "DDSCall.h"
 
 #include "DDSServerToServerMessages.refl.meta.h"
 #include "DDSCoordinatorProtocolMessages.refl.meta.h"
@@ -15,6 +16,8 @@
 #include <StormRefl/StormReflJsonStd.h>
 #include <StormData/StormDataChangePacket.h>
 #include <StormData/StormDataParent.h>
+
+DDS_DECLARE_CALL(Initialize);
 
 template <typename DataType>
 class DDSSharedObject : public DDSSharedObjectBase
@@ -80,6 +83,28 @@ public:
     }
 
     m_Coordinator.EndQueueingMessages();
+  }
+
+  void Initialize() override
+  {
+    BeginObjectModification();
+    DDS_CALL_FUNC(Initialize, *m_DataObject.get());
+    EndObjectModification();
+  }
+
+  void Update() override
+  {
+    if constexpr(DDS_HAS_FUNC(DataType, Update))
+    {
+      BeginObjectModification();
+      DDS_CALL_FUNC(Update, *m_DataObject.get());
+      EndObjectModification();
+    }
+  }
+
+  std::string Serialize() override
+  {
+    return StormReflEncodeJson(*m_DataObject.get());
   }
 
   void ProcessMessage(DDSCoordinatorProtocolMessageType message_type, const char * message) override
@@ -243,6 +268,11 @@ public:
   const void * GetSharedObjectPointer() override
   {
     return m_DataObject.get();
+  }
+
+  void Deserialize(const std::string & data)
+  {
+    StormReflParseJson(*m_DataObject.get(), data);
   }
 
   void ProcessDelta(const DDSCoordinatorSharedObjectDelta & delta) override

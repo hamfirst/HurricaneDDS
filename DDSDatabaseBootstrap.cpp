@@ -1,5 +1,5 @@
 
-#include <gsl/gsl_util.h>
+#include <gsl/gsl_util>
 
 
 #include <mongoc/mongoc.h>

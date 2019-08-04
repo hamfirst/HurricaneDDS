@@ -188,9 +188,10 @@ public:
       StormReflGetMemberFunctionIndex(return_func), std::string());
   }
 
-  template <typename QueryObject, typename ReturnObject, typename ReturnArg>
-  void QueryDatabase(const QueryObject & query, void (ReturnObject::*return_func)(ReturnArg return_arg, int ec, std::string data), ReturnObject * p_this, ReturnArg && return_arg)
+  template <typename QueryObject, typename ReturnObject, typename ReturnArg, typename ReturnArgType>
+  void QueryDatabase(const QueryObject & query, void (ReturnObject::*return_func)(ReturnArg return_arg, int ec, std::string data), ReturnObject * p_this, ReturnArgType && return_arg)
   {
+    static_assert(std::is_convertible_v<ReturnArgType, ReturnArg>, "Return data doesn't match function param");
     using DatabaseObject = typename QueryObject::DatabaseType;
     QueryDatabaseInternal(DatabaseObject::Collection(), StormReflEncodeJson(query), GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
@@ -203,9 +204,10 @@ public:
       StormReflGetMemberFunctionIndex(return_func), std::string());
   }
 
-  template <typename ReturnObject, typename ReturnArg>
-  void QueryDatabaseByKey(const char * collection, DDSKey key, void (ReturnObject::*return_func)(ReturnArg return_arg, int ec, std::string data), ReturnObject * p_this, ReturnArg && return_arg)
+  template <typename ReturnObject, typename ReturnArg, typename ReturnArgType>
+  void QueryDatabaseByKey(const char * collection, DDSKey key, void (ReturnObject::*return_func)(ReturnArg return_arg, int ec, std::string data), ReturnObject * p_this, ReturnArgType && return_arg)
   {
+    static_assert(std::is_convertible_v<ReturnArgType, ReturnArg>, "Return data doesn't match function param");
     QueryDatabaseByKeyInternal(collection, key, GetObjectType(StormReflTypeInfo<ReturnObject>::GetNameHash()), GetLocalKey(),
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
   }
@@ -236,10 +238,11 @@ public:
       StormReflGetMemberFunctionIndex(return_func), std::string());
   }
 
-  template <typename TargetObject, typename ReturnArg>
+  template <typename TargetObject, typename ReturnArg, typename ReturnArgFunc>
   void CreateHttpRequest(const DDSHttpRequest & request, DDSKey key, 
-    void (TargetObject::*return_func)(ReturnArg return_arg, bool success, std::string data, std::string headers), ReturnArg && return_arg)
+    void (TargetObject::*return_func)(ReturnArgFunc return_arg, bool success, std::string data, std::string headers), ReturnArg && return_arg)
   {
+    static_assert(std::is_convertible_v<ReturnArg, ReturnArgFunc>, "Return arg must convert to the type of the function parameter");
     CreateHttpRequestInternal(request, key, GetObjectType(StormReflTypeInfo<TargetObject>::GetNameHash()),
       StormReflGetMemberFunctionIndex(return_func), StormReflEncodeJson(return_arg));
   }
@@ -266,6 +269,7 @@ public:
       StormReflEncodeJson(return_arg), StormReflGetMemberFunctionIndex(err_func), force_load, false);
   }
 
+  // Creates a subscript on the database object
   template <typename TargetDataObject, typename ReturnObject>
   DDSKey CreateDataSubscription(const DDSSubscriptionTarget<TargetDataObject> & sub, DDSKey target_key, const char * path,
     void (ReturnObject::*return_func)(std::string data), bool delta_only,
@@ -310,7 +314,10 @@ public:
 
   virtual DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key) = 0;
 
-  virtual time_t GetNetworkTime() = 0;
+  virtual std::string QueryDatabaseSingleton(const char * collection_name) = 0;
+  virtual void UpsertDatabaseSingleton(const char * collection_name, const char * document) = 0;
+
+  virtual time_t GetNetworkTime() const = 0;
 
 private:
 
@@ -321,6 +328,7 @@ private:
   virtual int GetSharedObjectType(uint32_t object_type_name_hash) = 0;
 
   virtual const void * GetSharedObjectPointer(uint32_t object_type_name_hash) = 0;
+  virtual void * GetLocalObjectPointer(int target_object_type, DDSKey target_key) = 0;
 
   virtual void SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message) = 0;
   virtual void SendMessageToObjectWithResponderReturnArg(int target_object_type, DDSKey target_key, int target_method_id,
@@ -335,6 +343,8 @@ private:
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) = 0;
 
   virtual void QueryDatabaseInternal(const char * collection, std::string && query,
+    int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) = 0;
+  virtual void QueryDatabaseMultipleInternal(const char * collection, std::string && query,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) = 0;
   virtual void QueryDatabaseByKeyInternal(const char * collection, DDSKey key,
     int responder_object_type, DDSKey responder_key, int responder_method_id, std::string && return_arg) = 0;

@@ -5,7 +5,7 @@
 
 #include <StormSockets/StormHttpResponseWriter.h>
 
-#include <HurricaneDDS/DDSWebsiteInterface.h>
+#include "DDSWebsiteInterface.h"
 
 class DDSNetworkBackend;
 class DDSWebsiteFilesystemBuilder;

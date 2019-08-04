@@ -6,8 +6,7 @@
 #include <memory>
 #include <queue>
 #include <tuple>
-
-#include <optional/optional.hpp>
+#include <optional>
 
 #include "DDSNodeId.h"
 #include "DDSConnectionId.h"
@@ -41,9 +40,6 @@ struct DDSResponder;
 struct DDSResponderCallData;
 
 class DDSSharedLocalCopyPtrBase;
-
-template <typename T>
-using Optional = std::experimental::optional<T>;
 
 class DDSNodeState
 {
@@ -151,7 +147,8 @@ public:
 
   DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key);
 
-  time_t GetNetworkTime();
+  time_t GetNetworkTime() const;
+  void * GetLocalObject(int target_object_type, DDSKey target_key);
 private:
 
   friend class DDSCoordinatorClientProtocol;
@@ -218,6 +215,7 @@ private:
   void QueryObjectData(int object_type_id, DDSKey key, const char * collection);
   void QueryObjectData(const char * collection, DDSKey key, DDSResponderCallData && responder_call);
   void QueryObjectData(const char * collection, const char * query, DDSResponderCallData && responder_call);
+  void QueryObjectDataMultiple(const char * collection, const char * query, DDSResponderCallData && responder_call);
 
   void InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData && responder_call);
   void UpdateObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData * responder_call);
@@ -228,6 +226,7 @@ private:
   void EndQueueingMessages();
 
   void UpdateCPUUsage();
+  void UpdateObjects();
   void ProcessPendingExportedObjects();
 
   void HandleAllClear();
@@ -284,9 +283,9 @@ private:
   DDSTokenValidator m_TokenValidator;
   std::set<std::unique_ptr<DDSDeferredCallback>> m_DeferredCallbackList;
 
-  Optional<DDSNodeId> m_LocalNodeId;
-  Optional<DDSRoutingTable> m_RoutingTable;
-  Optional<DDSKeyRange> m_LocalKeyRange;
+  std::optional<DDSNodeId> m_LocalNodeId;
+  std::optional<DDSRoutingTable> m_RoutingTable;
+  std::optional<DDSKeyRange> m_LocalKeyRange;
   std::vector<std::pair<DDSNodeId, DDSKeyRange>> m_RoutingKeyRanges;
   int m_LastRoutingTableAck = 0;
   int m_LastRoutingTableAllClear = 0;
@@ -310,5 +309,6 @@ private:
   uint64_t m_ServerSecret = 0;
 
   time_t m_LastCPUUsageSync;
+  time_t m_LastUpdate;
 };
 

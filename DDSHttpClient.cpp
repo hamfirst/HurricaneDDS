@@ -87,7 +87,8 @@ bool DDSHttpClient::CompleteCallback(const DDSHttpClientData & callback_data, co
 
 DDSHttpClientData DDSHttpClient::GetCallbackData(const DDSHttpRequest & request)
 {
-  auto connection_id = m_HttpClient->RequestConnect(request.m_Uri, request.m_Body.data(), request.m_Body.length(), request.m_Headers.data(), request.m_Headers.length());
+  auto connection_id = m_HttpClient->RequestConnect(request.m_Uri, request.m_Method.data(), request.m_Body.data(),
+          request.m_Body.length(), request.m_Headers.data(), request.m_Headers.length());
   if (connection_id == StormSockets::StormSocketConnectionId::InvalidConnectionId)
   {
     DDSLog::LogError("Invalid url");

@@ -15,7 +15,37 @@ struct StormReflTypeInfo<DDSThrottle>
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSThrottle"; }
   static constexpr auto GetNameHash() { return 0xA610F43B; }
+  static constexpr bool HasDefault() { return true; }
   static DDSThrottle & GetDefault() { static DDSThrottle def; return def; }
+
+  static void * CastFromTypeNameHash(uint32_t type_name_hash, void * ptr)
+  {
+    auto c = static_cast<DDSThrottle *>(ptr);
+    if(GetNameHash() == type_name_hash) return c;
+    return nullptr;
+  }
+
+  static const void * CastFromTypeNameHash(uint32_t type_name_hash, const void * ptr)
+  {
+    auto c = static_cast<const DDSThrottle *>(ptr);
+    if(GetNameHash() == type_name_hash) return c;
+    return nullptr;
+  }
+
+  static void * CastFromTypeIdHash(std::size_t type_id_hash, void * ptr)
+  {
+    auto c = static_cast<DDSThrottle *>(ptr);
+    if(typeid(DDSThrottle).hash_code() == type_id_hash) return c;
+    return nullptr;
+  }
+
+  static const void * CastFromTypeIdHash(std::size_t type_id_hash, const void * ptr)
+  {
+    auto c = static_cast<const DDSThrottle *>(ptr);
+    if(typeid(DDSThrottle).hash_code() == type_id_hash) return c;
+    return nullptr;
+  }
+
 };
 
 template <>
@@ -26,8 +56,11 @@ struct StormReflTypeInfo<DDSThrottle>::field_data_static<0>
   static constexpr auto GetType() { return "float"; }
   static constexpr unsigned GetFieldNameHash() { return 0xD4E5A4AB; }
   static constexpr unsigned GetTypeNameHash() { return 0xC9A55E95; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSThrottle::m_Credits; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSThrottle *>(obj); return &ptr->m_Credits; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSThrottle *>(obj); return &ptr->m_Credits; }
 };
 
 template <typename Self>
@@ -48,8 +81,11 @@ struct StormReflTypeInfo<DDSThrottle>::field_data_static<1>
   static constexpr auto GetType() { return "float"; }
   static constexpr unsigned GetFieldNameHash() { return 0xE171AA26; }
   static constexpr unsigned GetTypeNameHash() { return 0xC9A55E95; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSThrottle::m_Rate; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSThrottle *>(obj); return &ptr->m_Rate; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSThrottle *>(obj); return &ptr->m_Rate; }
 };
 
 template <typename Self>
@@ -70,8 +106,11 @@ struct StormReflTypeInfo<DDSThrottle>::field_data_static<2>
   static constexpr auto GetType() { return "float"; }
   static constexpr unsigned GetFieldNameHash() { return 0x6E94E66E; }
   static constexpr unsigned GetTypeNameHash() { return 0xC9A55E95; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSThrottle::m_Max; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSThrottle *>(obj); return &ptr->m_Max; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSThrottle *>(obj); return &ptr->m_Max; }
 };
 
 template <typename Self>
@@ -92,8 +131,11 @@ struct StormReflTypeInfo<DDSThrottle>::field_data_static<3>
   static constexpr auto GetType() { return "long long"; }
   static constexpr unsigned GetFieldNameHash() { return 0xE100B249; }
   static constexpr unsigned GetTypeNameHash() { return 0x40FF8523; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSThrottle::m_CreditStart; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSThrottle *>(obj); return &ptr->m_CreditStart; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSThrottle *>(obj); return &ptr->m_CreditStart; }
 };
 
 template <typename Self>

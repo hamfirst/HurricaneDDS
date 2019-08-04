@@ -14,7 +14,7 @@ class DDSWebsiteFactoryBase : public DDSConnectionFactoryBase
 {
 public:
   DDSWebsiteFactoryBase(DDSNodeState & node_state, const StormSockets::StormSocketServerFrontendHttpSettings & settings);
-  ~DDSWebsiteFactoryBase();
+  virtual ~DDSWebsiteFactoryBase();
 
   void ProcessEvents();
 

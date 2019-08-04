@@ -32,6 +32,7 @@
 
 DDS_DECLARE_CALL(BeginLoad);
 DDS_DECLARE_CALL(PreMoveObject);
+DDS_DECLARE_CALL(Update);
 DDS_DECLARE_CALL(MoveObject);
 DDS_DECLARE_CALL(PreDestroy);
 
@@ -188,6 +189,28 @@ public:
     }
 
     return true;
+  }
+
+  void Update(DDSKeyRange active_range)
+  {
+    if constexpr (DDS_HAS_FUNC(DataType, Update))
+    {
+      for(auto & elem : m_Objects)
+      {
+        if(KeyInKeyRange(elem.first, active_range))
+        {
+          BeginObjectModification(elem.first);
+          auto & obj_data = elem.second;
+
+          if (obj_data.m_ActiveObject.get() != nullptr)
+          {
+            DDS_CALL_FUNC(Update, *obj_data.m_ActiveObject.get());
+          }
+
+          EndObjectModification();
+        }
+      }
+    }
   }
 
   virtual void * GetDataObjectForKey(DDSKey key)

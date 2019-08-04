@@ -116,6 +116,8 @@ void DDSConnectionInterface::FinalizeLocalObject(int target_object_type, DDSKey 
 
 void DDSConnectionInterface::SendMessageToObject(int target_object_type, DDSKey target_key, int target_method_id, std::string && message)
 {
+  assert(target_method_id != -1);
+
   DDSTargetedMessage packet;
   packet.m_Key = target_key;
   packet.m_ObjectType = target_object_type;

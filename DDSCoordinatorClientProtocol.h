@@ -32,7 +32,7 @@ public:
 
   void SendMessageToCoordinator(const std::string && data);
   void SendCPUUsage();
-  time_t GetNetworkTime();
+  time_t GetNetworkTime() const;
 
   bool ShutDown();
   void Disconnect();

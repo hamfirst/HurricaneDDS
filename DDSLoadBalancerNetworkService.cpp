@@ -26,6 +26,8 @@ void DDSLoadBalancerNetworkService::ProcessEvents()
   {
     switch (event.Type)
     {
+    case StormSockets::StormSocketEventType::ClientConnected:
+      break;
     case StormSockets::StormSocketEventType::ClientHandShakeCompleted:
       {
         std::string message = GetNodeListMessage();

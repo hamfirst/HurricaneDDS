@@ -2,9 +2,10 @@
 
 #include "DDSRoutingTable.refl.h"
 
-#include <optional/optional.hpp>
+#include <functional>
+#include <optional>
 
-using DDSRoutingTableNodeInfo = std::experimental::optional<const DDSNodeElementBase &>;
+using DDSRoutingTableNodeInfo = std::optional<std::reference_wrapper<const DDSNodeElementBase>>;
 
 std::string GetNodeAddrAsString(DDSNodeAddr addr);
 

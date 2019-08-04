@@ -132,14 +132,14 @@ void DDSNodeNetworkService::CreateNodeConnection(DDSNodeId id)
 
   char ip_addr[128];
   snprintf(ip_addr, sizeof(ip_addr), "%d.%d.%d.%d",
-    (node_data->m_Addr >> 24) & 0xFF,
-    (node_data->m_Addr >> 16) & 0xFF,
-    (node_data->m_Addr >> 8) & 0xFF,
-    (node_data->m_Addr >> 0) & 0xFF);
+    (node_data->get().m_Addr >> 24) & 0xFF,
+    (node_data->get().m_Addr >> 16) & 0xFF,
+    (node_data->get().m_Addr >> 8) & 0xFF,
+    (node_data->get().m_Addr >> 0) & 0xFF);
 
-  DDSLog::LogInfo("Creating connection to %s:%d", ip_addr, node_data->m_Port);
+  DDSLog::LogInfo("Creating connection to %s:%d", ip_addr, node_data->get().m_Port);
 
-  auto connection_id = m_ClientFrontend->RequestConnect(ip_addr, node_data->m_Port, StormSockets::StormSocketClientFrontendWebsocketRequestData{});
+  auto connection_id = m_ClientFrontend->RequestConnect(ip_addr, node_data->get().m_Port, StormSockets::StormSocketClientFrontendWebsocketRequestData{});
   if (connection_id == StormSockets::StormSocketConnectionId::InvalidConnectionId)
   {
     return;

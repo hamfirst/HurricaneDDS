@@ -11,6 +11,7 @@ enum class DDSDatabaseOperation
 {
   kKeyQuery,
   kCustomQuery,
+  kCustomQueryMultiple,
   kInsert,
   kUpdate,
   kUpsert,
@@ -28,6 +29,7 @@ public:
 
   void QueryDatabaseByKey(DDSKey key, const char * collection, std::function<void(const char *, int)> && result_callback);
   void QueryDatabaseCustom(const char * query, const char * collection, std::function<void(const char *, int)> && result_callback);
+  void QueryDatabaseCustomMultiple(const char * query, const char * collection, std::function<void(const char *, int)> && result_callback);
   void QueryDatabaseInsert(DDSKey key, const char * collection, const char * document, std::function<void(const char *, int)> && result_callback);
   void QueryDatabaseUpsert(DDSKey key, const char * collection, const char * document, std::function<void(const char *, int)> && result_callback);
   void QueryDatabaseDelete(DDSKey key, const char * collection, std::function<void(const char *, int)> && result_callback);

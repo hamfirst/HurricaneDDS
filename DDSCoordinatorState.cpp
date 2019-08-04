@@ -21,11 +21,13 @@ DDSCoordinatorState::DDSCoordinatorState(const StormSockets::StormSocketInitSett
   m_Backend(backend_settings),
   m_NetworkService(m_Backend, *this, node_server_settings),
   m_LastLoadBalancerSync(time(nullptr)),
+  m_LastUpdate(time(nullptr)),
   m_NextNodeId(0),
   m_ClientSecret(DDSGetRandomNumber64()),
   m_ServerSecret(DDSGetRandomNumber64()),
   m_HttpClient(http_client_settings, m_Backend),
-  m_Database(std::make_unique<DDSDatabaseConnectionPool>(database_settings))
+  m_Database(std::make_unique<DDSDatabaseConnectionPool>(database_settings)),
+  m_ImmediateDatabase(std::make_unique<DDSDatabaseConnection>(database_settings))
 {
 
 }
@@ -104,6 +106,14 @@ int DDSCoordinatorState::GetTargetObjectIdForNameHash(uint32_t name_hash) const
   return -1;
 }
 
+void DDSCoordinatorState::InitializeSharedObjects()
+{
+  for(auto & elem : m_SharedObjects)
+  {
+    elem->Initialize();
+  }
+}
+
 void DDSCoordinatorState::InitializeLoadBalancerServer(
   const StormSockets::StormSocketServerFrontendWebsocketSettings & lb_server_settings, int endpoint_id)
 {
@@ -115,6 +125,7 @@ void DDSCoordinatorState::CreateTimer(std::chrono::system_clock::duration durati
   std::unique_ptr<DDSDeferredCallback> callback = std::make_unique<DDSDeferredCallback>();
   DDSDeferredCallback * callback_ptr = callback.get();
 
+  responder_data.m_MethodArgs = "[]";
   std::string responder_str = StormReflEncodeJson(responder_data);
   DDSDataObjectAddress address{ responder_data.m_ObjectType, responder_data.m_Key };
 
@@ -149,9 +160,31 @@ DDSRoutingTableNodeInfo DDSCoordinatorState::GetNodeInfo(DDSKey key)
   return GetNodeDataForKey(key, m_RoutingTable, m_RoutingKeyRanges);
 }
 
-time_t DDSCoordinatorState::GetNetworkTime()
+std::string DDSCoordinatorState::QueryDatabaseSingleton(const char * collection_name)
+{
+  auto result = m_ImmediateDatabase->QueryDatabaseByKey(0, collection_name);
+  return result.first == 0 ? result.second : "";
+}
+
+void DDSCoordinatorState::UpsertDatabaseSingleton(const char * collection_name, const char * document)
+{
+  m_ImmediateDatabase->QueryDatabaseUpsert(0, collection_name, document);
+}
+
+time_t DDSCoordinatorState::GetNetworkTime() const
 {
   return time(nullptr);
+}
+
+void * DDSCoordinatorState::GetLocalObject(int target_object_type, DDSKey target_key)
+{
+  if (target_object_type >= m_NumDataObjects)
+  {
+    int shared_object_id = target_object_type - m_NumDataObjects;
+    return &m_SharedObjects[shared_object_id];
+  }
+
+  return nullptr;
 }
 
 void DDSCoordinatorState::GotMessageFromServer(DDSNodeId server_id, DDSCoordinatorProtocolMessageType type, const char * data)
@@ -264,8 +297,10 @@ void DDSCoordinatorState::GotMessageFromServer(DDSNodeId server_id, DDSCoordinat
 
 bool DDSCoordinatorState::SendTargetedMessage(DDSDataObjectAddress addr, DDSCoordinatorProtocolMessageType type, std::string && message, bool force_process)
 {
+  DDSLog::LogVerbose("-- Sending targeted message (coordinator) %s (%zu)", StormReflGetEnumAsString(type), addr.m_ObjectKey);
   if (m_QueueMessageDepth && force_process == false)
   {
+    DDSLog::LogVerbose("-- Queueing targeted message (coordinator) %s (%zu)", StormReflGetEnumAsString(type), addr.m_ObjectKey);
     m_QueuedTargetedMessages.emplace(std::make_tuple(addr, type, message));
     return true;
   }
@@ -279,7 +314,6 @@ bool DDSCoordinatorState::SendTargetedMessage(DDSDataObjectAddress addr, DDSCoor
   else
   {
     DDSNodeId node_id;
-
     if (m_RoutingTable.m_Table.size() == 0)
     {
       return false;
@@ -330,6 +364,15 @@ void DDSCoordinatorState::ProcessEvents()
     }
 
     m_LastLoadBalancerSync = cur_time;
+  }
+
+  if(cur_time != m_LastUpdate)
+  {
+    for(auto & elem : m_SharedObjects)
+    {
+      elem->Update();
+    }
+    cur_time = m_LastUpdate;
   }
 }
 
@@ -406,6 +449,23 @@ void DDSCoordinatorState::QueryObjectData(const char * collection, const char * 
   m_Database->QueryDatabaseCustom(query, collection, std::move(callback));
 }
 
+void DDSCoordinatorState::QueryObjectDataMultiple(const char * collection, const char * query, DDSCoordinatorResponderCallData && responder_call)
+{
+  DDSDataObjectAddress address{ responder_call.m_ObjectType, responder_call.m_Key };
+
+  auto callback = [&](const char * data, int ec) {
+
+    std::string sb;
+    StormReflJsonEncodeString(data, sb);
+
+    responder_call.m_MethodArgs = "[" + sb + "," + StormReflEncodeJson(ec) + "]";
+    std::string responder_str = StormReflEncodeJson(responder_call);
+    SendTargetedMessage(address, DDSCoordinatorProtocolMessageType::kResponderCall, std::move(responder_str));
+  };
+
+  m_Database->QueryDatabaseCustomMultiple(query, collection, std::move(callback));
+}
+
 void DDSCoordinatorState::InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSCoordinatorResponderCallData && responder_call)
 {
   m_Database->QueryDatabaseInsert(key, collection, data, [this, responder_call](const char * data, int ec) mutable { HandleInsertResult(ec, responder_call); });
@@ -458,7 +518,7 @@ void DDSCoordinatorState::EndQueueingMessages()
 
     while (m_QueuedTargetedMessages.size())
     {
-      auto message = m_QueuedTargetedMessages.back();
+      auto message = m_QueuedTargetedMessages.front();
       SendTargetedMessage(std::get<0>(message), std::get<1>(message), std::move(std::get<2>(message)), true);
       m_QueuedTargetedMessages.pop();
     }

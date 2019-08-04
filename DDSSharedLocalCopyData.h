@@ -12,6 +12,8 @@ class DDSBaseSharedLocalCopyData
 {
 public:
 
+  virtual ~DDSBaseSharedLocalCopyData() = default;
+
   void * GetVersion(int version);
   void ApplyChangePacket(const ReflectionChangeNotification & change, int data_gen);
   virtual void AppendFullJsonData(int version, std::string & str) = 0;

@@ -161,7 +161,8 @@ struct StormReflJson<DDSSharedLocalCopyPtr<T>, void>
     StormReflEncodeJson(data, sb);
   }
 
-  static bool Parse(DDSSharedLocalCopyPtr<T> & t, const char * str, const char *& result, bool additive)
+  template <typename CharPtr>
+  static bool Parse(DDSSharedLocalCopyPtr<T> & t, CharPtr str, CharPtr & result, bool additive)
   {
     StormReflJsonAdvanceWhiteSpace(str);
 

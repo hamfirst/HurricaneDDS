@@ -15,7 +15,37 @@ struct StormReflTypeInfo<DDSNodeElementBase>
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSNodeElementBase"; }
   static constexpr auto GetNameHash() { return 0x0DA54077; }
+  static constexpr bool HasDefault() { return true; }
   static DDSNodeElementBase & GetDefault() { static DDSNodeElementBase def; return def; }
+
+  static void * CastFromTypeNameHash(uint32_t type_name_hash, void * ptr)
+  {
+    auto c = static_cast<DDSNodeElementBase *>(ptr);
+    if(GetNameHash() == type_name_hash) return c;
+    return nullptr;
+  }
+
+  static const void * CastFromTypeNameHash(uint32_t type_name_hash, const void * ptr)
+  {
+    auto c = static_cast<const DDSNodeElementBase *>(ptr);
+    if(GetNameHash() == type_name_hash) return c;
+    return nullptr;
+  }
+
+  static void * CastFromTypeIdHash(std::size_t type_id_hash, void * ptr)
+  {
+    auto c = static_cast<DDSNodeElementBase *>(ptr);
+    if(typeid(DDSNodeElementBase).hash_code() == type_id_hash) return c;
+    return nullptr;
+  }
+
+  static const void * CastFromTypeIdHash(std::size_t type_id_hash, const void * ptr)
+  {
+    auto c = static_cast<const DDSNodeElementBase *>(ptr);
+    if(typeid(DDSNodeElementBase).hash_code() == type_id_hash) return c;
+    return nullptr;
+  }
+
 };
 
 template <>
@@ -26,8 +56,11 @@ struct StormReflTypeInfo<DDSNodeElementBase>::field_data_static<0>
   static constexpr auto GetType() { return "unsigned int"; }
   static constexpr unsigned GetFieldNameHash() { return 0xE48CC842; }
   static constexpr unsigned GetTypeNameHash() { return 0x562EF932; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSNodeElementBase::m_Id; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSNodeElementBase *>(obj); return &ptr->m_Id; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSNodeElementBase *>(obj); return &ptr->m_Id; }
 };
 
 template <typename Self>
@@ -48,8 +81,11 @@ struct StormReflTypeInfo<DDSNodeElementBase>::field_data_static<1>
   static constexpr auto GetType() { return "unsigned int"; }
   static constexpr unsigned GetFieldNameHash() { return 0x6C07072A; }
   static constexpr unsigned GetTypeNameHash() { return 0x562EF932; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSNodeElementBase::m_Addr; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSNodeElementBase *>(obj); return &ptr->m_Addr; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSNodeElementBase *>(obj); return &ptr->m_Addr; }
 };
 
 template <typename Self>
@@ -70,8 +106,11 @@ struct StormReflTypeInfo<DDSNodeElementBase>::field_data_static<2>
   static constexpr auto GetType() { return "unsigned short"; }
   static constexpr unsigned GetFieldNameHash() { return 0x7D0CC8D3; }
   static constexpr unsigned GetTypeNameHash() { return 0x3DE16827; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSNodeElementBase::m_Port; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSNodeElementBase *>(obj); return &ptr->m_Port; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSNodeElementBase *>(obj); return &ptr->m_Port; }
 };
 
 template <typename Self>
@@ -92,8 +131,11 @@ struct StormReflTypeInfo<DDSNodeElementBase>::field_data_static<3>
   static constexpr auto GetType() { return "std::vector<unsigned short, std::allocator<unsigned short> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0xE6C133B1; }
   static constexpr unsigned GetTypeNameHash() { return 0x072FC70B; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 3; }
   static constexpr auto GetMemberPtr() { return &DDSNodeElementBase::m_EndpointPorts; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSNodeElementBase *>(obj); return &ptr->m_EndpointPorts; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSNodeElementBase *>(obj); return &ptr->m_EndpointPorts; }
 };
 
 template <typename Self>
@@ -114,8 +156,11 @@ struct StormReflTypeInfo<DDSNodeElementBase>::field_data_static<4>
   static constexpr auto GetType() { return "std::vector<unsigned short, std::allocator<unsigned short> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0xB0FC1FC0; }
   static constexpr unsigned GetTypeNameHash() { return 0x072FC70B; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 4; }
   static constexpr auto GetMemberPtr() { return &DDSNodeElementBase::m_WebsitePorts; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSNodeElementBase *>(obj); return &ptr->m_WebsitePorts; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSNodeElementBase *>(obj); return &ptr->m_WebsitePorts; }
 };
 
 template <typename Self>
@@ -141,7 +186,41 @@ struct StormReflTypeInfo<DDSNodeElement>
   template <int N> struct annotations : public StormReflTypeInfo<MyBase>::annotations<N> {};
   static constexpr auto GetName() { return "DDSNodeElement"; }
   static constexpr auto GetNameHash() { return 0x91B8D954; }
+  static constexpr bool HasDefault() { return true; }
   static DDSNodeElement & GetDefault() { static DDSNodeElement def; return def; }
+
+  static void * CastFromTypeNameHash(uint32_t type_name_hash, void * ptr)
+  {
+    auto c = static_cast<DDSNodeElement *>(ptr);
+    if(GetNameHash() == type_name_hash) return c;
+    if(0x0DA54077 == type_name_hash) return static_cast<DDSNodeElementBase *>(c);
+    return nullptr;
+  }
+
+  static const void * CastFromTypeNameHash(uint32_t type_name_hash, const void * ptr)
+  {
+    auto c = static_cast<const DDSNodeElement *>(ptr);
+    if(GetNameHash() == type_name_hash) return c;
+    if(0x0DA54077 == type_name_hash) return static_cast<const DDSNodeElementBase *>(c);
+    return nullptr;
+  }
+
+  static void * CastFromTypeIdHash(std::size_t type_id_hash, void * ptr)
+  {
+    auto c = static_cast<DDSNodeElement *>(ptr);
+    if(typeid(DDSNodeElement).hash_code() == type_id_hash) return c;
+    if(typeid(DDSNodeElementBase).hash_code() == type_id_hash) return static_cast<DDSNodeElementBase *>(c);
+    return nullptr;
+  }
+
+  static const void * CastFromTypeIdHash(std::size_t type_id_hash, const void * ptr)
+  {
+    auto c = static_cast<const DDSNodeElement *>(ptr);
+    if(typeid(DDSNodeElement).hash_code() == type_id_hash) return c;
+    if(typeid(DDSNodeElementBase).hash_code() == type_id_hash) return static_cast<const DDSNodeElementBase *>(c);
+    return nullptr;
+  }
+
 };
 
 template <>
@@ -152,8 +231,11 @@ struct StormReflTypeInfo<DDSNodeElement>::field_data_static<0 + StormReflTypeInf
   static constexpr auto GetType() { return "unsigned long long"; }
   static constexpr unsigned GetFieldNameHash() { return 0x46853245; }
   static constexpr unsigned GetTypeNameHash() { return 0x1EF85FE5; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 0 + StormReflTypeInfo<DDSNodeElementBase>::fields_n; }
   static constexpr auto GetMemberPtr() { return &DDSNodeElement::m_CentralKey; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSNodeElement *>(obj); return &ptr->m_CentralKey; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSNodeElement *>(obj); return &ptr->m_CentralKey; }
 };
 
 template <typename Self>
@@ -176,7 +258,37 @@ struct StormReflTypeInfo<DDSRoutingTable>
   template <int N> struct annotations { static constexpr int annotations_n = 0; template <int A> struct annoation { }; };
   static constexpr auto GetName() { return "DDSRoutingTable"; }
   static constexpr auto GetNameHash() { return 0x2554A051; }
+  static constexpr bool HasDefault() { return true; }
   static DDSRoutingTable & GetDefault() { static DDSRoutingTable def; return def; }
+
+  static void * CastFromTypeNameHash(uint32_t type_name_hash, void * ptr)
+  {
+    auto c = static_cast<DDSRoutingTable *>(ptr);
+    if(GetNameHash() == type_name_hash) return c;
+    return nullptr;
+  }
+
+  static const void * CastFromTypeNameHash(uint32_t type_name_hash, const void * ptr)
+  {
+    auto c = static_cast<const DDSRoutingTable *>(ptr);
+    if(GetNameHash() == type_name_hash) return c;
+    return nullptr;
+  }
+
+  static void * CastFromTypeIdHash(std::size_t type_id_hash, void * ptr)
+  {
+    auto c = static_cast<DDSRoutingTable *>(ptr);
+    if(typeid(DDSRoutingTable).hash_code() == type_id_hash) return c;
+    return nullptr;
+  }
+
+  static const void * CastFromTypeIdHash(std::size_t type_id_hash, const void * ptr)
+  {
+    auto c = static_cast<const DDSRoutingTable *>(ptr);
+    if(typeid(DDSRoutingTable).hash_code() == type_id_hash) return c;
+    return nullptr;
+  }
+
 };
 
 template <>
@@ -187,8 +299,11 @@ struct StormReflTypeInfo<DDSRoutingTable>::field_data_static<0>
   static constexpr auto GetType() { return "std::vector<DDSNodeElement, std::allocator<DDSNodeElement> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0x7B1F1F26; }
   static constexpr unsigned GetTypeNameHash() { return 0xFBA8241F; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 0; }
   static constexpr auto GetMemberPtr() { return &DDSRoutingTable::m_Table; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSRoutingTable *>(obj); return &ptr->m_Table; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSRoutingTable *>(obj); return &ptr->m_Table; }
 };
 
 template <typename Self>
@@ -209,8 +324,11 @@ struct StormReflTypeInfo<DDSRoutingTable>::field_data_static<1>
   static constexpr auto GetType() { return "std::vector<DDSNodeElementBase, std::allocator<DDSNodeElementBase> >"; }
   static constexpr unsigned GetFieldNameHash() { return 0x3E3CE59C; }
   static constexpr unsigned GetTypeNameHash() { return 0x4BB2C546; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 1; }
   static constexpr auto GetMemberPtr() { return &DDSRoutingTable::m_Defunct; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSRoutingTable *>(obj); return &ptr->m_Defunct; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSRoutingTable *>(obj); return &ptr->m_Defunct; }
 };
 
 template <typename Self>
@@ -231,8 +349,11 @@ struct StormReflTypeInfo<DDSRoutingTable>::field_data_static<2>
   static constexpr auto GetType() { return "int"; }
   static constexpr unsigned GetFieldNameHash() { return 0xE6B5368A; }
   static constexpr unsigned GetTypeNameHash() { return 0x1451DAB1; }
+  static constexpr bool HasDefault() { return true; }
   static constexpr auto GetFieldIndex() { return 2; }
   static constexpr auto GetMemberPtr() { return &DDSRoutingTable::m_TableGeneration; }
+  static void * GetFromParent(void * obj) { auto ptr = static_cast<DDSRoutingTable *>(obj); return &ptr->m_TableGeneration; }
+  static const void * GetFromParentConst(const void * obj) { auto ptr = static_cast<const DDSRoutingTable *>(obj); return &ptr->m_TableGeneration; }
 };
 
 template <typename Self>

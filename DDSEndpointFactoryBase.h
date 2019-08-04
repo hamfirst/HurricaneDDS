@@ -15,7 +15,7 @@ class DDSEndpointFactoryBase : public DDSConnectionFactoryBase
 {
 public:
   DDSEndpointFactoryBase(DDSNodeState & node_state, const StormSockets::StormSocketServerFrontendWebsocketSettings & settings);
-  ~DDSEndpointFactoryBase();
+  virtual ~DDSEndpointFactoryBase();
 
   void ProcessEvents();
   bool SendData(StormSockets::StormSocketConnectionId connection_id, const std::string & data);

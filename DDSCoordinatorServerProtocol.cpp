@@ -129,6 +129,12 @@ bool DDSCoordinatorServerProtocol::HandleMessage(const char * msg, int length)
       response.m_InitialNode = m_CoordinatorState.GetRoutingTable().m_Table.size() == 1;
       response.m_ClientSecret = m_CoordinatorState.GetClientSecret();
       response.m_ServerSecret = m_CoordinatorState.GetServerSecret();
+
+      for(auto & elem : m_CoordinatorState.m_SharedObjects)
+      {
+        response.m_SharedObjects.emplace_back(elem->Serialize());
+      }
+
       m_State = kConnected;
 
       SendMessageToClient(response);

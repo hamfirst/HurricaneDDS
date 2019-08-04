@@ -8,11 +8,16 @@
 class DDSSharedObjectBase
 {
 public:
+  virtual ~DDSSharedObjectBase() = default;
+
   virtual uint32_t GetObjectClassNameHash() = 0;
   virtual int GetObjectTypeId() = 0;
 
   virtual const void * GetSharedObjectPointer() = 0;
 
+  virtual void Initialize() = 0;
+  virtual void Update() = 0;
+  virtual std::string Serialize() = 0;
   virtual void ProcessMessage(DDSCoordinatorProtocolMessageType message_type, const char * message) = 0;
 
   virtual void AssignRequestedSubscription(const DDSExportedRequestedSubscription & requested_sub) = 0;
@@ -22,11 +27,14 @@ public:
 class DDSSharedObjectCopyBase
 {
 public:
+  virtual ~DDSSharedObjectCopyBase() = default;
+
   virtual uint32_t GetObjectClassNameHash() = 0;
   virtual int GetObjectTypeId() = 0;
 
   virtual const void * GetSharedObjectPointer() = 0;
 
+  virtual void Deserialize(const std::string & data) = 0;
   virtual void ProcessDelta(const DDSCoordinatorSharedObjectDelta & delta) = 0;
 
   virtual void CreateSubscription(DDSExportedSubscription && sub_data) = 0;

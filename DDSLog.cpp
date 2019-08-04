@@ -6,7 +6,7 @@
 
 #include <stdexcept>
 
-static DDSLog::LogLevel s_LogLevel = DDSLog::kVerbose;
+static DDSLog::LogLevel s_LogLevel = DDSLog::kInfo;
 
 void DDSLog::SetLogLevel(LogLevel level)
 {
@@ -25,7 +25,7 @@ void DDSLog::LogInfo(const char * fmt, ...)
   vprintf(fmt, args);
   va_end(args);
 
-  printf("\r\n");
+  printf("\n");
 }
 
 void DDSLog::LogInfo(const std::string & str)
@@ -35,7 +35,7 @@ void DDSLog::LogInfo(const std::string & str)
     return;
   }
 
-  printf("%s\r\n", str.c_str());
+  printf("%s\n", str.c_str());
 }
 
 void DDSLog::LogVerbose(const char * fmt, ...)
@@ -50,7 +50,7 @@ void DDSLog::LogVerbose(const char * fmt, ...)
   vprintf(fmt, args);
   va_end(args);
 
-  printf("\r\n");
+  printf("\n");
 }
 
 void DDSLog::LogVerbose(const std::string & str)
@@ -60,7 +60,7 @@ void DDSLog::LogVerbose(const std::string & str)
     return;
   }
 
-  printf("%s\r\n", str.c_str());
+  printf("%s\n", str.c_str());
 }
 
 void DDSLog::LogError(const char * fmt, ...)

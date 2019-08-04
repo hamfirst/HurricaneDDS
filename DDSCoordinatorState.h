@@ -11,6 +11,7 @@
 #include "DDSTimerSystem.h"
 #include "DDSHttpClient.h"
 #include "DDSResolver.h"
+#include "DDSDatabaseConnection.h"
 #include "DDSDatabaseConnectionPool.h"
 #include "DDSLoadBalancerNetworkService.h"
 
@@ -32,8 +33,8 @@ public:
   {
     m_NumDataObjects = std::decay_t<DataTypeList>::NumTypes;
     data_list(m_DataObjectNameHashes, m_DatabaseObjectNameHashes);
-    shared_object(*this, m_SharedObjects, m_NumDataObjects);
     shared_object(m_SharedObjectNameHashes);
+    shared_object(*this, m_SharedObjects, m_NumDataObjects);
   }
 
   ~DDSCoordinatorState();
@@ -43,6 +44,7 @@ public:
   int GetSharedObjectTypeIdForNameHash(uint32_t name_hash) const;
   int GetTargetObjectIdForNameHash(uint32_t name_hash) const;
 
+  void InitializeSharedObjects();
   void InitializeLoadBalancerServer(
     const StormSockets::StormSocketServerFrontendWebsocketSettings & node_server_settings, int endpoint_id);
 
@@ -53,7 +55,12 @@ public:
 
   DDSRoutingTableNodeInfo GetNodeInfo(DDSKey key);
 
-  time_t GetNetworkTime();
+  std::string QueryDatabaseSingleton(const char * collection_name);
+  void UpsertDatabaseSingleton(const char * collection_name, const char * document);
+
+  time_t GetNetworkTime() const;
+
+  void * GetLocalObject(int target_object_type, DDSKey target_key);
 private:
 
   friend class DDSCoordinatorServerProtocol;
@@ -78,6 +85,8 @@ private:
   void QueryObjectData(int object_type_id, DDSKey key, const char * collection);
   void QueryObjectData(const char * collection, DDSKey key, DDSCoordinatorResponderCallData && responder_call);
   void QueryObjectData(const char * collection, const char * query, DDSCoordinatorResponderCallData && responder_call);
+  void QueryObjectDataMultiple(const char * collection, const char * query, DDSCoordinatorResponderCallData && responder_call);
+
   void InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSCoordinatorResponderCallData && responder_call);
   void DeleteObjectData(const char * collection, DDSKey key);
 
@@ -131,9 +140,11 @@ private:
   std::vector<std::unique_ptr<DDSSharedObjectBase>> m_SharedObjects;
 
   std::unique_ptr<DDSDatabaseConnectionPool> m_Database;
+  std::unique_ptr<DDSDatabaseConnection> m_ImmediateDatabase;
 
   uint64_t m_ClientSecret;
   uint64_t m_ServerSecret;
 
   time_t m_LastLoadBalancerSync;
+  time_t m_LastUpdate;
 };

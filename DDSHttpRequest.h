@@ -22,9 +22,13 @@ public:
   DDSHttpRequest & operator = (const DDSHttpRequest & rhs) = default;
   DDSHttpRequest & operator = (DDSHttpRequest && rhs) = default;
 
+  void SetMethod(const char * method);
+  void SetMethod(const std::string & method);
+
 public:
 
   StormSockets::StormURI m_Uri;
+  std::string m_Method;
   std::string m_Body;
   std::string m_Headers;
 };

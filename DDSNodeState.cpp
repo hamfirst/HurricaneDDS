@@ -37,9 +37,14 @@ DDSNodeState::DDSNodeState(
   m_SharedLocalCopyDatabase(*this),
   m_Database(std::make_unique<DDSDatabaseConnectionPool>(database_settings))
 {
+#ifdef _MSC_VER
+  m_LocalInterface = (uint32_t)inet_addr(node_server_settings.ListenSettings.LocalInterface);
+#else
   inet_pton(AF_INET, node_server_settings.ListenSettings.LocalInterface, &m_LocalInterface);
+#endif
   m_LocalPort = node_server_settings.ListenSettings.Port;
   m_LastCPUUsageSync = time(nullptr);
+  m_LastUpdate = time(nullptr);
   
   m_CoordinatorConnection.RequestConnect();
   DDSShutdownRegisterNode(this);
@@ -98,6 +103,7 @@ void DDSNodeState::ProcessEvents()
   EndQueueingMessages();
 
   UpdateCPUUsage();
+  UpdateObjects();
   ProcessPendingExportedObjects();
 }
 
@@ -515,7 +521,7 @@ void DDSNodeState::SendTargetedMessage(DDSDataObjectAddress addr, DDSServerToSer
 {
   if (m_QueueMessageDepth && force_process == false)
   {
-    DDSLog::LogVerbose("-- Queueing targeted message %s", StormReflGetEnumAsString(type));
+    DDSLog::LogVerbose("-- Queueing targeted message %s (%zu)", StormReflGetEnumAsString(type), addr.m_ObjectKey);
 
     int priority = (int)DDSDataObjectPriority::kHigh;
     if (addr.m_ObjectType < (int)m_DataObjectList.size())
@@ -583,7 +589,7 @@ DDSRoutingTableNodeInfo DDSNodeState::GetNodeInfo(DDSKey key)
   return GetNodeDataForKey(key, *m_RoutingTable, m_RoutingKeyRanges);
 }
 
-time_t DDSNodeState::GetNetworkTime()
+time_t DDSNodeState::GetNetworkTime() const
 {
   if (!m_LocalNodeId)
   {
@@ -592,6 +598,24 @@ time_t DDSNodeState::GetNetworkTime()
   }
 
   return m_CoordinatorConnection.GetNetworkTime();
+}
+
+void * DDSNodeState::GetLocalObject(int target_object_type, DDSKey target_key)
+{
+  if (target_object_type >= (int)m_DataObjectList.size())
+  {
+    return nullptr;
+  }
+
+  if (m_IsDefunct == false && KeyInKeyRange(target_key, *m_LocalKeyRange))
+  {
+    if (m_IncomingKeyspace.IsComplete())
+    {
+      m_DataObjectList[target_object_type]->GetDataObjectForKey(target_key);
+    }
+  }
+
+  return nullptr;
 }
 
 void DDSNodeState::SendSubscriptionCreate(DDSCreateSubscription && req)
@@ -925,6 +949,23 @@ void DDSNodeState::QueryObjectData(const char * collection, const char * query, 
   m_Database->QueryDatabaseCustom(query, collection, std::move(callback));
 }
 
+void DDSNodeState::QueryObjectDataMultiple(const char * collection, const char * query, DDSResponderCallData && responder_call)
+{
+  DDSDataObjectAddress address{ responder_call.m_ObjectType, responder_call.m_Key };
+
+  auto callback = [=](const char * data, int ec) mutable {
+
+    std::string sb;
+    StormReflJsonEncodeString(data, sb);
+
+    responder_call.m_MethodArgs = std::string("[") + StormReflEncodeJson(ec) + "," + sb + "]";
+    std::string responder_str = StormReflEncodeJson(responder_call);
+    SendTargetedMessage(address, DDSServerToServerMessageType::kResponderCall, std::move(responder_str));
+  };
+
+  m_Database->QueryDatabaseCustom(query, collection, std::move(callback));
+}
+
 void DDSNodeState::InsertObjectData(int object_type_id, DDSKey key, const char * collection, const char * data, DDSResponderCallData && responder_call)
 {
   m_Database->QueryDatabaseInsert(key, collection, data, [this, responder_call](const char * data, int ec) mutable { HandleInsertResult(ec, responder_call); });
@@ -1070,6 +1111,23 @@ void DDSNodeState::UpdateCPUUsage()
     {
       m_CoordinatorConnection.SendCPUUsage();
       m_LastCPUUsageSync = cur_time;
+    }
+  }
+}
+
+void DDSNodeState::UpdateObjects()
+{
+  if(m_IsReady && m_LocalKeyRange)
+  {
+    auto cur_time = time(nullptr);
+    if(cur_time != m_LastUpdate)
+    {
+      for (auto & elem : m_DataObjectList)
+      {
+        elem->Update(m_LocalKeyRange.value());
+      }
+
+      m_LastUpdate = cur_time;
     }
   }
 }

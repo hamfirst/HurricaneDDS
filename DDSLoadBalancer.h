@@ -20,6 +20,7 @@ namespace StormSockets
 struct DDSLoadBalancerSettings
 {
   const char * CoordinatorIpAddr = "localhost";
+  const char * CoordinatorProtocol = nullptr;
   int CoordinatorPort = 9001;
 };
 
@@ -49,6 +50,7 @@ private:
   DDSNetworkBackend m_Backend;
 
   std::string m_CoordinatorHost;
+  std::string m_CoordinatorProtocol;
   int m_CoordinatorPort;
   time_t m_LastConnect;
 

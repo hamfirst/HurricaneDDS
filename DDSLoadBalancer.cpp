@@ -15,6 +15,7 @@ DDSLoadBalancer::DDSLoadBalancer(
   m_Backend(backend_settings),
   m_Frontend(std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(server_settings, m_Backend.m_Backend.get())),
   m_CoordinatorHost(lb_settings.CoordinatorIpAddr),
+  m_CoordinatorProtocol(lb_settings.CoordinatorProtocol),
   m_CoordinatorPort(lb_settings.CoordinatorPort),
   m_LastConnect(time(nullptr))
 {
@@ -35,7 +36,10 @@ void DDSLoadBalancer::ProcessEvents()
   {
     if (time(nullptr) - m_LastConnect >= 5)
     {
-      m_Client->RequestConnect(m_CoordinatorHost.c_str(), m_CoordinatorPort, StormSockets::StormSocketClientFrontendWebsocketRequestData{});
+      StormSockets::StormSocketClientFrontendWebsocketRequestData request;
+      request.m_Protocol = m_CoordinatorProtocol.empty() ? nullptr : m_CoordinatorProtocol.c_str();
+
+      m_Client->RequestConnect(m_CoordinatorHost.c_str(), m_CoordinatorPort, request);
       m_LastConnect = time(nullptr);
       m_State = kConnecting;
     }    

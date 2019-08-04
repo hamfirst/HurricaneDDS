@@ -185,6 +185,13 @@ bool DDSCoordinatorClientProtocol::HandleMessage(const char * msg, int length)
       m_ClientSecret = response.m_ClientSecret;
       m_ServerSecret = response.m_ServerSecret;
       m_NetworkTime = response.m_NetworkTime - time(nullptr);
+
+      assert(m_NodeState.m_SharedObjects.size() == response.m_SharedObjects.size());
+      for(std::size_t index = 0, end = response.m_SharedObjects.size(); index < end; ++index)
+      {
+        m_NodeState.m_SharedObjects[index]->Deserialize(response.m_SharedObjects[index]);
+      }
+
       m_State = kRoutingTableInit;
       return true;
     }
@@ -290,7 +297,7 @@ void DDSCoordinatorClientProtocol::SendCPUUsage()
   SendMessageToCoordinator(DDSGetServerMessage(DDSCoordinatorNodeCPUUsage{ DDSGetCPUUsage() }));
 }
 
-time_t DDSCoordinatorClientProtocol::GetNetworkTime()
+time_t DDSCoordinatorClientProtocol::GetNetworkTime() const
 {
   return m_NetworkTime + time(nullptr);
 }

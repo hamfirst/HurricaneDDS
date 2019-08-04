@@ -10,7 +10,7 @@
 class DDSDataObjectStoreBase
 {
 public:
-  ~DDSDataObjectStoreBase() {}
+  virtual ~DDSDataObjectStoreBase() = default;
 
   virtual uint32_t GetDataClassNameHash() const = 0;
   virtual uint32_t GetDatabaseClassNameHash() const = 0;
@@ -21,6 +21,7 @@ public:
 
   virtual void SpawnNewNonDatabaseBackedType(DDSKey key) = 0;
   virtual bool Destroy(DDSKey key) = 0;
+  virtual void Update(DDSKeyRange active_range) = 0;
   virtual void * GetDataObjectForKey(DDSKey key) = 0;
 
   virtual void HandleMessage(DDSKey key, DDSServerToServerMessageType message_type, const char * msg) = 0;

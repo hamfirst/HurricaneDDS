@@ -53,6 +53,19 @@ public:
     }
   }
 
+  void CancelCallback(int callback_id)
+  {
+    auto itr = m_PendingCallbacks.begin();
+    while (itr != m_PendingCallbacks.end())
+    {
+      if(itr->m_Id == callback_id)
+      {
+        m_PendingCallbacks.erase(itr);
+        return;
+      }
+    }
+  }
+
   const CallbackData & CreateCallback(CreationData creation_data, DDSDeferredCallback & callback, std::function<void(Args...)> && function)
   {
     callback.m_Id = m_NextId;
