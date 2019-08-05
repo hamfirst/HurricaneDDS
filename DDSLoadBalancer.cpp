@@ -15,7 +15,7 @@ DDSLoadBalancer::DDSLoadBalancer(
   m_Backend(backend_settings),
   m_Frontend(std::make_unique<StormSockets::StormSocketServerFrontendWebsocket>(server_settings, m_Backend.m_Backend.get())),
   m_CoordinatorHost(lb_settings.CoordinatorIpAddr),
-  m_CoordinatorProtocol(lb_settings.CoordinatorProtocol),
+  m_CoordinatorProtocol(lb_settings.CoordinatorProtocol ? lb_settings.CoordinatorProtocol : ""),
   m_CoordinatorPort(lb_settings.CoordinatorPort),
   m_LastConnect(time(nullptr))
 {
